@@ -11,7 +11,7 @@ export function FormContainerForgotPassword() {
                 <ButtonForm textButton="Send reset link" />
             </form>
             <div className="flex flex-col items-center gap-y-3">
-                <FormFooterRow textFooterRow="" textFooterRowLink="Back to login" linkFooterRow="/" />
+                <FormFooterRow textFooterRow="" textFooterRowLink="Back to login" linkFooterRow="/bookmark-manager-app/" />
             </div>
         </div>
     )

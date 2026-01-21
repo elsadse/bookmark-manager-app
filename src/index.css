@@ -24,7 +24,7 @@
   --color-neutral-900: #051513;
   --color-neutral-800: #4C5C59;
   --color-neutral-500: #899492;
-  --color-neutral-400: #COCFCC;
+  --color-neutral-400: #C0CFCC;
   --color-neutral-300: #DDE9E7;
   --color-neutral-100: #E8F0EF;
   --color-neutral-0: #FFFFFF;
@@ -81,17 +81,21 @@
 }
 
 @layer base {
-  #root {
+  :root {
     font-family: var(--font-mediumbold), serif;
     background-color: var(--color-neutral-100);
   }
 
+  :root.dark {
+    background-color: var(--color-neutral-d-100);
+  }
+
   body {
-    @apply min-w-93.75 max-w-360 min-h-screen mx-auto 
+    @apply min-w-93.75 max-w-360 min-h-screen mx-auto
   }
 
   #root {
-    @apply min-h-screen w-full flex flex-col justify-center items-center gap-y-2.5 px-4 md:p-0
+    @apply min-h-screen w-full flex flex-col 
   }
 }
 

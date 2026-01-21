@@ -12,8 +12,8 @@ export function FormContainerSignIn() {
                 <ButtonForm textButton="Log in" />
             </form>
             <div className="flex flex-col items-center gap-y-3">
-                <FormFooterRow textFooterRow="Forgot password?" textFooterRowLink="Reset it" linkFooterRow="/forgotPassword" />
-                <FormFooterRow textFooterRow="Don’t have an account?" textFooterRowLink="Sign up" linkFooterRow="/signUp" />
+                <FormFooterRow textFooterRow="Forgot password?" textFooterRowLink="Reset it" linkFooterRow="/bookmark-manager-app/forgotPassword" />
+                <FormFooterRow textFooterRow="Don’t have an account?" textFooterRowLink="Sign up" linkFooterRow="/bookmark-manager-app/signUp" />
             </div>
         </div>
     )

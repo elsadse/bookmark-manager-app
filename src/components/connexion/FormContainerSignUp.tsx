@@ -13,7 +13,7 @@ export function FormContainerSignUp() {
                 <ButtonForm textButton="Create account" />
             </form>
             <div className="flex flex-col items-center gap-y-3">
-                <FormFooterRow textFooterRow="Already have an account?" textFooterRowLink="Log in" linkFooterRow="/" />
+                <FormFooterRow textFooterRow="Already have an account?" textFooterRowLink="Log in" linkFooterRow="/bookmark-manager-app/" />
             </div>
         </div>
     )
