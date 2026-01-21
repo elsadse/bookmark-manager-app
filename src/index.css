@@ -81,7 +81,7 @@
 }
 
 @layer base {
-  :root {
+  #root {
     font-family: var(--font-mediumbold), serif;
     background-color: var(--color-neutral-100);
   }
