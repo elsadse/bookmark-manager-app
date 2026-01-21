@@ -1,6 +1,10 @@
+import { FormContainerForgotPassword } from '@/components/connexion/FormContainerForgotPassword'
+import { FormContainerResetPassword } from '@/components/connexion/FormContainerResetPassword'
+import { FormContainerSignIn } from '@/components/connexion/FormContainerSignIn'
+import { FormContainerSignUp } from '@/components/connexion/FormContainerSignUp'
 import { DarkModeToggle } from '@/DarkModeToggle'
 import { useEffect } from 'react'
-import { useLocation } from 'react-router'
+import { Route, Routes, useLocation } from 'react-router'
 
 export function App() {
   const location = useLocation()
@@ -32,10 +36,12 @@ export function App() {
   }, [location.pathname])
 
   return (
-    <>
-      <DarkModeToggle />
-      <h1>Hello World</h1>
-    </>
+    <Routes>
+      <Route path="/" element={<FormContainerSignIn />} />
+      <Route path="/signUp" element={<FormContainerSignUp />} />
+      <Route path="/forgotPassword" element={<FormContainerForgotPassword />} />
+      <Route path="/ResetPassword" element={<FormContainerResetPassword />} />
+    </Routes>
   )
 }
 
