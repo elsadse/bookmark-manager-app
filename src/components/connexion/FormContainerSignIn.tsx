@@ -1,4 +1,5 @@
 import logo_light from "@/assets/images/logo-light-theme.svg"
+import { Link } from "react-router"
 
 export function FormContainerSignIn() {
 
@@ -60,7 +61,7 @@ export function FormFooterRow({ textFooterRow, textFooterRowLink, linkFooterRow 
     return (
         <div className="flex flex-row gap-x-1.5">
             <span className="text-preset-4-md text-neutral-800">{textFooterRow}</span>
-            <a href={linkFooterRow} className="text-preset-4">{textFooterRowLink}</a>
+            <Link to={linkFooterRow} className="text-preset-4">{textFooterRowLink}</Link>
         </div>
     )
 }

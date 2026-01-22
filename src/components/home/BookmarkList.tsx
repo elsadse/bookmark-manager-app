@@ -6,7 +6,15 @@ import iconTime from "@/assets/images/icon-time.svg"
 import iconDate from "@/assets/images/icon-date.svg"
 import iconPin from "@/assets/images/icon-pin.svg"
 
-export function BookmarkList({ listTitle }: { listTitle: string }) {
+export function BookmarkList({ listTitle, isBookmarkAichived, isBookmarkPin }: { listTitle: string, isBookmarkAichived: boolean, isBookmarkPin: boolean }) {
+    const logoBookmark = iconFrontEndMentor
+    const nameBookmark = "Frontend Mentor"
+    const textSupportingNameBookmark = "frontendmentor.io"
+    const descriptionBookmark = "Improve your front-end coding skills by building real projects. Solve real-world HTML, CSS and JavaScript challenges whilst working to professional designs."
+    const tagsBookmark = ["Practice", "Learning", "Community"]
+    const numberVisitBookmark = 47
+    const dayVisitBookmark = "23 Sep"
+    const dayLastedVisitBookmark = "15 Jan"
 
     return (
         <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16">
@@ -18,51 +26,102 @@ export function BookmarkList({ listTitle }: { listTitle: string }) {
                 </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
-                <BookmarkListCard />
-                <BookmarkListCard />
-                <BookmarkListCard />
-                <BookmarkListCard />
-                <BookmarkListCard />
-                <BookmarkListCard />
-                <BookmarkListCard />
+                <BookmarkListCard descriptionBookmark={descriptionBookmark}
+                    logoBookmark={logoBookmark} nameBookmark={nameBookmark}
+                    dayLastedVisitBookmark={dayLastedVisitBookmark} numberVisitBookmark={numberVisitBookmark}
+                    dayVisitBookmark={dayVisitBookmark} isBookmarkAichived={isBookmarkAichived} isBookmarkPin={isBookmarkPin}
+                    tagsBookmark={tagsBookmark} textSupportingNameBookmark={textSupportingNameBookmark}
+                />
+                <BookmarkListCard descriptionBookmark={descriptionBookmark}
+                    logoBookmark={logoBookmark} nameBookmark={nameBookmark}
+                    dayLastedVisitBookmark={dayLastedVisitBookmark} numberVisitBookmark={numberVisitBookmark}
+                    dayVisitBookmark={dayVisitBookmark} isBookmarkAichived={isBookmarkAichived} isBookmarkPin={isBookmarkPin}
+                    tagsBookmark={tagsBookmark} textSupportingNameBookmark={textSupportingNameBookmark}
+                /><BookmarkListCard descriptionBookmark={descriptionBookmark}
+                    logoBookmark={logoBookmark} nameBookmark={nameBookmark}
+                    dayLastedVisitBookmark={dayLastedVisitBookmark} numberVisitBookmark={numberVisitBookmark}
+                    dayVisitBookmark={dayVisitBookmark} isBookmarkAichived={isBookmarkAichived} isBookmarkPin={isBookmarkPin}
+                    tagsBookmark={tagsBookmark} textSupportingNameBookmark={textSupportingNameBookmark}
+                /><BookmarkListCard descriptionBookmark={descriptionBookmark}
+                    logoBookmark={logoBookmark} nameBookmark={nameBookmark}
+                    dayLastedVisitBookmark={dayLastedVisitBookmark} numberVisitBookmark={numberVisitBookmark}
+                    dayVisitBookmark={dayVisitBookmark} isBookmarkAichived={isBookmarkAichived} isBookmarkPin={isBookmarkPin}
+                    tagsBookmark={tagsBookmark} textSupportingNameBookmark={textSupportingNameBookmark}
+                /><BookmarkListCard descriptionBookmark={descriptionBookmark}
+                    logoBookmark={logoBookmark} nameBookmark={nameBookmark}
+                    dayLastedVisitBookmark={dayLastedVisitBookmark} numberVisitBookmark={numberVisitBookmark}
+                    dayVisitBookmark={dayVisitBookmark} isBookmarkAichived={isBookmarkAichived} isBookmarkPin={isBookmarkPin}
+                    tagsBookmark={tagsBookmark} textSupportingNameBookmark={textSupportingNameBookmark}
+                />
             </div>
         </div>
     )
 }
 
-type BookmarkListCardProps={
-
+type BookmarkListCardProps = {
+    logoBookmark: string,
+    nameBookmark: string,
+    textSupportingNameBookmark: string,
+    descriptionBookmark: string,
+    tagsBookmark: string[],
+    numberVisitBookmark: number,
+    dayLastedVisitBookmark: string,
+    dayVisitBookmark: string,
+    isBookmarkPin: boolean,
+    isBookmarkAichived: boolean,
 }
 
-export function BookmarkListCard() {
+export function BookmarkListCard({
+    logoBookmark,
+    dayLastedVisitBookmark,
+    descriptionBookmark,
+    dayVisitBookmark,
+    nameBookmark,
+    numberVisitBookmark,
+    tagsBookmark,
+    textSupportingNameBookmark,
+    isBookmarkAichived,
+    isBookmarkPin
+}: BookmarkListCardProps) {
 
     return (
         <div className="rounded-8 bg-neutral-0">
-            <BookmarkListCardContainer />
-            <div className="flex flex-row justify-between items-center gap-x-2 px-4 py-3 border-t-1 border-neutral-300">
+            <BookmarkListCardContainer descriptionBookmark={descriptionBookmark} logoBookmark={logoBookmark} nameBookmark={nameBookmark} tagsBookmark={tagsBookmark} textSupportingNameBookmark={textSupportingNameBookmark} />
+            <div className="flex flex-row justify-between items-center gap-x-2 px-4 py-3 border-t border-neutral-300">
                 <div className="flex flex-row gap-x-4">
-                    <BookmarkListCardFooterInfo icon={iconVisitCount} information="47" />
-                    <BookmarkListCardFooterInfo icon={iconTime} information="23 Sep" />
-                    <BookmarkListCardFooterInfo icon={iconDate} information="15 Jan" />
+                    <BookmarkListCardFooterInfo icon={iconVisitCount} information={numberVisitBookmark.toString()} />
+                    <BookmarkListCardFooterInfo icon={iconTime} information={dayVisitBookmark} />
+                    <BookmarkListCardFooterInfo icon={iconDate} information={dayLastedVisitBookmark} />
                 </div>
-                <img src={iconPin} className="size-4" alt="icon pin" />
+                {isBookmarkPin && <img src={iconPin} className="size-4" alt="icon pin" />}
+                {isBookmarkAichived &&
+                    <span className="text-center text-preset-5 text-neutral-800 bg-neutral-100 rounded-4 px-2 py-0.5">Archived</span>
+                }
             </div>
         </div>
     )
 }
 
-export function BookmarkListCardContainer() {
+type BookmarkListCardContainerProps = {
+    logoBookmark: string,
+    nameBookmark: string,
+    textSupportingNameBookmark: string,
+    descriptionBookmark: string,
+    tagsBookmark: string[]
+}
+
+export function BookmarkListCardContainer({ logoBookmark, nameBookmark, textSupportingNameBookmark, descriptionBookmark, tagsBookmark }: BookmarkListCardContainerProps) {
 
     return (
         <div className="flex flex-col gap-y-4 p-4 rounded-10">
             <div className="flex flex-row justify-between gap-x-3">
                 <div className="flex flex-row">
                     <div className="size-11 flex items-center rounded-8 border border-neutral-100">
-                        <img src={iconFrontEndMentor} className="w-11 h-11" alt="icon logo" />
+                        <img src={logoBookmark} className="w-11 h-11" alt="icon logo" />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <span className="text-preset-2 text-neutral-900">Frontend Mentor</span>
-                        <span className="text-preset-5 text-neutral-800">frontendmentor.io</span>
+                        <span className="text-preset-2 text-neutral-900">{nameBookmark}</span>
+                        <span className="text-preset-5 text-neutral-800">{textSupportingNameBookmark}</span>
                     </div>
                 </div>
                 <div className="flex justify-center items-center size-8 gap-x-1 rounded-8 bg-neutral-0 border border-neutral-400">
@@ -71,12 +130,12 @@ export function BookmarkListCardContainer() {
             </div>
             <div className="h-px bg-neutral-300" />
             <span className="text-preset-4-md text-neutral-800 text-left">
-                Improve your front-end coding skills by building real projects. Solve real-world HTML, CSS and JavaScript challenges whilst working to professional designs.
+                {descriptionBookmark}
             </span>
             <div className="flex flex-row gap-x-2">
-                <span className="text-center text-preset-5 text-neutral-800 bg-neutral-100 rounded-4 px-2 py-0.5">Pratice</span>
-                <span className="text-center text-preset-5 text-neutral-800 bg-neutral-100 rounded-4 px-2 py-0.5">Learning</span>
-                <span className="text-center text-preset-5 text-neutral-800 bg-neutral-100 rounded-4 px-2 py-0.5">Community</span>
+                {tagsBookmark.map((tag, index) => (
+                    <span key={index} className="text-center text-preset-5 text-neutral-800 bg-neutral-100 rounded-4 px-2 py-0.5">{tag}</span>
+                ))}
             </div>
         </div>
     )

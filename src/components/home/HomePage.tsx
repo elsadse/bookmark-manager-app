@@ -6,11 +6,11 @@ export function HomePage() {
     return (
         <div className="flex flex-row">
             <div className="hidden xl:block">
-                <SideBar />
+                <SideBar page="Home"/>
             </div>
             <div className="flex flex-col">
                 <Header />
-                <BookmarkList listTitle="All bookmarks"/>
+                <BookmarkList listTitle="All bookmarks" isBookmarkPin={true} isBookmarkAichived={false} />
             </div>
         </div>
     )
