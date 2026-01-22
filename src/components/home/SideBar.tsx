@@ -1,16 +1,24 @@
 import iconHome from "@/assets/images/icon-home.svg"
 import iconArchived from "@/assets/images/icon-archive.svg"
+import iconClose from "@/assets/images/icon-close.svg"
 import { Logo } from "@/components/connexion/FormContainerSignIn"
 import { useState } from "react"
 import { useNavigate } from "react-router"
 
-export function SideBar({ page }: { page: "Home" | "Archived" }) {
-    const [selectedItem, setSelectedItem] = useState<"Home" | "Archived">(page)
+export function SideBar({ page, onClose, showCloseButton = false }: { page: "Home" | "Archived", onClose?: () => void, showCloseButton?: boolean }) {
+    const [selectedItem, setSelectedItem] = useState<"Home" | "Archived">(page === "Archived" ? "Archived" : "Home")
     const navigate = useNavigate()
 
     return (
-        <div className="flex flex-col gap-y-10 bg-neutral-0 border border-neutral-300 w-74 h-full">
-            <div className="gap-y-5 px-5 pt-5 pb-2.5">
+        <div className="flex flex-col gap-y-10 bg-neutral-0 border border-neutral-300 w-74 h-screen max-h-screen overflow-y-auto">
+            <div className="relative flex flex-col gap-y-5 px-5 pt-5 pb-2.5">
+                {showCloseButton && (
+                    <div onClick={onClose}
+                        className="absolute right-0 top-0 size-8 flex justify-center items-center gap-x-1 cursor-pointer">
+                        <img src={iconClose} className="size-5" alt="icon close" />
+                    </div>
+
+                )}
                 <Logo />
             </div>
             <div className="flex flex-col gap-y-4 px-4 pb-5">
@@ -19,6 +27,7 @@ export function SideBar({ page }: { page: "Home" | "Archived" }) {
                         onClick={() => {
                             setSelectedItem("Home")
                             navigate("/bookmark-manager-app/home")
+                            
                         }}
                         className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 cursor-pointer ${selectedItem === "Home" ? 'bg-neutral-100 border border-neutral-100 text-neutral-900' : 'text-neutral-800'}`}>
                         <div className="flex flex-row items-center gap-x-2">
@@ -45,6 +54,15 @@ export function SideBar({ page }: { page: "Home" | "Archived" }) {
                         <ContentItemNavigationSideBar text="Community" numberBadge={5} />
                         <ContentItemNavigationSideBar text="Compatibility" numberBadge={1} />
                         <ContentItemNavigationSideBar text="CSS" numberBadge={6} />
+                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
+                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
+                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
+                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
+                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
+                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
+                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
+                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
+                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
                         <ContentItemNavigationSideBar text="Design" numberBadge={1} />
                     </div>
                 </div>

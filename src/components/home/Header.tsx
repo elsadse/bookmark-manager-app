@@ -3,12 +3,14 @@ import iconSearch from "@/assets/images/icon-search.svg"
 import iconAdd from "@/assets/images/icon-add.svg"
 import iconAvatar from "@/assets/images/image-avatar.webp"
 
-export function Header() {
+export function Header({ onMenuClick }: { onMenuClick: () => void }) {
 
     return (
         <div className="w-full flex justify-center sm:items-start md:justify-between gap-x-2.5 md:gap-x-auto px-4 py-3 md:px-8 md:py-4 bg-neutral-0 border border-neutral-300">
             <div className="flex flex-row justify-center gap-x-2.5 md:gap-x-4">
-                <div className="flex flex-row justify-center items-center xl:hidden gap-x-1 p-2.5 md:p-3 rounded-8 bg-neutral-0 border border-neutral-400">
+                <div
+                    onClick={onMenuClick}
+                    className="flex flex-row justify-center items-center xl:hidden gap-x-1 p-2.5 md:p-3 rounded-8 bg-neutral-0 border border-neutral-400 cursor-pointer">
                     <img src={iconMenu} className="w-5 h-5" alt="icon menu" />
                 </div>
                 <div className="flex flex-row justify-center items-center gap-x-1.5 md:gap-x-2 md:p-3 border border-neutral-300 rounded-8">
