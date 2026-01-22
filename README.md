@@ -1,73 +1,64 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Application de gestionnaire de favoris
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/elsadse/bookmark-manager-app/deployment.yaml)
+![GitHub package.json version](https://img.shields.io/github/package-json/v/elsadse/bookmark-manager-app)
+![GitHub repo size](https://img.shields.io/github/repo-size/elsadse/bookmark-manager-app)
+![GitHub License](https://img.shields.io/github/license/elsadse/bookmark-manager-app)
+![GitHub top language](https://img.shields.io/github/languages/top/elsadse/bookmark-manager-app)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/t/elsadse/bookmark-manager-app)
+![GitHub Repo stars](https://img.shields.io/github/stars/elsadse/bookmark-manager-app)
 
-Currently, two official plugins are available:
+Application de gestion de favoris responsive avec des fonctionnalités d'ajout, de modification, d'archivage, de recherche et de filtrage.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Configuration
 
-## React Compiler
+- **Configuration de l'environnement de devéloppement:**
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/elsadse/bookmark-manager-app.git
+cd bookmark-manager-app
+bun install
+bun run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **Production build et déploiement:**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/elsadse/bookmark-manager-app.git
+cd bookmark-manager-app
+bun install
+bun run build
+bun run preview
 ```
+
+## Caractéristiques
+
+- Ajoutez de nouveaux favoris avec un titre, une description, l'URL du site web et des balises.
+- Affichez tous vos favoris.
+- Consultez les détails des favoris, notamment leur favicon, leur titre, leur URL, leur description, leurs balises, le nombre de vues, la date de la dernière visite et la date d'ajout.
+- Recherchez des favoris par titre dans la barre de recherche.
+- Filtrez les favoris en sélectionnant une ou plusieurs balises dans la barre latérale.
+- Réinitialisez les filtres de balises pour afficher à nouveau tous les favoris
+- Affichez les favoris archivés
+- Archivez les favoris pour les supprimer de la vue principale sans les supprimer
+- Épinglez/dépinglez des favoris pour garder les plus importants facilement accessibles
+- Modifiez les favoris existants pour mettre à jour leurs détails
+- Copiez les URL des favoris dans le presse-papiers.
+- Visitez les sites web mis en signet directement depuis l'application.
+- Triez les favoris par « Ajoutés récemment », « Visités récemment » ou « Les plus visités ».
+- Basculez entre les thèmes de couleurs claires et foncées.
+- Affichez la mise en page optimale pour l'interface en fonction de la taille de l'écran de votre appareil.
+- Affichez les états de survol et de mise au point pour tous les éléments interactifs de la page.
+
+
+## Stack technologique
+
+- Typescript
+- React 19 + Vite
+- Tailwind CSS
+- Githup Pages + Githup Action
+
+
+## Auteurs
+
+- [@elsadse](https://www.github.com/elsadse)
