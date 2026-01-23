@@ -1,5 +1,7 @@
 import iconMenu from "@/assets/images/icon-menu-hamburger.svg"
+import iconMenuDark from "@/assets/images/icon-menu-hamburber-dark.svg"
 import iconSearch from "@/assets/images/icon-search.svg"
+import iconSearchDark from "@/assets/images/icon-search-dark.svg"
 import iconAdd from "@/assets/images/icon-add.svg"
 import iconAvatar from "@/assets/images/image-avatar.webp"
 import iconTheme from "@/assets/images/icon-theme.svg"
@@ -14,18 +16,24 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
     const { searchQuery, setSearchQuery } = useBookmarkList()
 
     return (
-        <div className="w-full flex justify-center sm:items-start md:justify-between gap-x-2.5 md:gap-x-auto px-4 py-3 md:px-8 md:py-4 bg-neutral-0 border border-neutral-300">
+        <div className="w-full flex justify-center sm:items-start md:justify-between gap-x-2.5 md:gap-x-auto px-4 py-3 md:px-8 md:py-4 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500">
             <div className="flex flex-row justify-center gap-x-2.5 md:gap-x-4">
                 <div
                     onClick={onMenuClick}
-                    className="flex flex-row justify-center items-center xl:hidden gap-x-1 p-2.5 md:p-3 rounded-8 bg-neutral-0 border border-neutral-400 cursor-pointer">
+                    className="flex flex-row justify-center items-center xl:hidden gap-x-1 p-2.5 md:p-3 rounded-8 bg-neutral-0 border border-neutral-400 cursor-pointer dark:hidden">
                     <img src={iconMenu} className="w-5 h-5" alt="icon menu" />
                 </div>
-                <div className={`flex flex-row justify-center items-center 
-                    gap-x-1.5 md:gap-x-2 md:p-3 border border-neutral-300 
+                <div
+                    onClick={onMenuClick}
+                    className="flex flex-row justify-center items-center xl:hidden gap-x-1 p-2.5 md:p-3 rounded-8 bg-neutral-d-800 border border-neutral-d-400 cursor-pointer">
+                    <img src={iconMenuDark} className="w-5 h-5" alt="icon menu" />
+                </div>
+                <div className={`flex flex-row justify-center items-center dark:bg-neutral-d-500
+                    gap-x-1.5 md:gap-x-2 md:p-3 border border-neutral-300 dark:border-neutral-d-400
                     rounded-8 cursor-pointer hover:bg-neutral-100 
                    ${searchQuery.length > 0 ? "ring ring-teal-700" : ""} `}>
-                    <img src={iconSearch} className="w-5 h-5" alt="icon search" />
+                    <img src={iconSearch} className="w-5 h-5 dark:hidden" alt="icon search" />
+                    <img src={iconSearchDark} className="w-5 h-5 hidden dark:block" alt="icon search" />
                     <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                         className="placeholder:text-preset-4-md focus:outline-none" placeholder="Search by title..."
                     />
@@ -34,7 +42,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
             <div className="flex flex-row justify-center items-center gap-x-2.5 md:gap-4">
                 <button className="flex justify-center items-center 
                     gap-1 p-2.5 md:px-4 md:py-3 rounded-8 bg-teal-700 
-                    border-none cursor-pointer ring ring-teal-700">
+                    border-none dark:border border-neutral-d-400 cursor-pointer ring ring-teal-700">
                     <img src={iconAdd} className="w-5 h-5" alt="icon add" />
                     <span className="hidden md:inline text-neutral-0 text-preset-3 text-center md:px-0.5">Add Bookmark</span>
                 </button>

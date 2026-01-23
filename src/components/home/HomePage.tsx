@@ -17,7 +17,7 @@ export function HomePage() {
     const [isDeleteBookmarkDialogOpen, setIsDeleteBookmarkDialogOpen] = useState(false)
     const isDivCenterItems = isAddBookmarkFormOpen || isEditBookmarkFormOpen || isArchivedBookmarkDialogOpen || isUnArchivedBookmarkDialogOpen || isDeleteBookmarkDialogOpen
     const { selectedTagsList } = useFilterTagsContext()
-    const {searchQuery}=useBookmarkList()
+    const { searchQuery } = useBookmarkList()
 
     function getTitleBookmarkList(): string {
         if (selectedTagsList.length > 0) {

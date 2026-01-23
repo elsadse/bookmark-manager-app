@@ -1,5 +1,6 @@
 import iconHome from "@/assets/images/icon-home.svg"
 import iconArchived from "@/assets/images/icon-archive.svg"
+import iconArchivedDark from "@/assets/images/icon-archive-dark.svg"
 import iconClose from "@/assets/images/icon-close.svg"
 import { Logo } from "@/components/connexion/FormContainerSignIn"
 import { useState } from "react"
@@ -23,7 +24,7 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
     ]
 
     return (
-        <div className="flex flex-col gap-y-10 bg-neutral-0 border border-neutral-300 w-74 h-screen max-h-screen overflow-y-auto">
+        <div className="flex flex-col gap-y-10 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500 w-74 h-screen max-h-screen overflow-y-auto">
             <div className="relative flex flex-col gap-y-5 px-5 pt-5 pb-2.5">
                 {showCloseButton && (
                     <div onClick={onClose}
@@ -43,8 +44,8 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
 
                         }}
                         className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 
-                        cursor-pointer hover:bg-neutral-100 
-                        ${selectedItem === "Home" ? 'bg-neutral-100 border border-neutral-100 text-neutral-900 ring ring-teal-700' : 'text-neutral-800'}`}>
+                        cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
+                        ${selectedItem === "Home" ? 'bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-100 dark:border-neutral-d-500 text-neutral-900 dark:text-neutral-0 ring ring-teal-700' : 'text-neutral-800 dark:text-neutral-d-100'}`}>
                         <div className="flex flex-row items-center gap-x-2">
                             <img src={iconHome} className="size-5" alt="icon navigation" />
                             <span className="text-preset-3">Home</span>
@@ -56,10 +57,11 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
                             navigate("/bookmark-manager-app/archived")
                         }}
                         className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 
-                        cursor-pointer hover:bg-neutral-100 
-                        ${selectedItem === "Archived" ? 'bg-neutral-100 border border-neutral-100 text-neutral-900 ring ring-teal-700' : 'text-neutral-800'}`}>
+                        cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600 
+                        ${selectedItem === "Archived" ? 'bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-100 dark:border-neutral-d-500 text-neutral-900 dark:text-neutral-0 ring ring-teal-700' : 'text-neutral-800 dark:text-neutral-d-100'}`}>
                         <div className="flex flex-row items-center gap-x-2">
-                            <img src={iconArchived} className="size-5" alt="icon navigation" />
+                            <img src={iconArchived} className="size-5 dark:hidden" alt="icon navigation" />
+                            <img src={iconArchivedDark} className="size-5 hidden dark:block" alt="icon navigation" />
                             <span className="text-preset-3">Archived</span>
                         </div>
                     </div>

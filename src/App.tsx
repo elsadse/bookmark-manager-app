@@ -40,6 +40,11 @@ export function App() {
     initPreline()
   }, [location.pathname])
 
+  useEffect(() => {
+    // Pour tester, forcez le dark mode
+    localStorage.setItem('hs_theme', 'dark')
+  }, [])
+
   return (
     <BookmarkListContextProvider>
       <FilterTagsContextProvider>

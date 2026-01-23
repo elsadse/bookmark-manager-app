@@ -85,13 +85,18 @@
     font-family: var(--font-mediumbold), serif;
     background-color: var(--color-neutral-100);
   }
+  
+  :root.dark {
+    color: var(--color-neutral-0);
+    background-color: var(--color-neutral-d-900);
+  }
 
   body {
     @apply min-w-93.75 max-w-360 min-h-screen mx-auto
   }
 
   #root {
-    @apply min-h-screen w-full flex flex-col 
+    @apply min-h-screen w-full flex flex-col
   }
 }
 

@@ -3,7 +3,7 @@ import { ButtonForm, FormFooterRow, FormHeader, InputField, Logo } from "@/compo
 export function FormContainerResetPassword() {
 
     return (
-        <div className="flex flex-col gap-y-8 px-5 py-8 md:w-112 md:h-auto md:px-8 md:py-10 rounded-12 bg-neutral-0">
+        <div className="flex flex-col gap-y-8 px-5 py-8 md:w-112 md:h-auto md:px-8 md:py-10 rounded-12 bg-neutral-0 dark:bg-neutral-d-800 dark:border border-neutral-d-500">
             <Logo />
             <FormHeader text="Reset Your Password" supportingText="Enter your new password below. Make sure it’s strong and secure." />
             <form className="flex flex-col gap-y-4">

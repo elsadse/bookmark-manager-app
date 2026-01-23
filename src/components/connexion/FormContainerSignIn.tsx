@@ -1,10 +1,11 @@
 import logo_light from "@/assets/images/logo-light-theme.svg"
+import logo_dark from "@/assets/images/logo-dark-theme.svg"
 import { Link } from "react-router"
 
 export function FormContainerSignIn() {
 
     return (
-        <div className="flex flex-col gap-y-8 px-5 py-8 md:w-112 md:h-auto md:px-8 md:py-10 rounded-12 bg-neutral-0">
+        <div className="flex flex-col gap-y-8 px-5 py-8 md:w-112 md:h-auto md:px-8 md:py-10 rounded-12 bg-neutral-0 dark:bg-neutral-d-800 dark:border border-neutral-d-500">
             <Logo />
             <FormHeader text="Log in your account" supportingText="Welcome back! Please enter your details." />
             <form className="flex flex-col gap-y-4">
@@ -23,7 +24,10 @@ export function FormContainerSignIn() {
 export function Logo() {
 
     return (
-        <img src={logo_light} className="h-8 w-auto flex justify-center" alt="logo" />
+        <>
+            <img src={logo_light} className="h-8 w-auto flex justify-center dark:hidden" alt="logo" />
+            <img src={logo_dark} className="h-8 w-auto flex justify-center hidden dark:block" alt="logo" />
+        </>
     )
 }
 
@@ -42,9 +46,9 @@ export function InputField({ typeInput, labelInput }: { typeInput: string, label
     return (
         <div className="flex flex-col gap-y-1.5">
             <span className="text-preset-4">{labelInput}</span>
-            <input type={typeInput} 
-                className="p-3 rounded-8 border border-neutral-500 focus:outline-none
-                focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100" 
+            <input type={typeInput}
+                className="p-3 rounded-8 border border-neutral-500 dark:border-neutral-d-300 dark:bg-neutral-d-600 focus:outline-none
+                focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500"
             />
         </div>
     )

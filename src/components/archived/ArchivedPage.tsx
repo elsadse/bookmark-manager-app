@@ -2,13 +2,13 @@ import { BookmarkList } from "@/components/home/BookmarkList";
 import { Header } from "@/components/home/Header";
 import { SideBar } from "@/components/home/SideBar";
 import { useFilterTagsContext } from "@/context/FilterTagsContext";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function ArchivedPage() {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
     const { selectedTagsList } = useFilterTagsContext()
 
-    function getTitleBookmarkList():string {
+    function getTitleBookmarkList(): string {
         if (selectedTagsList.length === 0) {
             return "Archived bookmarks"
         }
