@@ -1,35 +1,32 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { ArchivedPage } from '@/components/archived/ArchivedPage'
+import { FormContainerForgotPassword } from '@/components/connexion/FormContainerForgotPassword'
+import { FormContainerResetPassword } from '@/components/connexion/FormContainerResetPassword'
+import { FormContainerSignIn } from '@/components/connexion/FormContainerSignIn'
+import { FormContainerSignUp } from '@/components/connexion/FormContainerSignUp'
+import { HomePage } from '@/components/home/HomePage'
+import { BookmarkListContextProvider } from '@/context/BookmarkListContext'
+import { FilterTagsContextProvider } from '@/context/FilterTagsContext'
+import { Route, Routes, useLocation } from 'react-router'
 
-function App() {
-  const [count, setCount] = useState(0)
+export function App() {
+  const location = useLocation()
+  const centeredRoutes = ['/bookmark-manager-app/', '/bookmark-manager-app/signUp', '/bookmark-manager-app/forgotPassword', '/bookmark-manager-app/resetPassword']
+  const isCenteredRoute = centeredRoutes.includes(location.pathname)
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <BookmarkListContextProvider>
+      <FilterTagsContextProvider>
+        <div className={`${isCenteredRoute ? 'min-h-screen flex justify-center items-center gap-y-2.5 px-4 md:p-0' : ''}`}>
+          <Routes>
+            <Route path="/bookmark-manager-app/" element={<FormContainerSignIn />} />
+            <Route path="/bookmark-manager-app/signUp" element={<FormContainerSignUp />} />
+            <Route path="/bookmark-manager-app/forgotPassword" element={<FormContainerForgotPassword />} />
+            <Route path="/bookmark-manager-app/ResetPassword" element={<FormContainerResetPassword />} />
+            <Route path="/bookmark-manager-app/home" element={<HomePage />} />
+            <Route path="/bookmark-manager-app/archived" element={<ArchivedPage />} />
+          </Routes>
+        </div>
+      </FilterTagsContextProvider>
+    </BookmarkListContextProvider>
   )
 }
-
-export default App
