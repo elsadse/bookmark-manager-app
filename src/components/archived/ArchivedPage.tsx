@@ -1,19 +1,19 @@
 import { BookmarkList } from "@/components/home/BookmarkList";
 import { Header } from "@/components/home/Header";
 import { SideBar } from "@/components/home/SideBar";
+import { useFilterTagsContext } from "@/context/FilterTagsContext";
 import { useEffect, useState } from "react";
 
 export function ArchivedPage() {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+    const { selectedTagsList } = useFilterTagsContext()
 
-    useEffect(() => {
-        if (isMobileSidebarOpen) {
-            document.body.style.overflow = 'hidden'
+    function getTitleBookmarkList():string {
+        if (selectedTagsList.length === 0) {
+            return "Archived bookmarks"
         }
-        return () => {
-            document.body.style.overflow = 'auto'
-        }
-    }, [isMobileSidebarOpen])
+        return "Bookmarks tagged:"
+    }
 
     return (
         <div className="relative flex flex-row">
@@ -36,7 +36,7 @@ export function ArchivedPage() {
             )}
             <div className="flex flex-col">
                 <Header onMenuClick={() => setIsMobileSidebarOpen(true)} />
-                <BookmarkList listTitle="Archived bookmarks" isBookmarkPin={false} isBookmarkAichived={true} />
+                <BookmarkList listTitle={getTitleBookmarkList()} isOnArchivedPage={true} />
             </div>
         </div>
     )

@@ -45,7 +45,7 @@
 
   --font-bold: "Manrope Bold";
   --font-semibold: "Manrope SemiBold";
-  --font-mediumbold: "Manrope MeduimBold";
+  --font-mediumbold: "Manrope Medium";
 
   --spacing-0: 0;
   --spacing-025: 2px;
@@ -84,10 +84,6 @@
   :root {
     font-family: var(--font-mediumbold), serif;
     background-color: var(--color-neutral-100);
-  }
-
-  :root.dark {
-    background-color: var(--color-neutral-d-100);
   }
 
   body {

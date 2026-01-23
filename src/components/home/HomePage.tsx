@@ -1,22 +1,36 @@
+import { ArchiveDialog, DeleteDialog, UnArchiveDialog } from "@/components/dialog/Dialogs";
 import { BookmarkList } from "@/components/home/BookmarkList";
 import { Header } from "@/components/home/Header";
 import { SideBar } from "@/components/home/SideBar";
-import { useEffect, useState } from "react";
+import { AddBookmark } from "@/components/modals/Modals";
+import { EditBookmark } from "@/components/modals/Modals";
+import { useBookmarkList } from "@/context/BookmarkListContext";
+import { useFilterTagsContext } from "@/context/FilterTagsContext";
+import { useState } from "react";
 
 export function HomePage() {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+    const [isAddBookmarkFormOpen, setIsAddBookmarkFormOpen] = useState(false)
+    const [isEditBookmarkFormOpen, setIsEditBookmarkFormOpen] = useState(false)
+    const [isArchivedBookmarkDialogOpen, setIsArchivedBookmarkDialogOpen] = useState(false)
+    const [isUnArchivedBookmarkDialogOpen, setIsUnArchivedBookmarkDialogOpen] = useState(false)
+    const [isDeleteBookmarkDialogOpen, setIsDeleteBookmarkDialogOpen] = useState(false)
+    const isDivCenterItems = isAddBookmarkFormOpen || isEditBookmarkFormOpen || isArchivedBookmarkDialogOpen || isUnArchivedBookmarkDialogOpen || isDeleteBookmarkDialogOpen
+    const { selectedTagsList } = useFilterTagsContext()
+    const {searchQuery}=useBookmarkList()
 
-    useEffect(() => {
-        if (isMobileSidebarOpen) {
-            document.body.style.overflow = 'hidden'
+    function getTitleBookmarkList(): string {
+        if (selectedTagsList.length > 0) {
+            return "Bookmarks tagged:"
         }
-        return () => {
-            document.body.style.overflow = 'auto'
+        if (searchQuery.length > 0) {
+            return "Results For:"
         }
-    }, [isMobileSidebarOpen])
+        return "All Bookmarks"
+    }
 
     return (
-        <div className="relative flex flex-row">
+        <div className={`relative flex flex-row ${isDivCenterItems ? "justify-center items-center " : ""}`}>
             <div className="hidden xl:block">
                 <SideBar page="Home" />
             </div>
@@ -34,9 +48,15 @@ export function HomePage() {
                     </div>
                 </>
             )}
-            <div className="flex flex-col">
+
+            {isAddBookmarkFormOpen && <AddBookmark onClose={() => setIsAddBookmarkFormOpen(false)} />}
+            {isEditBookmarkFormOpen && <EditBookmark onClose={() => setIsEditBookmarkFormOpen(false)} />}
+            {isArchivedBookmarkDialogOpen && <ArchiveDialog onClose={() => setIsArchivedBookmarkDialogOpen(false)} />}
+            {isUnArchivedBookmarkDialogOpen && <UnArchiveDialog onClose={() => setIsUnArchivedBookmarkDialogOpen(false)} />}
+            {isDeleteBookmarkDialogOpen && <DeleteDialog onClose={() => setIsDeleteBookmarkDialogOpen(false)} />}
+            <div className="flex flex-col xl:w-286">
                 <Header onMenuClick={() => setIsMobileSidebarOpen(true)} />
-                <BookmarkList listTitle="All bookmarks" isBookmarkPin={true} isBookmarkAichived={false} />
+                <BookmarkList listTitle={getTitleBookmarkList()} isOnArchivedPage={false} />
             </div>
         </div>
     )

@@ -4,10 +4,23 @@ import iconClose from "@/assets/images/icon-close.svg"
 import { Logo } from "@/components/connexion/FormContainerSignIn"
 import { useState } from "react"
 import { useNavigate } from "react-router"
+import { useFilterTagsContext } from "@/context/FilterTagsContext"
 
 export function SideBar({ page, onClose, showCloseButton = false }: { page: "Home" | "Archived", onClose?: () => void, showCloseButton?: boolean }) {
     const [selectedItem, setSelectedItem] = useState<"Home" | "Archived">(page === "Archived" ? "Archived" : "Home")
     const navigate = useNavigate()
+    const availableTags = [
+        { name: "AI", count: 1 },
+        { name: "Community", count: 5 },
+        { name: "Compatibility", count: 1 },
+        { name: "CSS", count: 6 },
+        { name: "Design", count: 1 },
+        { name: "React", count: 3 },
+        { name: "JavaScript", count: 4 },
+        { name: "TypeScript", count: 2 },
+        { name: "Tailwind", count: 3 },
+        { name: "Learning", count: 2 }
+    ]
 
     return (
         <div className="flex flex-col gap-y-10 bg-neutral-0 border border-neutral-300 w-74 h-screen max-h-screen overflow-y-auto">
@@ -22,14 +35,16 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
                 <Logo />
             </div>
             <div className="flex flex-col gap-y-4 px-4 pb-5">
-                <div>
+                <div className="flex flex-col gap-y-1">
                     <div
                         onClick={() => {
                             setSelectedItem("Home")
                             navigate("/bookmark-manager-app/home")
-                            
+
                         }}
-                        className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 cursor-pointer ${selectedItem === "Home" ? 'bg-neutral-100 border border-neutral-100 text-neutral-900' : 'text-neutral-800'}`}>
+                        className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 
+                        cursor-pointer hover:bg-neutral-100 
+                        ${selectedItem === "Home" ? 'bg-neutral-100 border border-neutral-100 text-neutral-900 ring ring-teal-700' : 'text-neutral-800'}`}>
                         <div className="flex flex-row items-center gap-x-2">
                             <img src={iconHome} className="size-5" alt="icon navigation" />
                             <span className="text-preset-3">Home</span>
@@ -40,7 +55,9 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
                             setSelectedItem("Archived")
                             navigate("/bookmark-manager-app/archived")
                         }}
-                        className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 cursor-pointer ${selectedItem === "Archived" ? 'bg-neutral-100 border border-neutral-100 text-neutral-900' : 'text-neutral-800'}`}>
+                        className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 
+                        cursor-pointer hover:bg-neutral-100 
+                        ${selectedItem === "Archived" ? 'bg-neutral-100 border border-neutral-100 text-neutral-900 ring ring-teal-700' : 'text-neutral-800'}`}>
                         <div className="flex flex-row items-center gap-x-2">
                             <img src={iconArchived} className="size-5" alt="icon navigation" />
                             <span className="text-preset-3">Archived</span>
@@ -50,20 +67,13 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
                 <div>
                     <span className="h-5.25 items-center px-3 pb-1 text-[#34D4D4D] text-xs font-bold">TAGS</span>
                     <div>
-                        <ContentItemNavigationSideBar text="AI" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="Community" numberBadge={5} />
-                        <ContentItemNavigationSideBar text="Compatibility" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="CSS" numberBadge={6} />
-                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
-                        <ContentItemNavigationSideBar text="Design" numberBadge={1} />
+                        {availableTags.map(tag => (
+                            <ContentItemNavigationSideBar
+                                key={tag.name}
+                                text={tag.name}
+                                numberBadge={tag.count}
+                            />
+                        ))}
                     </div>
                 </div>
             </div>
@@ -72,11 +82,24 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
 }
 
 export function ContentItemNavigationSideBar({ text, numberBadge }: { text: string, numberBadge: number }) {
+    const { selectedTagsList, addTag, deleteTag } = useFilterTagsContext()
+    const isChecked = selectedTagsList.includes(text)
+
+    function handleChangeInput(event: React.ChangeEvent<HTMLInputElement>) {
+        if (event.target.checked) {
+            addTag(text);
+        } else {
+            deleteTag(text);
+        }
+    }
 
     return (
         <div className="flex justify-between px-3 py-2.5">
             <div className="flex flex-row items-center gap-x-2">
-                <input type="checkbox" />
+                <input type="checkbox" checked={isChecked} onChange={handleChangeInput}
+                    className= {`size-4 border border-neutral-500 cursor-pointer
+                         ${isChecked? "accent-teal-700": ""}`}
+                />
                 <span className="text-preset-3 text-neutral-800"> {text} </span>
             </div>
             <div className="items-center px-2 pb-0.5 rounded-full bg-neutral-100 border border-neutral-300">
