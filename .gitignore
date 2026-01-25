@@ -1,2 +1,6 @@
 .vscode/
+
 bookmark-manager-ui/node_modules/
+
+.env
+Migrations

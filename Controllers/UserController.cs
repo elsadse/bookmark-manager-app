@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace bookmark_manager_app.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -33,8 +33,11 @@ public class UserController : ControllerBase
                     Error = $"User with ID {id} not found"
                 });
             }
-
-            return user;
+            return StatusCode(StatusCodes.Status200OK, new ApiResponse<object>
+            {
+                Success = true,
+                Data = new { fullname = user.FullName, email = user.Email }
+            });
         }
         catch (Exception ex)
         {
@@ -44,7 +47,8 @@ public class UserController : ControllerBase
                 {
                     Success = false,
                     Error = "Internal server error"
-                });
+                }
+            );
         }
     }
 
@@ -64,15 +68,20 @@ public class UserController : ControllerBase
                     Error = "Email already exists"
                 });
             }
-            _logger.LogInformation("User created successfully with ID: {UserId}", user.Id);
+            _logger.LogInformation("User created successfully with ID: {UserId}", user.UserId);
             return CreatedAtAction(
                 nameof(GetUserById),
-                new { id = user.Id },
-                new ApiResponse<User>
+                new { id = user.UserId },
+                new ApiResponse<object>
                 {
                     Success = true,
-                    Data = user
-                });
+                    Data = new
+                    {
+                        fullName=user.FullName,
+                        email=user.Email
+                    }
+                }
+            );
         }
         catch (Exception ex)
         {
@@ -105,7 +114,7 @@ public class UserController : ControllerBase
                 });
             }
             _logger.LogInformation("User with ID {UserId} updated successfully", id);
-            return StatusCode(StatusCodes.Status200OK,
+            return StatusCode(StatusCodes.Status204NoContent,
                 new ApiResponse
                 {
                     Success = true,

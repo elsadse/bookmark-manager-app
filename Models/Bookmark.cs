@@ -8,7 +8,8 @@ public class Bookmark
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    [Column("bookmark_id")]
+    public int BookmarkId { get; set; }
 
     [Required]
     [ForeignKey("User")]
@@ -17,19 +18,16 @@ public class Bookmark
 
     [Required]
     [Column("title")]
-    public string? Title { get; set; }
+    public string Title { get; set; } = string.Empty;
 
     [Required]
     [Url]
     [Column("url")]
-    public string? Url { get; set; }
+    public string Url { get; set; } = string.Empty;
 
     [Required]
     [Column("description")]
-    public string? Description { get; set; }
-
-    [Column("tags", TypeName = "text[]")]
-    public List<string> Tags { get; set; } = new List<string>();
+    public string Description { get; set; } = string.Empty;
 
     [Column("is_pinned")]
     public bool IsPinned { get; set; } = false;
@@ -37,14 +35,17 @@ public class Bookmark
     [Column("is_archived")]
     public bool IsArchived { get; set; } = false;
 
-    [Column("visit_count")]
-    public int VisitCount { get; set; } = 0;
-
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [Column("visited_last_at")]
-    public DateTime VisitedLastAt { get; set; } = DateTime.UtcNow;
+    [Column("update_at")]
+    public DateTime UpdateAt { get; set; }
+
+    public User? User { get; set; }
+
+    public ICollection<Visit> Visits { get; set; } = new List<Visit>();
+
+    public ICollection<BookmarkTag> BookmarkTags { get; set; } = new List<BookmarkTag>();
 }
 
 public class BookmarkCreateDto
@@ -56,7 +57,30 @@ public class BookmarkCreateDto
     [Url]
     public string Url { get; set; } = string.Empty;
 
+    [Required]
+    public string Description { get; set; } = string.Empty;
+
+    [Required]
+    public ICollection<int> TagIds { get; set; } = new List<int>();
+}
+
+public class BookmarkUpdateDto
+{
+    public string? Title { get; set; }
+
+    [Url]
+    public string? Url { get; set; }
+
     public string? Description { get; set; }
 
-    public List<string> Tags { get; set; } = new List<string>();
+    public DateTime UpdateAt { get; set; } = DateTime.UtcNow;
+
+    public List<int>? TagIds { get; set; }
+}
+
+public class BookmarkPatchDto
+{
+    public bool? IsPinned { get; set; }
+
+    public bool? IsArchived { get; set; }
 }

@@ -42,14 +42,15 @@ public class UserService : IUserService
             }
             var user = new User
             {
-                Username = userDto.Username,
+                FullName = userDto.FullName,
                 Email = userDto.Email,
                 PasswordHash = HashPassword(userDto.Password),
+                CreatedAt=  DateTime.UtcNow
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("User created with ID: {UserId}", user.Id);
+            _logger.LogInformation("User created with ID: {UserId}", user.UserId);
             return user;
         }
         catch (Exception ex)
@@ -59,16 +60,16 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<User?> GetUserByIdAsync(int id)
+    public async Task<User?> GetUserByIdAsync(int userId)
     {
         try
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             return user;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting user with ID: {UserId}", id);
+            _logger.LogError(ex, "Error getting user with ID: {UserId}", userId);
             return null;
         }
     }
