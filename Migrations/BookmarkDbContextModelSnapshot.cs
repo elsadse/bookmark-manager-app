@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using bookmark_manager_app.Data;
+using bookmark_manager_app.Persistence;
 
 #nullable disable
 
@@ -17,7 +17,7 @@ namespace bookmark_manager_app.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("bookmark")
+                .HasDefaultSchema("bookmark_manager")
                 .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -27,52 +27,45 @@ namespace bookmark_manager_app.Migrations
                 {
                     b.Property<int>("BookmarkId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("bookmark_id");
+                        .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BookmarkId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description");
+                        .HasMaxLength(280)
+                        .HasColumnType("character varying(280)");
 
                     b.Property<bool>("IsArchived")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_archived");
+                        .HasDefaultValue(false);
 
                     b.Property<bool>("IsPinned")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_pinned");
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("title");
+                        .HasColumnType("text");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("update_at");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("url");
+                        .HasColumnType("text");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
+                        .HasColumnType("integer");
 
                     b.HasKey("BookmarkId");
 
@@ -82,117 +75,98 @@ namespace bookmark_manager_app.Migrations
                     b.HasIndex("UserId", "Url")
                         .IsUnique();
 
-                    b.ToTable("bookmarks", "bookmark");
+                    b.ToTable("bookmarks", "bookmark_manager");
                 });
 
             modelBuilder.Entity("bookmark_manager_app.Models.BookmarkTag", b =>
                 {
-                    b.Property<int>("BookmarkTagId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BookmarkTagId"));
-
                     b.Property<int>("BookmarkId")
                         .HasColumnType("integer");
 
                     b.Property<int>("TagId")
                         .HasColumnType("integer");
 
-                    b.HasKey("BookmarkTagId");
+                    b.HasKey("BookmarkId", "TagId");
 
                     b.HasIndex("TagId");
 
-                    b.HasIndex("BookmarkId", "TagId")
-                        .IsUnique();
-
-                    b.ToTable("bookmark_tags", "bookmark");
+                    b.ToTable("bookmark_tags", "bookmark_manager");
                 });
 
             modelBuilder.Entity("bookmark_manager_app.Models.Tag", b =>
                 {
                     b.Property<int>("TagId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("tag_id");
+                        .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TagId"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("name");
+                        .HasMaxLength(25)
+                        .HasColumnType("character varying(25)");
 
                     b.HasKey("TagId");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("tags", "bookmark");
+                    b.ToTable("tags", "bookmark_manager");
                 });
 
             modelBuilder.Entity("bookmark_manager_app.Models.User", b =>
                 {
                     b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
+                        .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("email");
+                        .HasColumnType("text");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("full_name");
+                        .HasColumnType("text");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("password_hash");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                        .HasDefaultValueSql("NOW()");
 
                     b.HasKey("UserId");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("users", "bookmark");
+                    b.ToTable("users", "bookmark_manager");
                 });
 
             modelBuilder.Entity("bookmark_manager_app.Models.Visit", b =>
                 {
                     b.Property<int>("VisitId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("visit_id");
+                        .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VisitId"));
 
                     b.Property<int>("BookmarkId")
-                        .HasColumnType("integer")
-                        .HasColumnName("bookmark_id");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("VisitDateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("visit_date_at")
-                        .HasDefaultValueSql("NULL");
+                        .HasDefaultValueSql("NOW()");
 
                     b.HasKey("VisitId");
 
@@ -200,7 +174,7 @@ namespace bookmark_manager_app.Migrations
 
                     b.HasIndex("VisitDateAt");
 
-                    b.ToTable("visits", "bookmark");
+                    b.ToTable("visits", "bookmark_manager");
                 });
 
             modelBuilder.Entity("bookmark_manager_app.Models.Bookmark", b =>

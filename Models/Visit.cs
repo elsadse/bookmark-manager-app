@@ -1,29 +1,22 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using bookmark_manager_app.DTOs;
 
 namespace bookmark_manager_app.Models;
 
-[Table("visits", Schema = "bookmark")]
-public class Visit
+public sealed class Visit
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column("visit_id")]
-    public int VisitId { get; set; }
+    public int VisitId { get; private set; }
+    public int BookmarkId { get; private set; }
+    public DateTime VisitDateAt { get; private set; }
+    public Bookmark? Bookmark { get; private set; }
 
-    [Required]
-    [ForeignKey("Bookmark")]
-    [Column("bookmark_id")]
-    public int BookmarkId { get; set; }
+    private Visit() { }
 
-    [Column("visit_date_at")]
-    public DateTime VisitDateAt { get; set; }
+    public Visit(int bookmarkId)
+    {
+        if (bookmarkId <= 0)
+            throw new ArgumentException("BookmarkId must be a positive number", nameof(bookmarkId));
+        BookmarkId = bookmarkId;
+        VisitDateAt  = DateTime.UtcNow;
+    }
 
-    public Bookmark? Bookmark { get; set; }
-}
-
-public class VisitCreateDto
-{
-    [Required]
-    public int BookmarkId { get; set; }
 }

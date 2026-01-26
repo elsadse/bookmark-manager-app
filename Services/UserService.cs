@@ -1,109 +1,47 @@
-using System.Security.Cryptography;
-using bookmark_manager_app.Data;
+using bookmark_manager_app.DTOs;
+using bookmark_manager_app.Exceptions;
+using bookmark_manager_app.Interfaces;
 using bookmark_manager_app.Models;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using Microsoft.EntityFrameworkCore;
 
 namespace bookmark_manager_app.Services;
 
 public class UserService : IUserService
 {
-    private readonly BookmarkDbContext _context;
-    private readonly ILogger<UserService> _logger;
+    private readonly IUserRepository _userRepository;
 
-    public UserService(BookmarkDbContext context, ILogger<UserService> logger)
+    public UserService(IUserRepository userRepository)
     {
-        _context = context;
-        _logger = logger;
+        _userRepository = userRepository;
     }
 
-    private string HashPassword(string password)
+    public async Task<UserDto> CreateUserAsync(UserCreateDto command)
     {
-        byte[] salt = RandomNumberGenerator.GetBytes(128 / 8);
-        string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-            password: password,
-            salt: salt,
-            prf: KeyDerivationPrf.HMACSHA256,
-            iterationCount: 100000,
-            numBytesRequested: 256 / 8));
-
-        return hashed;
-    }
-
-    public async Task<User?> CreateUserAsync(UserCreateDto userDto)
-    {
-        try
-        {
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
-            if (existingUser != null)
-            {
-                _logger.LogWarning("Email {Email} already exists", userDto.Email);
-                return null;
-            }
-            var user = new User
-            {
-                FullName = userDto.FullName,
-                Email = userDto.Email,
-                PasswordHash = HashPassword(userDto.Password),
-                CreatedAt=  DateTime.UtcNow
-            };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation("User created with ID: {UserId}", user.UserId);
-            return user;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating user with email {Email}", userDto.Email);
-            return null;
-        }
+        var existingUser = await _userRepository.GetByEmailAsync(command.Email);
+        if (existingUser != null)
+            throw new ConflictException($"User with email '{command.Email}' already exists");
+        var user = User.Create(command);
+        var createdUser = await _userRepository.CreateAsync(user);
+        return createdUser;
     }
 
     public async Task<User?> GetUserByIdAsync(int userId)
     {
-        try
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
-            return user;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting user with ID: {UserId}", userId);
-            return null;
-        }
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user is null)
+            throw new NotFoundException("User ID not found");
+        return user;
+
     }
 
-    public async Task<bool> UpdateUserAsync(int id, UserUpdateDto userUpdate)
+    public async Task UpdateUserAsync(int id, UserUpdateDto command)
     {
-        try
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                _logger.LogWarning("User with ID {UserId} not found", id);
-                return false;
-            }
-            bool hasChanges = false;
-            if (!string.IsNullOrEmpty(userUpdate.Password))
-            {
-                user.PasswordHash = HashPassword(userUpdate.Password);
-                hasChanges = true;
-            }
-            if (hasChanges)
-            {
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("User with ID {UserId} updated successfully", id);
-                return true;
-            }
-            _logger.LogInformation("No changes to update for user ID {UserId}", id);
-            return false;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating user with ID: {UserId}", id);
-            return false;
-        }
+        var user = await _userRepository.GetByEmailAsync(command.Email);
+        if (user is null)
+            throw new NotFoundException($"User with email doesn't exist");
+        if (user.UserId != id)
+            throw new ForbiddenException($"You cannot access this resource.");
+        user.Update(command);
+        await _userRepository.UpdateAsync(user);
     }
 
 }

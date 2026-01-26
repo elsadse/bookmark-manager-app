@@ -1,25 +1,19 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using bookmark_manager_app.DTOs;
 
 namespace bookmark_manager_app.Models;
 
-[Table("tags", Schema = "bookmark")]
-public class Tag
+public sealed class Tag
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column("tag_id")]
-    public int TagId { get; set; }
+    public int TagId { get; private set; }
+    public string Name { get; private set; } = string.Empty;
+    private readonly List<BookmarkTag> _bookmarkTags = new();
+    public IReadOnlyCollection<BookmarkTag> BookmarkTags => _bookmarkTags.AsReadOnly();
 
-    [Required]
-    [Column("name")]
-    public string Name { get; set; } = string.Empty;
+    public Tag(string name)
+    {
+        if (name.Length > 25)
+            throw new ArgumentException("length of name must be a under 25 character", nameof(name));
+        Name = name;
 
-    public ICollection<BookmarkTag> BookmarkTags { get; set; } = new List<BookmarkTag>();
-}
-
-public class TagCreateDto
-{
-    [Required]
-    public string Name { get; set; } = string.Empty;
+    }
 }

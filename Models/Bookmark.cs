@@ -1,86 +1,102 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using bookmark_manager_app.DTOs;
 
 namespace bookmark_manager_app.Models;
 
-[Table("bookmarks", Schema = "bookmark")]
-public class Bookmark
+public sealed class Bookmark
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column("bookmark_id")]
-    public int BookmarkId { get; set; }
+    public int BookmarkId { get; private set; }
+    public int UserId { get; private set; }
+    public string Title { get; private set; } = string.Empty;
+    public string Url { get; private set; } = string.Empty;
+    public string Description { get; private set; } = string.Empty;
+    public bool IsPinned { get; private set; } = false;
+    public bool IsArchived { get; private set; } = false;
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; private set; }
+    public User? User { get; private set; }
+    private readonly List<Visit> _visits = new();
+    public IReadOnlyCollection<Visit> Visits => _visits.AsReadOnly();
+    private readonly List<BookmarkTag> _bookmarkTags = new();
+    public IReadOnlyCollection<BookmarkTag> BookmarkTags => _bookmarkTags.AsReadOnly();
 
-    [Required]
-    [ForeignKey("User")]
-    [Column("user_id")]
-    public int UserId { get; set; }
+    private Bookmark() { }
 
-    [Required]
-    [Column("title")]
-    public string Title { get; set; } = string.Empty;
+    private Bookmark(int userId, string title, string url, string? description)
+    {
+        UserId = userId;
+        Title = title ?? throw new ArgumentNullException(nameof(title));
+        Url = url ?? throw new ArgumentNullException(nameof(url));
+        Description = description ?? throw new ArgumentNullException(nameof(url));
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = CreatedAt;
+    }
+    public static Bookmark Create(int userId, BookmarkCreateDto dto)
+    {
+        ValidateCreateInputs(dto);
+        return new Bookmark(
+            userId: userId,
+            title: dto.Title,
+            url: dto.Url,
+            description: dto.Description
+        );
+    }
 
-    [Required]
-    [Url]
-    [Column("url")]
-    public string Url { get; set; } = string.Empty;
+    public void Update(BookmarkUpdateDto dto)
+    {
+        bool hasChanges = false;
+        if (dto.Title is not null && dto.Title.ToLower() != Title.ToLower())
+        {
+            Title = dto.Title;
+            hasChanges = true;
+        }
+        if (dto.Url is not null && dto.Url.ToLower() != Url.ToLower())
+        {
+            Url = dto.Url;
+            hasChanges = true;
+        }
+        if (dto.Description is not null && dto.Description.ToLower() != Description.ToLower())
+        {
+            Description = dto.Description;
+            hasChanges = true;
+        }
+        if (hasChanges)
+            UpdatedAt = DateTime.UtcNow;
+    }
 
-    [Required]
-    [Column("description")]
-    public string Description { get; set; } = string.Empty;
+    public void Patch(BookmarkPatchDto dto)
+    {
+        bool hasChanges = false;
+        if (dto.IsPinned.HasValue && dto.IsPinned != IsPinned)
+        {
+            IsPinned = dto.IsPinned.Value;
+            hasChanges = true;
+        }
+        if (dto.IsArchived.HasValue && dto.IsArchived != IsArchived)
+        {
+            IsArchived = dto.IsArchived.Value;
+            hasChanges = true;
+        }
+        if (hasChanges)
+            UpdatedAt = DateTime.UtcNow;
+    }
 
-    [Column("is_pinned")]
-    public bool IsPinned { get; set; } = false;
+    public void AddVisit( )
+    {
+        _visits.Add(new Visit(BookmarkId));
+    }
 
-    [Column("is_archived")]
-    public bool IsArchived { get; set; } = false;
-
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    [Column("update_at")]
-    public DateTime UpdateAt { get; set; }
-
-    public User? User { get; set; }
-
-    public ICollection<Visit> Visits { get; set; } = new List<Visit>();
-
-    public ICollection<BookmarkTag> BookmarkTags { get; set; } = new List<BookmarkTag>();
-}
-
-public class BookmarkCreateDto
-{
-    [Required]
-    public string Title { get; set; } = string.Empty;
-
-    [Required]
-    [Url]
-    public string Url { get; set; } = string.Empty;
-
-    [Required]
-    public string Description { get; set; } = string.Empty;
-
-    [Required]
-    public ICollection<int> TagIds { get; set; } = new List<int>();
-}
-
-public class BookmarkUpdateDto
-{
-    public string? Title { get; set; }
-
-    [Url]
-    public string? Url { get; set; }
-
-    public string? Description { get; set; }
-
-    public DateTime UpdateAt { get; set; } = DateTime.UtcNow;
-
-    public List<int>? TagIds { get; set; }
-}
-
-public class BookmarkPatchDto
-{
-    public bool? IsPinned { get; set; }
-
-    public bool? IsArchived { get; set; }
+    private static void ValidateCreateInputs(BookmarkCreateDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Title))
+            throw new ArgumentException("Title is required", nameof(dto.Title));
+        if (string.IsNullOrWhiteSpace(dto.Url))
+            throw new ArgumentException("URL is required", nameof(dto.Url));
+        if (!Uri.TryCreate(dto.Url, UriKind.Absolute, out _))
+            throw new ArgumentException("Invalid URL format", nameof(dto.Url));
+        if (string.IsNullOrWhiteSpace(dto.Description))
+            throw new ArgumentException("Description is required", nameof(dto.Description));
+        if (dto.Description?.Length > 280)
+            throw new ArgumentException("Description cannot exceed 280 characters", nameof(dto.Description));
+    }
 }
