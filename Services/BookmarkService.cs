@@ -1,297 +1,125 @@
-using bookmark_manager_app.Data;
+using bookmark_manager_app.DTOs;
+using bookmark_manager_app.Exceptions;
+using bookmark_manager_app.Interfaces;
 using bookmark_manager_app.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace bookmark_manager_app.Services;
 
 public class BookmarkService : IBookmarkService
 {
-    private readonly BookmarkDbContext _context;
-    private readonly ILogger<BookmarkService> _logger;
+    private readonly IBookmarkRepository _bookmarkRepository;
+    private readonly ITagRepository _tagRepository;
+    private readonly IBookmarkTagRepository _bookmarkTagRepository;
+    private readonly IVisitRepository _visitRepository;
+    private readonly IUserRepository _userRepository;
 
-    public BookmarkService(BookmarkDbContext context, ILogger<BookmarkService> logger)
+    public BookmarkService(IBookmarkRepository bookmarkRepository, ITagRepository tagRepository, IBookmarkTagRepository bookmarkTagRepository, IVisitRepository visitRepository, IUserRepository userRepository)
     {
-        _context = context;
-        _logger = logger;
+        _bookmarkRepository = bookmarkRepository;
+        _tagRepository = tagRepository;
+        _bookmarkTagRepository = bookmarkTagRepository;
+        _visitRepository = visitRepository;
+        _userRepository = userRepository;
     }
 
-    public async Task<Bookmark?> CreateBookmarkAsync(int userId, BookmarkCreateDto bookmarkDto)
+    public async Task<BookmarkDto?> CreateBookmarkAsync(int userId, BookmarkCreateDto command)
     {
-        try
+        var userExists = await _userRepository.ExistsAsync(userId);
+        if (!userExists)
+            throw new NotFoundException($"User with ID {userId} not found");
+        var bookmark = Bookmark.Create(userId, command);
+        var createdBookmark = await _bookmarkRepository.CreateAsync(bookmark);
+        foreach (int tagId in command.TagIds)
         {
-            //verify if user exist
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-            {
-                _logger.LogWarning("User with ID {UserId} not found", userId);
-                return null;
-            }
-            //verify if bookmark exist
-            var existingBookmark = await _context.Bookmarks.FirstOrDefaultAsync(b => b.UserId == userId && (b.Title == bookmarkDto.Title || b.Url == bookmarkDto.Url));
-            if (existingBookmark != null)
-            {
-                _logger.LogWarning("Bookmark already exists for user {UserId}", userId);
-                return null;
-            }
-            //create bookmark 
-            var bookmark = new Bookmark
-            {
-                UserId = userId,
-                Title = bookmarkDto.Title,
-                Url = bookmarkDto.Url,
-                Description = bookmarkDto.Description,
-                CreatedAt = DateTime.UtcNow
-            };
-            _context.Bookmarks.Add(bookmark);
-            await _context.SaveChangesAsync();
-            // Add tags in bookmark_tags
-            if (bookmarkDto.TagIds != null && bookmarkDto.TagIds.Any())
-            {
-                foreach (var tagId in bookmarkDto.TagIds)
-                {
-                    var tag = await _context.Tags.FindAsync(tagId);
-                    if (tag != null)
-                    {
-                        var bookmarkTag = new BookmarkTag
-                        {
-                            BookmarkId = bookmark.BookmarkId,
-                            TagId = tagId
-                        };
-                        _context.BookmarkTags.Add(bookmarkTag);
-                    }
-                }
-                await _context.SaveChangesAsync();
-            }
-            _logger.LogInformation("Bookmark created with ID: {BookmarkId}", bookmark.BookmarkId);
-            return bookmark;
+            var existingTag = await _tagRepository.GetByIdAsync(tagId);
+            if (existingTag == null)
+                throw new NotFoundException($"Tag with ID {tagId} not found");
+            var bookmarkTag = BookmarkTag.Create(createdBookmark.BookmarkId, tagId);
+            await _bookmarkTagRepository.CreateAsync(bookmarkTag);
         }
-        catch (Exception ex)
+        var bookmarkDto = await _bookmarkRepository.GetByIdWithDetailsAsync(createdBookmark.BookmarkId, userId);
+        return bookmarkDto;
+    }
+
+    public async Task<BookmarkDto?> GetBookmarkByIdAsync(int bookmarkId, int userId)
+    {
+        var bookmark = await _bookmarkRepository.GetByIdWithDetailsAsync(bookmarkId, userId);
+        if (bookmark is null) return null;
+        return bookmark;
+    }
+
+    public async Task<IEnumerable<BookmarkDto>> GetBookmarkAsync(int userId)
+    {
+        var userExists = await _userRepository.ExistsAsync(userId);
+        if (!userExists)
+            throw new NotFoundException($"User with ID {userId} not found");
+        return await _bookmarkRepository.GetBookmarksWithDetailsByUserIdAsync(userId);
+    }
+
+    public async Task UpdateBookmarkAsync(int bookmarkId, int userId, BookmarkUpdateDto command)
+    {
+        var existingBookmark = await _bookmarkRepository.GetByIdWithTagsAndVisitsAsync(bookmarkId, userId);
+        if (existingBookmark is null)
+            throw new NotFoundException($"Bookmark with ID {bookmarkId} not found");
+        if (command.TagIds is not null)
         {
-            _logger.LogError(ex, "Error creating bookmark for user {UserId}", userId);
-            return null;
+            await _bookmarkTagRepository.DeleteByBookmarkIdAsync(bookmarkId);
+            foreach (int tagId in command.TagIds)
+            {
+                var existingTag = await _tagRepository.GetByIdAsync(tagId);
+                if (existingTag == null)
+                    throw new NotFoundException($"Tag with ID {tagId} not found");
+                await _bookmarkTagRepository.CreateAsync(BookmarkTag.Create(bookmarkId, tagId));
+            }
         }
+        existingBookmark.Update(command);
+        await _bookmarkRepository.UpdateAsync(existingBookmark, userId);
+    }
+
+    public async Task DeleteBookmarkAsync(int bookmarkId, int userId)
+    {
+        var bookmark = await _bookmarkRepository.GetByIdAsync(bookmarkId, userId);
+        if (bookmark is null)
+            throw new NotFoundException($"Bookmark with ID {bookmarkId} not found");
+        await _visitRepository.DeleteByBookmarkIdAsync(bookmarkId);
+        foreach (var bookmarkTag in bookmark.BookmarkTags)
+        {
+            await _tagRepository.DeleteAsync(bookmarkTag.TagId);
+        }
+        await _bookmarkTagRepository.DeleteByBookmarkIdAsync(bookmarkId);
+        await _bookmarkRepository.DeleteAsync(bookmarkId, userId);
 
     }
 
-    public async Task<Bookmark?> GetBookmarkByIdAsync(int bookmarkId)
+    public async Task PatchBookmarkAsync(int bookmarkId, int userId, BookmarkPatchDto command)
     {
-        try
-        {
-            return await _context.Bookmarks
-                .Include(b => b.User)
-                .Include(b => b.BookmarkTags)
-                    .ThenInclude(bt => bt.Tag)
-                .Include(b => b.Visits)
-                .FirstOrDefaultAsync(b => b.BookmarkId == bookmarkId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting bookmark with ID: {BookmarkId}", bookmarkId);
-            return null;
-        }
+        var existingBookmark = await _bookmarkRepository.GetByIdAsync(bookmarkId, userId);
+        if (existingBookmark is null)
+            throw new NotFoundException($"Bookmark with ID {bookmarkId} not found");
+
+        existingBookmark.Patch(command);
+        await _bookmarkRepository.UpdateAsync(existingBookmark, userId);
     }
 
-    public async Task<IEnumerable<Bookmark>> GetBookmarkAsync(int userId)
+    public async Task<Visit> AddVisitToBookmarkAsync(int bookmarkId, int userId)
     {
-        try
-        {
-            return await _context.Bookmarks
-                .Include(b => b.BookmarkTags)
-                    .ThenInclude(bt => bt.Tag)
-                .Include(b => b.Visits)
-                .Where(b => b.UserId == userId)
-                .ToListAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting bookmarks for user {UserId}", userId);
-            return Enumerable.Empty<Bookmark>();
-        }
+        var bookmark = await _bookmarkRepository.GetByIdAsync(bookmarkId, userId);
+        if (bookmark == null)
+            throw new NotFoundException($"Bookmark with ID {bookmarkId} not found");
+        var visit = new Visit(bookmarkId);
+        bookmark.AddVisit();
+        var createdVisit = await _visitRepository.CreateAsync(visit);
+        return createdVisit;
     }
 
-    public async Task<bool> UpdateBookmarkAsync(int bookmarkId, BookmarkUpdateDto bookmarkUpdate)
+    public async Task<Tag> AddTagToBookmarkAsync(string tagName)
     {
-        try
-        {
-            bool hasChanges = false;
-
-            var bookmark = await _context.Bookmarks.Include(b => b.BookmarkTags).FirstOrDefaultAsync(b => b.BookmarkId == bookmarkId);
-            if (bookmark == null)
-            {
-                _logger.LogWarning("Bookmark with ID {BookmarkId} not found", bookmarkId);
-                return false;
-            }
-
-            if (!string.IsNullOrEmpty(bookmarkUpdate.Title) && bookmarkUpdate.Title != bookmark.Title)
-            {
-                bookmark.Title = bookmarkUpdate.Title;
-                hasChanges = true;
-            }
-            if (!string.IsNullOrEmpty(bookmarkUpdate.Url) && bookmarkUpdate.Url != bookmark.Url)
-            {
-                bookmark.Url = bookmarkUpdate.Url;
-                hasChanges = true;
-            }
-            if (!string.IsNullOrEmpty(bookmarkUpdate.Description) && bookmarkUpdate.Description != bookmark.Description)
-            {
-                bookmark.Description = bookmarkUpdate.Description;
-                hasChanges = true;
-            }
-            if (bookmarkUpdate.TagIds != null)
-            {
-                //delete tags in bookmark_tags
-                var existingTags = bookmark.BookmarkTags.ToList();
-                foreach (var existingTag in existingTags)
-                {
-                    _context.BookmarkTags.Remove(existingTag);
-                }
-                //create tags in bookmark_tags
-                foreach (var tagId in bookmarkUpdate.TagIds)
-                {
-                    var tag = await _context.Tags.FindAsync(tagId);
-                    if (tag != null)
-                    {
-                        var bookmarkTag = new BookmarkTag
-                        {
-                            BookmarkId = bookmarkId,
-                            TagId = tagId
-                        };
-                        _context.BookmarkTags.Add(bookmarkTag);
-                    }
-                }
-                hasChanges = true;
-                if (hasChanges)
-                {
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation("Bookmark with ID {BookmarkId} updated", bookmarkId);
-                    return true;
-                }
-            }
-            return false;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating bookmark with ID: {BookmarkId}", bookmarkId);
-            return false;
-        }
+        var existingTag = await _tagRepository.GetByNameAsync(tagName);
+        if (existingTag != null)
+            throw new ConflictException($"{tagName} already exist");
+        var tag = new Tag(tagName);
+        return await _tagRepository.CreateAsync(tag);
     }
 
-    public async Task<bool> DeleteBookmarkAsync(int bookmarkId)
-    {
-        try
-        {
-            var bookmark = await _context.Bookmarks.FindAsync(bookmarkId);
-            if (bookmark == null)
-            {
-                _logger.LogWarning("Bookmark with ID {BookmarkId} not found", bookmarkId);
-                return false;
-            }
-            _context.Bookmarks.Remove(bookmark);
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Bookmark with ID {BookmarkId} deleted", bookmarkId);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting bookmark with ID: {BookmarkId}", bookmarkId);
-            return false;
-        }
-    }
 
-    public async Task<bool> TogglePinAsync(int bookmarkId)
-    {
-        try
-        {
-            var bookmark = await _context.Bookmarks.FindAsync(bookmarkId);
-            if (bookmark == null)
-            {
-                _logger.LogWarning("Bookmark with ID {BookmarkId} not found", bookmarkId);
-                return false;
-            }
-            bookmark.IsPinned = !bookmark.IsPinned;
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Bookmark with ID {BookmarkId} pin toggled to {IsPinned}", bookmarkId, bookmark.IsPinned);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error toggling pin for bookmark with ID: {BookmarkId}", bookmarkId);
-            return false;
-        }
-    }
-
-    public async Task<bool> ToggleArchiveAsync(int bookmarkId)
-    {
-        try
-        {
-            var bookmark = await _context.Bookmarks.FindAsync(bookmarkId);
-            if (bookmark == null)
-            {
-                _logger.LogWarning("Bookmark with ID {BookmarkId} not found", bookmarkId);
-                return false;
-            }
-            bookmark.IsArchived = !bookmark.IsArchived;
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Bookmark with ID {BookmarkId} archive toggled to {IsArchived}", bookmarkId, bookmark.IsArchived);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error toggling archive for bookmark with ID: {BookmarkId}", bookmarkId);
-            return false;
-        }
-    }
-
-    public async Task<Visit?> AddVisitAsync(int bookmarkId)
-    {
-        try
-        {
-            var bookmark = await _context.Bookmarks.FindAsync(bookmarkId);
-            if (bookmark == null)
-            {
-                _logger.LogWarning("Bookmark with ID {BookmarkId} not found", bookmarkId);
-                return null;
-            }
-            var visit = new Visit
-            {
-                BookmarkId = bookmarkId,
-                VisitDateAt = DateTime.UtcNow
-            };
-            _context.Visits.Add(visit);
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Visit added for bookmark with ID {BookmarkId}", bookmarkId);
-            return visit;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding visit for bookmark with ID: {BookmarkId}", bookmarkId);
-            return null;
-        }
-    }
-
-    public async Task<int> GetVisitCountAsync(int bookmarkId)
-    {
-        try
-        {
-            return await _context.Visits.CountAsync(v => v.BookmarkId == bookmarkId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting visit count for bookmark with ID: {BookmarkId}", bookmarkId);
-            return 0;
-        }
-    }
-
-    public async Task<DateTime?> GetLastVisitedAsync(int bookmarkId)
-    {
-        try
-        {
-            return (await _context.Visits.Where(v => v.BookmarkId == bookmarkId).OrderByDescending(v => v.BookmarkId).FirstOrDefaultAsync()).VisitDateAt;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting last visited date for bookmark with ID: {BookmarkId}", bookmarkId);
-            return null;
-        }
-    }
 }
