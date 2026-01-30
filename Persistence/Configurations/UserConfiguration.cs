@@ -8,19 +8,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.ToTable("users");
-        builder.HasKey(u => u.UserId);
-        builder.Property(e => e.UserId).ValueGeneratedOnAdd().UseIdentityColumn();
+         builder.ToTable("users");
+        builder.HasKey(x => x.UserId);
+        builder.HasIndex(x => x.Email).IsUnique();
 
-        builder.Property(u => u.FullName).IsRequired();
-        builder.Property(u => u.Email).IsRequired();
-        builder.Property(u => u.PasswordHash).IsRequired();
-        builder.Property(u => u.CreatedAt).HasDefaultValueSql("NOW()");
-        builder.Property(u => u.UpdatedAt).HasDefaultValueSql("NOW()");
-        builder.Property(u => u.UpdatedAt).ValueGeneratedOnAddOrUpdate().HasDefaultValueSql("NOW()");
-
-        builder.HasIndex(u => u.Email).IsUnique();
-
-        builder.HasMany(u => u.Bookmarks).WithOne(u => u.User).HasForeignKey(u => u.UserId).OnDelete(DeleteBehavior.Cascade);
+        builder.Property(x => x.Fullname).IsRequired().HasMaxLength(200);
+        builder.Property(x => x.Email).IsRequired().HasMaxLength(320);
+        builder.Property(x => x.Password).IsRequired().HasMaxLength(255);
+        builder.Property(x => x.CreationTime).ValueGeneratedOnAdd();
+        builder.Property(x => x.LastModifiedTime).ValueGeneratedOnUpdate();
     }
 }

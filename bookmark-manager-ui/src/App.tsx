@@ -4,6 +4,8 @@ import { FormContainerResetPassword } from '@/components/connexion/FormContainer
 import { FormContainerSignIn } from '@/components/connexion/FormContainerSignIn'
 import { FormContainerSignUp } from '@/components/connexion/FormContainerSignUp'
 import { HomePage } from '@/components/home/HomePage'
+import { PrivateRoute } from '@/components/PivateRoute'
+import { PublicRoute } from '@/components/PublicRoute'
 import { BookmarkListContextProvider } from '@/context/BookmarkListContext'
 import { FilterTagsContextProvider } from '@/context/FilterTagsContext'
 import { Route, Routes, useLocation } from 'react-router'
@@ -18,12 +20,13 @@ export function App() {
       <FilterTagsContextProvider>
         <div className={`${isCenteredRoute ? 'min-h-screen flex justify-center items-center gap-y-2.5 px-4 md:p-0' : ''}`}>
           <Routes>
-            <Route path="/bookmark-manager-app/" element={<FormContainerSignIn />} />
-            <Route path="/bookmark-manager-app/signUp" element={<FormContainerSignUp />} />
-            <Route path="/bookmark-manager-app/forgotPassword" element={<FormContainerForgotPassword />} />
-            <Route path="/bookmark-manager-app/ResetPassword" element={<FormContainerResetPassword />} />
-            <Route path="/bookmark-manager-app/home" element={<HomePage />} />
-            <Route path="/bookmark-manager-app/archived" element={<ArchivedPage />} />
+            <Route path="/bookmark-manager-app/" element={<PublicRoute><FormContainerSignIn /></PublicRoute>} />
+            <Route path="/bookmark-manager-app/signUp" element={<PublicRoute><FormContainerSignUp /></PublicRoute>} />
+            <Route path="/bookmark-manager-app/forgotPassword" element={<PublicRoute><FormContainerForgotPassword /></PublicRoute>} />
+            <Route path="/bookmark-manager-app/ResetPassword" element={<PublicRoute><FormContainerResetPassword /></PublicRoute>} />
+
+            <Route path="/bookmark-manager-app/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
+            <Route path="/bookmark-manager-app/archived" element={<PrivateRoute><ArchivedPage /></PrivateRoute>} />
           </Routes>
         </div>
       </FilterTagsContextProvider>

@@ -1,71 +1,21 @@
-using bookmark_manager_app.DTOs;
-using bookmark_manager_app.Exceptions;
-using bookmark_manager_app.Interfaces;
-using bookmark_manager_app.Models;
+using bookmark_manager_app.Controllers.Responses;
+using bookmark_manager_app.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace bookmark_manager_app.Controllers;
 
 [ApiController]
-[Route("api/users")]
-public class UsersController : ControllerBase
+[Route("/api/users")]
+public class UserController(UserService userService) : ControllerBase
 {
-    private readonly IUserService _userService;
-    private readonly ILogger<UsersController> _logger;
-
-    public UsersController(IUserService userService, ILogger<UsersController> logger)
+    [HttpGet("{id:long}", Name = nameof(GetUserByIdAsync))]
+    public async Task<ActionResult<GetUserByIdResponse>> GetUserByIdAsync(long id)
     {
-        _userService = userService;
-        _logger = logger;
-    }
-
-    [HttpGet("{id}")]
-    public async Task<ActionResult<User>> GetUserById(int id)
-    {
-        if (id <= 0)
-            throw new BadRequestException("User ID must be positive");
-        var user = await _userService.GetUserByIdAsync(id);
-        if (user == null) throw new NotFoundException("User ID not found");
-        return Ok(user);
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserCreateDto command)
-    {
-
-        if (!ModelState.IsValid)
+        var user = await userService.GetUserByIdAsync(id);
+        if (user == null)
         {
-            var errors = ModelState
-            .Where(e => e.Value?.Errors.Count > 0)
-            .ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-            );
-            throw new ValidationException(errors);
+            return NotFound();
         }
-        var user = await _userService.CreateUserAsync(command);
-        return CreatedAtAction(nameof(GetUserById), new { id = user.UserId }, user);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateDto command)
-    {
-
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState
-            .Where(e => e.Value?.Errors.Count > 0)
-            .ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-            );
-            throw new ValidationException(errors);
-        }
-        if (id <= 0)
-            throw new BadRequestException("User ID must be positive");
-
-        await _userService.UpdateUserAsync(id, command);
-        return NoContent();
-
+        return Ok(GetUserByIdResponse.FromModel(user));
     }
 }

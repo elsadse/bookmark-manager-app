@@ -3,3 +3,5 @@
 bookmark-manager-ui/node_modules/
 
 .env
+bin/
+obj/

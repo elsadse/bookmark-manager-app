@@ -12,3 +12,8 @@ export type Bookmark = {
     lastVisited: string | null
 }
 
+export type User = {
+    Email: string,
+    Fullname: string
+}
+

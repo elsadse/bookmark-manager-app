@@ -17,7 +17,7 @@ public sealed class HandlerValidationException : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is not ValidationException validationException)
+        if (exception is not CustomValidationException validationException)
         {
             return false;
         }
@@ -25,10 +25,11 @@ public sealed class HandlerValidationException : IExceptionHandler
         _logger.LogWarning("Validation Error: {Message}", validationException.Message);
 
         httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-        await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
+        await httpContext.Response.WriteAsJsonAsync(new ValidationProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
             Title = "Validation Error",
+            Errors= validationException.Errors
         }, cancellationToken);
 
         return true;

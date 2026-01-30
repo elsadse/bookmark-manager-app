@@ -1,10 +1,14 @@
+using System.Text;
 using bookmark_manager_app.Exceptions.Handler;
 using bookmark_manager_app.Exceptions.Handlers;
-using bookmark_manager_app.Interfaces;
 using bookmark_manager_app.Persistence;
 using bookmark_manager_app.Repositories;
 using bookmark_manager_app.Services;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,14 +37,46 @@ builder.Services.AddDbContext<BookmarkDbContext>(options =>
     options.UseNpgsql(connectionString);
 });
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
-builder.Services.AddScoped<ITagRepository, TagRepository>();
-builder.Services.AddScoped<IBookmarkTagRepository, BookmarkTagRepository>();
-builder.Services.AddScoped<IVisitRepository, VisitRepository>();
+builder.Services.AddSingleton<PasswordHasher<IdentityUser>>();
 
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IBookmarkService, BookmarkService>();
+builder.Services.AddScoped<UserRepository>();
+
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<AuthService>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+var jwt = builder.Configuration.GetSection("Jwt");
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwt["Issuer"],
+            ValidAudience = jwt["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwt["Key"]!)
+            )
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
@@ -54,7 +90,9 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseExceptionHandler();
 
