@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using bookmark_manager_app.Persistence;
@@ -11,9 +12,11 @@ using bookmark_manager_app.Persistence;
 namespace bookmark_manager_app.Migrations
 {
     [DbContext(typeof(BookmarkDbContext))]
-    partial class BookmarkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260131184959_DataBaseV2")]
+    partial class DataBaseV2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -170,11 +173,9 @@ namespace bookmark_manager_app.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreationTime")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("LastModifiedTime")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("VisitTime")
@@ -184,7 +185,7 @@ namespace bookmark_manager_app.Migrations
 
                     b.HasIndex("BookmarkId");
 
-                    b.ToTable("visits", "bookmark-manager");
+                    b.ToTable("Visits", "bookmark-manager");
                 });
 
             modelBuilder.Entity("BookmarkTag", b =>
@@ -216,17 +217,12 @@ namespace bookmark_manager_app.Migrations
             modelBuilder.Entity("bookmark_manager_app.Models.Visit", b =>
                 {
                     b.HasOne("bookmark_manager_app.Models.Bookmark", "Bookmark")
-                        .WithMany("Visits")
+                        .WithMany()
                         .HasForeignKey("BookmarkId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Bookmark");
-                });
-
-            modelBuilder.Entity("bookmark_manager_app.Models.Bookmark", b =>
-                {
-                    b.Navigation("Visits");
                 });
 
             modelBuilder.Entity("bookmark_manager_app.Models.User", b =>

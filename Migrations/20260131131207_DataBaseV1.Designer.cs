@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using bookmark_manager_app.Persistence;
@@ -11,9 +12,11 @@ using bookmark_manager_app.Persistence;
 namespace bookmark_manager_app.Migrations
 {
     [DbContext(typeof(BookmarkDbContext))]
-    partial class BookmarkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260131131207_DataBaseV1")]
+    partial class DataBaseV1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,21 +25,6 @@ namespace bookmark_manager_app.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("BookmarkTag", b =>
-                {
-                    b.Property<long>("BookmarksBookmarkId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TagsTagId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("BookmarksBookmarkId", "TagsTagId");
-
-                    b.HasIndex("TagsTagId");
-
-                    b.ToTable("bookmark_tags", "bookmark-manager");
-                });
 
             modelBuilder.Entity("bookmark_manager_app.Models.Bookmark", b =>
                 {
@@ -90,6 +78,29 @@ namespace bookmark_manager_app.Migrations
                     b.ToTable("bookmarks", "bookmark-manager");
                 });
 
+            modelBuilder.Entity("bookmark_manager_app.Models.BookmarkTag", b =>
+                {
+                    b.Property<long>("BookmarkId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TagId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreationTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("LastModifiedTime")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("BookmarkId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("bookmark_tags", "bookmark-manager");
+                });
+
             modelBuilder.Entity("bookmark_manager_app.Models.Tag", b =>
                 {
                     b.Property<long>("TagId")
@@ -99,11 +110,9 @@ namespace bookmark_manager_app.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("TagId"));
 
                     b.Property<DateTimeOffset>("CreationTime")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("LastModifiedTime")
-                        .ValueGeneratedOnUpdate()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
@@ -187,21 +196,6 @@ namespace bookmark_manager_app.Migrations
                     b.ToTable("visits", "bookmark-manager");
                 });
 
-            modelBuilder.Entity("BookmarkTag", b =>
-                {
-                    b.HasOne("bookmark_manager_app.Models.Bookmark", null)
-                        .WithMany()
-                        .HasForeignKey("BookmarksBookmarkId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("bookmark_manager_app.Models.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagsTagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("bookmark_manager_app.Models.Bookmark", b =>
                 {
                     b.HasOne("bookmark_manager_app.Models.User", "User")
@@ -211,6 +205,25 @@ namespace bookmark_manager_app.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("bookmark_manager_app.Models.BookmarkTag", b =>
+                {
+                    b.HasOne("bookmark_manager_app.Models.Bookmark", "Bookmark")
+                        .WithMany("BookmarkTags")
+                        .HasForeignKey("BookmarkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("bookmark_manager_app.Models.Tag", "Tag")
+                        .WithMany("BookmarkTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bookmark");
+
+                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("bookmark_manager_app.Models.Visit", b =>
@@ -226,7 +239,14 @@ namespace bookmark_manager_app.Migrations
 
             modelBuilder.Entity("bookmark_manager_app.Models.Bookmark", b =>
                 {
+                    b.Navigation("BookmarkTags");
+
                     b.Navigation("Visits");
+                });
+
+            modelBuilder.Entity("bookmark_manager_app.Models.Tag", b =>
+                {
+                    b.Navigation("BookmarkTags");
                 });
 
             modelBuilder.Entity("bookmark_manager_app.Models.User", b =>

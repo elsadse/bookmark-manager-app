@@ -2,7 +2,7 @@ using bookmark_manager_app.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace bookmark_manager_app.Persistence.Configuration;
+namespace bookmark_manager_app.Persistence.Configurations;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {

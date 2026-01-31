@@ -1,8 +1,10 @@
+using System.Security.Claims;
 using System.Text;
 using bookmark_manager_app.Exceptions.Handlers;
 using bookmark_manager_app.Persistence;
 using bookmark_manager_app.Repositories;
 using bookmark_manager_app.Services;
+using bookmark_manager_app.Services.Utils;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -40,31 +42,68 @@ builder.Services.AddDbContext<BookmarkDbContext>(options =>
 builder.Services.AddSingleton<PasswordHasher<IdentityUser>>();
 
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<BookmarkRepository>();
+builder.Services.AddScoped<TagRepository>();
+builder.Services.AddScoped<VisitRepository>();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<BookmarkService>();
+builder.Services.AddScoped<TagService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var jwt = builder.Configuration.GetSection("Jwt");
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwt["Issuer"],
-            ValidAudience = jwt["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwt["Key"]!)
-            )
-        };
-    });
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwt["Issuer"],
+        ValidAudience = jwt["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwt["Key"]!)
+        )
+    };
 
+    options.MapInboundClaims = false; // Disable Microsoft MapInboundClaims to keep JWT claim names as is.
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (context.Request.Cookies.TryGetValue("token", out var token))
+            {
+                context.Token = token;
+            }
+
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            if (context.Exception is SecurityTokenExpiredException)
+            {
+                context.Response.Headers.Append("Token-Expired", "true");
+            }
+
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogWarning("Authentication failed: {ExceptionMessage}", context.Exception.Message);
+
+            return Task.CompletedTask;
+        }
+    };
+});
 builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ClaimsPrincipal>(sp =>
+{
+    var accessor = sp.GetRequiredService<IHttpContextAccessor>();
+    return accessor.HttpContext?.User ?? new ClaimsPrincipal(new ClaimsIdentity());
+});
+builder.Services.AddScoped<UserContext>();
 
 builder.Services.AddCors(options =>
 {

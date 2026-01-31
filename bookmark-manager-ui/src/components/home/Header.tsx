@@ -12,7 +12,7 @@ import { useState } from "react"
 import { useBookmarkList } from "@/context/BookmarkListContext"
 import { useAuthContext } from "@/hooks/useAuthContext"
 
-export function Header({ onMenuClick }: { onMenuClick: () => void }) {
+export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, onAddClick:()=>void }) {
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
     const { searchQuery, setSearchQuery } = useBookmarkList()
 
@@ -41,7 +41,8 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
                 </div>
             </div>
             <div className="flex flex-row justify-center items-center gap-x-2.5 md:gap-4">
-                <button className="flex justify-center items-center 
+                <button onClick={onAddClick}
+                    className="flex justify-center items-center 
                     gap-1 p-2.5 md:px-4 md:py-3 rounded-8 bg-teal-700 
                     border-none dark:border border-neutral-d-400 cursor-pointer ring ring-teal-700">
                     <img src={iconAdd} className="w-5 h-5" alt="icon add" />
