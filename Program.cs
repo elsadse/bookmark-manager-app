@@ -1,5 +1,4 @@
 using System.Text;
-using bookmark_manager_app.Exceptions.Handler;
 using bookmark_manager_app.Exceptions.Handlers;
 using bookmark_manager_app.Persistence;
 using bookmark_manager_app.Repositories;
@@ -19,17 +18,18 @@ builder.Services.AddProblemDetails(options =>
     {
         context.ProblemDetails.Instance = context.HttpContext.Request.Path;
         context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
-        context.ProblemDetails.Extensions["timestamp"] = DateTime.UtcNow.ToString();
+        context.ProblemDetails.Extensions["timestamp"] = DateTimeOffset.UtcNow.ToString();
         context.ProblemDetails.Instance = $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
     };
 });
 
-builder.Services.AddExceptionHandler<HandlerValidationException>();
-builder.Services.AddExceptionHandler<HandlerNotFoundException>();
+builder.Services.AddExceptionHandler<UnauthorizedExceptionHandler>();
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
 builder.Services.AddExceptionHandler<HandlerBadRequestException>();
-builder.Services.AddExceptionHandler<HandlerConflictException>();
-builder.Services.AddExceptionHandler<HandlerForbiddenException>();
-builder.Services.AddExceptionHandler<HandlerGlobalException>();
+builder.Services.AddExceptionHandler<ConflictExceptionHandler>();
+builder.Services.AddExceptionHandler<ForbiddenExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddDbContext<BookmarkDbContext>(options =>
 {

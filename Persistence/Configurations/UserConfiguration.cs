@@ -8,7 +8,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-         builder.ToTable("users");
+        builder.ToTable("users");
         builder.HasKey(x => x.UserId);
         builder.HasIndex(x => x.Email).IsUnique();
 

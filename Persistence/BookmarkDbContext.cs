@@ -8,7 +8,7 @@ namespace bookmark_manager_app.Persistence;
 public class BookmarkDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
-    public BookmarkDbContext(DbContextOptions options) : base(options) { } 
+    public BookmarkDbContext(DbContextOptions options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

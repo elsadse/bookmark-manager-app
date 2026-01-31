@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace bookmark_manager_app.Exceptions.Handlers;
 
-public sealed class HandlerGlobalException( ILogger<HandlerGlobalException> logger,
+public sealed class GlobalExceptionHandler( ILogger<GlobalExceptionHandler> logger,
     IProblemDetailsService problemDetailsService) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception,

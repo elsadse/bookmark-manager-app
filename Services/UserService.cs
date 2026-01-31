@@ -4,14 +4,11 @@ using bookmark_manager_app.Repositories;
 
 namespace bookmark_manager_app.Services;
 
-public class UserService (UserRepository userRepository)
+public class UserService(UserRepository userRepository)
 {
-    public async Task<User?> GetUserByIdAsync(long userId)
+    public async Task<User> GetUserByIdAsync(long userId)
     {
         var user = await userRepository.GetByIdAsync(userId);
-        if (user is null)
-            throw new NotFoundException("User ID not found");
-        return user;
-
+        return user ?? throw new NotFoundException("User ID not found");
     }
 }

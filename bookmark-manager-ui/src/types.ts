@@ -13,7 +13,7 @@ export type Bookmark = {
 }
 
 export type User = {
-    Email: string,
-    Fullname: string
+    email: string,
+    fullname: string
 }
 

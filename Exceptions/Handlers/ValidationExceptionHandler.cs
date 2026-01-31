@@ -3,15 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace bookmark_manager_app.Exceptions.Handlers;
 
-public sealed class HandlerValidationException : IExceptionHandler
+public sealed class ValidationExceptionHandler(ILogger<ValidationExceptionHandler> logger) : IExceptionHandler
 {
-    private readonly ILogger<HandlerValidationException> _logger;
-
-    public HandlerValidationException(ILogger<HandlerValidationException> logger)
-    {
-        _logger = logger;
-    }
-
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
@@ -22,14 +15,14 @@ public sealed class HandlerValidationException : IExceptionHandler
             return false;
         }
 
-        _logger.LogWarning("Validation Error: {Message}", validationException.Message);
+        logger.LogWarning("Validation Error: {Message}", validationException.Message);
 
-        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+        httpContext.Response.StatusCode = validationException.HttpStatusCode;
         await httpContext.Response.WriteAsJsonAsync(new ValidationProblemDetails
         {
-            Status = StatusCodes.Status400BadRequest,
+            Status = validationException.HttpStatusCode,
             Title = "Validation Error",
-            Errors= validationException.Errors
+            Errors = validationException.Errors
         }, cancellationToken);
 
         return true;

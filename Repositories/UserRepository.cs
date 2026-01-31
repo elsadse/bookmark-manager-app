@@ -6,19 +6,12 @@ namespace bookmark_manager_app.Repositories;
 
 public class UserRepository(BookmarkDbContext context)
 {
-   public async Task<User?> GetByEmailAsync(string email)
-    {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
-        if (user is null) return null;
-        return user;
-    }
+    public async Task<User?> GetByEmailAsync(string email) =>
+        await context.Users.AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Email == email);
 
-    public async Task<User?> GetByIdAsync(long userId)
-    {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.UserId==userId);
-        if (user is null) return null;
-        return user;
-    }
+    public async Task<User?> GetByIdAsync(long userId) =>
+        await context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId);
 
     public async Task<User> CreateAsync(User user)
     {
@@ -33,18 +26,15 @@ public class UserRepository(BookmarkDbContext context)
         await context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int userId)
+    public async Task DeleteAsync(User user)
     {
-        var user = await GetByIdAsync(userId);
-        if (user != null)
-        {
-            context.Users.Remove(user);
-            await context.SaveChangesAsync();
-        }
+        context.Users.Remove(user);
+        await context.SaveChangesAsync();
     }
 
     public async Task<bool> EmailExistsAsync(string email)
     {
-        return await context.Users.AsNoTracking().AnyAsync(u => u.Email.ToLower() == email.ToLower());
+        return await context.Users.AsNoTracking()
+            .AnyAsync(u => u.Email == email);
     }
 }
