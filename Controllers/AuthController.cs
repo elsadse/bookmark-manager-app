@@ -33,7 +33,7 @@ public class AuthController(
         await userLoginRequestValidator.ValidateAndThrowAsync(userLoginRequest);
 
         var jwtToken = await authService.AuthenticateUserAsync(userLoginRequest.Email, userLoginRequest.Password);
-        var durationInMinutes = configuration.GetValue("JwtSettings:DurationInMinutes", 5);
+        var durationInMinutes = configuration.GetValue("Jwt:DurationInMinutes", 5);
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,

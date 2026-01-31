@@ -1,8 +1,7 @@
 import { z } from "zod"
 
-export const ApiResponseSchema = z.object({
+export const AuthApiResponseSchema = z.object({
     fullname: z.string(),
-    email: z.string()
+    email: z.string(),
 })
-
-export type ApiResponse = z.infer<typeof ApiResponseSchema>
+export type AuthApiResponse = z.infer<typeof AuthApiResponseSchema>

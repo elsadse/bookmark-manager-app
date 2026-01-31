@@ -93,7 +93,7 @@
   }
 
   #root {
-    @apply min-h-screen w-full flex flex-col
+    @apply min-h-screen w-full
   }
 }
 

@@ -23,10 +23,21 @@ import { Link } from "react-router"
 import { useBookmarkList } from "@/context/BookmarkListContext"
 import { useState } from "react"
 
-export function BookmarkList({ listTitle, isOnArchivedPage }: { listTitle: string, isOnArchivedPage: boolean }) {
-    const { selectedTagsList, filteredBookmarkList, filteredBookmarkListArchived } = useFilterTagsContext()
-    const { bookmarkList, bookmarkListArchived, searchQuery } = useBookmarkList()
+export function BookmarkList() {
+    const { selectedTagsList, filteredBookmarkList } = useFilterTagsContext()
+    const { bookmarkList, searchQuery } = useBookmarkList()
     const [isSortByDropdownOpen, setIsSortByDropdownOpen] = useState(false)
+
+
+    function getTitleBookmarkList(): string {
+        if (selectedTagsList.length > 0) {
+            return "Bookmarks tagged:"
+        }
+        if (searchQuery.length > 0) {
+            return "Results For:"
+        }
+        return "All Bookmarks"
+    }
 
     function handleClickSortBy() {
         setIsSortByDropdownOpen(!isSortByDropdownOpen)
@@ -36,7 +47,7 @@ export function BookmarkList({ listTitle, isOnArchivedPage }: { listTitle: strin
         <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16 h-screen overflow-y-auto">
             <div className="flex flex-row justify-between items-center gap-x-4">
                 <div className="flex flex-col md:flex-row">
-                    <span className="text-preset-2 md:text-preset-1 text-neutral-900 dark:text-neutral-0">{listTitle}</span>
+                    <span className="text-preset-2 md:text-preset-1 text-neutral-900 dark:text-neutral-0">{getTitleBookmarkList()}</span>
                     {selectedTagsList.length !== 0 && (
                         <div className="flex flex-row">
                             {selectedTagsList.map((tag, index) => (
@@ -65,21 +76,10 @@ export function BookmarkList({ listTitle, isOnArchivedPage }: { listTitle: strin
                     {isSortByDropdownOpen && <SortByDropdown />}
                 </button>
             </div>
-            {isOnArchivedPage && selectedTagsList.length === 0 &&
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
-                    {bookmarkListArchived.map((boormark, index) => (
-                        <BookmarkListCard key={index} isOnArchivedPage={isOnArchivedPage} title={boormark.title} url={boormark.url} favicon={boormark.favicon}
-                            description={boormark.description} tags={boormark.tags} pinned={boormark.pinned}
-                            isArchived={boormark.isArchived} visitCount={boormark.visitCount} createdAt={new Date(boormark.createdAt)}
-                            lastVisited={boormark.lastVisited === null ? null : new Date(boormark.lastVisited)}
-                        />
-                    ))}
-                </div>
-            }
-            {!isOnArchivedPage && selectedTagsList.length === 0 &&
+            {selectedTagsList.length === 0 &&
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
                     {bookmarkList.map((boormark, index) => (
-                        <BookmarkListCard key={index} isOnArchivedPage={isOnArchivedPage} title={boormark.title} url={boormark.url} favicon={boormark.favicon}
+                        <BookmarkListCard key={index} isOnArchivedPage={false} title={boormark.title} url={boormark.url} favicon={boormark.favicon}
                             description={boormark.description} tags={boormark.tags} pinned={boormark.pinned}
                             isArchived={boormark.isArchived} visitCount={boormark.visitCount} createdAt={new Date(boormark.createdAt)}
                             lastVisited={boormark.lastVisited === null ? null : new Date(boormark.lastVisited)}
@@ -87,21 +87,10 @@ export function BookmarkList({ listTitle, isOnArchivedPage }: { listTitle: strin
                     ))}
                 </div>
             }
-            {isOnArchivedPage && selectedTagsList.length > 0 &&
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
-                    {filteredBookmarkListArchived.map((boormark, index) => (
-                        <BookmarkListCard key={index} isOnArchivedPage={isOnArchivedPage} title={boormark.title} url={boormark.url} favicon={boormark.favicon}
-                            description={boormark.description} tags={boormark.tags} pinned={boormark.pinned}
-                            isArchived={boormark.isArchived} visitCount={boormark.visitCount} createdAt={new Date(boormark.createdAt)}
-                            lastVisited={boormark.lastVisited === null ? null : new Date(boormark.lastVisited)}
-                        />
-                    ))}
-                </div>
-            }
-            {!isOnArchivedPage && selectedTagsList.length > 0 &&
+            {selectedTagsList.length > 0 &&
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
                     {filteredBookmarkList.map((boormark, index) => (
-                        <BookmarkListCard key={index} isOnArchivedPage={isOnArchivedPage} title={boormark.title} url={boormark.url} favicon={boormark.favicon}
+                        <BookmarkListCard key={index} isOnArchivedPage={false} title={boormark.title} url={boormark.url} favicon={boormark.favicon}
                             description={boormark.description} tags={boormark.tags} pinned={boormark.pinned}
                             isArchived={boormark.isArchived} visitCount={boormark.visitCount} createdAt={new Date(boormark.createdAt)}
                             lastVisited={boormark.lastVisited === null ? null : new Date(boormark.lastVisited)}
@@ -185,7 +174,7 @@ export function BookmarkListCardContainer({ favicon, title, url, description, ta
     return (
         <div className="h-57.75 flex flex-col gap-y-4 p-4 rounded-10">
             <div className="flex flex-row justify-between gap-x-3">
-                <div className="flex flex-row">
+                <div className="flex flex-row gap-x-3">
                     <div className="size-11 flex items-center rounded-8 border border-neutral-100 dark:border-neutral-d-500">
                         <img src={favicon} className="w-11 h-11" alt="icon logo" />
                     </div>

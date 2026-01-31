@@ -4,7 +4,7 @@
       "id": "bm-001",
       "title": "GitHub",
       "url": "https://github.com",
-      "favicon": "src/assets/images/favicon-github.png",
+      "favicon": "@/assets/images/favicon-github.png",
       "description": "Where the world builds software. Millions of developers and companies build, ship, and maintain their software on GitHub.",
       "tags": [
         "Tools",

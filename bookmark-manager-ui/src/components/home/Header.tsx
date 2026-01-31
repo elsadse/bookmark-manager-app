@@ -10,13 +10,14 @@ import iconThemeDark from "@/assets/images/icon-dark-theme.svg"
 import iconLogout from "@/assets/images/icon-logout.svg"
 import { useState } from "react"
 import { useBookmarkList } from "@/context/BookmarkListContext"
+import { useAuthContext } from "@/hooks/useAuthContext"
 
 export function Header({ onMenuClick }: { onMenuClick: () => void }) {
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
     const { searchQuery, setSearchQuery } = useBookmarkList()
 
     return (
-        <div className="w-full flex justify-center sm:items-start md:justify-between gap-x-2.5 md:gap-x-auto px-4 py-3 md:px-8 md:py-4 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500">
+        <div className="absolute top-0 w-full flex justify-center sm:items-start md:justify-between gap-x-2.5 md:gap-x-auto px-4 py-3 md:px-8 md:py-4 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500">
             <div className="flex flex-row justify-center gap-x-2.5 md:gap-x-4">
                 <div
                     onClick={onMenuClick}
@@ -25,7 +26,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
                 </div>
                 <div
                     onClick={onMenuClick}
-                    className="flex flex-row justify-center items-center xl:hidden gap-x-1 p-2.5 md:p-3 rounded-8 bg-neutral-d-800 border border-neutral-d-400 cursor-pointer">
+                    className="flex flex-row justify-center items-center xl:hidden gap-x-1 p-2.5 md:p-3 rounded-8 bg-neutral-d-800 border border-neutral-d-400 cursor-pointer hidden dark:block">
                     <img src={iconMenuDark} className="w-5 h-5" alt="icon menu" />
                 </div>
                 <div className={`flex flex-row justify-center items-center dark:bg-neutral-d-500
@@ -57,6 +58,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
 }
 
 export function ProfileMenuDropdown() {
+    const { logout } = useAuthContext()
 
     return (
         <div className="absolute top-15 right-8 md:top-17 
@@ -85,7 +87,8 @@ export function ProfileMenuDropdown() {
                     </div>
                 </div>
             </div>
-            <div className="flex flex-row gap-x-2 px-4 py-3 border-t border-[#E9EAEB]">
+            <div onClick={logout}
+                className="flex flex-row gap-x-2 px-4 py-3 border-t border-[#E9EAEB] cursor-pointer">
                 <img src={iconLogout} className="size-4" alt="icon logout" />
                 <span className="text-preset-4 text-neutral-800">Logout</span>
             </div>

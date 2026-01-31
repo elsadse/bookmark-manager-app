@@ -1,4 +1,4 @@
-import { ButtonForm, FormFooterRow, FormHeader, InputField, Logo } from "@/components/connexion/FormContainerSignIn";
+import { ButtonForm, FormFooterRow, FormHeader, InputField, Logo } from "@/components/auth/FormContainerSignIn";
 
 export function FormContainerResetPassword() {
 

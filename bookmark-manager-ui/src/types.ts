@@ -12,8 +12,5 @@ export type Bookmark = {
     lastVisited: string | null
 }
 
-export type User = {
-    email: string,
-    fullname: string
-}
+export type Nullable<T> = T | null
 

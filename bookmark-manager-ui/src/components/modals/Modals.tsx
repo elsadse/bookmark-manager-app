@@ -1,4 +1,4 @@
-import { InputField } from "@/components/connexion/FormContainerSignIn"
+import { InputField } from "@/components/auth/FormContainerSignIn"
 import iconClose from "@/assets/images/icon-close.svg"
 
 export function AddBookmark({ onClose }: { onClose: () => void }) {
