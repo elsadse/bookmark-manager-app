@@ -44,11 +44,12 @@ export function Dialog({ title, description, titleButton, isDelete, onClose }: {
                     </div>
                 </div>
                 <div className="flex flex-row justify-end gap-x-8">
-                    <button className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-neutral-0 border border-neutral-400">
+                    <button onClick={onClose}
+                        className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-neutral-0 border border-neutral-400 cursor-pointer">
                         <span className="text-center px-0.5 text-neutral-900">Cancel</span>
                     </button>
                     <button className={`flex justify-center items-center 
-                        gap-x-1 px-4 py-3 rounded-8 
+                        gap-x-1 px-4 py-3 rounded-8 cursor-pointer
                         ${isDelete ? "bg-red-800" : "bg-teal-700"}`}>
                         <span className="text-center px-0.5 text-neutral-0">{titleButton}</span>
                     </button>

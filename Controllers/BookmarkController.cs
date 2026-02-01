@@ -56,4 +56,11 @@ public class BookmarkController(
         await bookmarkService.ToggleArchiveAsync(id);
         return NoContent();
     }
+
+    [HttpDelete("{id:long}")]
+    public async Task<IActionResult> DeleteAsync(long id)
+    {
+        await bookmarkService.DeleteAsync(id);
+        return NoContent();
+    }
 }

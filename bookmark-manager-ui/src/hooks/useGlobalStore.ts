@@ -10,7 +10,9 @@ export type GlobalStore = {
     addTagFilter: (tag: string) => void,
     removeTagFilter: (tag: string) => void,
     filterArchivedBookmarks: boolean,
-    setFilterArchivedBookmarks: (filterArchivedBookmarks: boolean) => void
+    setFilterArchivedBookmarks: (filterArchivedBookmarks: boolean) => void,
+    isDeleteDialogOpen: boolean,
+    setIsDeleteDialogOpen: (isDeleteDialogOpen: boolean) => void
 }
 
 export const useGlobalStore = create<GlobalStore>((set) => ({
@@ -47,5 +49,7 @@ export const useGlobalStore = create<GlobalStore>((set) => ({
         const prefix = filterArchivedBookmarks ? "Archived" : "All"
         headerTitle = `${prefix} ${headerTitle}`
         return { headerTitle, filterArchivedBookmarks }
-    })
+    }),
+    isDeleteDialogOpen: false,
+    setIsDeleteDialogOpen: (isDeleteDialogOpen: boolean) => set({ isDeleteDialogOpen })
 }))

@@ -9,10 +9,10 @@ export function AddBookmark({ onClose }: { onClose: () => void }) {
     const queryClient = useQueryClient()
     const { mutate: addBookmarkFn } = useMutation({
         mutationFn: addBookmark,
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
-            await queryClient.invalidateQueries({ queryKey: ["tags"] })
-        }
+        onSuccess: async () => await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ["bookmarks"] }),
+            queryClient.invalidateQueries({ queryKey: ["tags"] })
+        ])
     })
 
     function handleAddBookmark(data: { title: string, description: string, url: string, tags: string[] }) {
@@ -120,11 +120,11 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                     </div>
                     <div className="flex flex-row justify-end gap-x-4">
                         <button onClick={onClose} type="button"
-                            className="w-35.5 flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-neutral-0 border border-neutral-400">
+                            className="w-35.5 flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-neutral-0 border border-neutral-400 cursor-pointer">
                             <span className="text-center px-0.5 text-neutral-900">Cancel</span>
                         </button>
                         <button type="submit"
-                            className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-teal-700">
+                            className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-teal-700 cursor-pointer">
                             <span className="text-center px-0.5 text-neutral-0">{titleButton}</span>
                         </button>
                     </div>

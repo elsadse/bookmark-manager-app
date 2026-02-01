@@ -10,6 +10,19 @@ public class BookmarkService(
     UserContext userContext,
     TagRepository tagRepository)
 {
+    public async Task DeleteAsync(long bookmarkId)
+    {
+        var bookmark = await bookmarkRepository.GetByIdAsync(bookmarkId);
+        if (bookmark == null)
+        {
+            throw new NotFoundException("Bookmark not found");
+        }
+        if (!bookmark.IsArchived)
+        {
+            throw new ForbiddenException("Cannot delete a non-archive bookmark");
+        }
+        await bookmarkRepository.DeleteAsync(bookmarkId);
+    }
 
     public async Task TogglePinAsync(long bookmarkId)
     {

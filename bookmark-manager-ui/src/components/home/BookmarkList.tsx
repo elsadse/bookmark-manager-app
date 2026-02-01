@@ -96,83 +96,31 @@ export function BookmarkList() {
                     {isSortByDropdownOpen && <SortByDropdown />}
                 </button>
             </div>
-            {/*{tagFilters.length === 0 &&
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
-                    {bookmarks?.map((boormark, index) => (
-                        <BookmarkListCard key={index} isOnArchivedPage={false} title={boormark.title} url={boormark.url} favicon={boormark.favicon}
-                            description={boormark.description} tags={boormark.tags} pinned={boormark.pinned}
-                            isArchived={boormark.isArchived} visitCount={boormark.visitCount} createdAt={new Date(boormark.createdAt)}
-                            lastVisited={boormark.lastVisited === null ? null : new Date(boormark.lastVisited)}
-                        />
-                    ))}
-                </div>
-            }
-            {tagFilters.length > 0 &&
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
-                    {filteredBookmarkList.map((boormark, index) => (
-                        <BookmarkListCard key={index} isOnArchivedPage={false} title={boormark.title} url={boormark.url} favicon={boormark.favicon}
-                            description={boormark.description} tags={boormark.tags} pinned={boormark.pinned}
-                            isArchived={boormark.isArchived} visitCount={boormark.visitCount} createdAt={new Date(boormark.createdAt)}
-                            lastVisited={boormark.lastVisited === null ? null : new Date(boormark.lastVisited)}
-                        />
-                    ))}
-                </div>
-            }*/}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
-                {bookmarks?.map((boormark, index) => (
-                    <BookmarkListCard key={index} title={boormark.title} url={boormark.url}
-                        description={boormark.description} tags={boormark.tags} pinned={boormark.isPinned}
-                        isArchived={boormark.isArchived} visitCount={boormark.visitsCount} createdAt={new Date(boormark.creationTime)}
-                        lastVisited={boormark.lastVisitTime === null ? null : new Date(boormark.lastVisitTime)} id={boormark.bookmarkId}
-                    />
+                {bookmarks?.map((bookmark, index) => (
+                    <BookmarkListCard key={index} bookmark={bookmark} />
                 ))}
             </div>
         </div>
     )
 }
 
-type BookmarkListCardProps = {
-    id: number,
-    title: string,
-    url: string,
-    description: string,
-    tags: string[],
-    pinned: boolean,
-    isArchived: boolean,
-    visitCount: number,
-    createdAt: Date,
-    lastVisited: Date | null
-}
-
-export function BookmarkListCard({ id,
-    title,
-    url,
-    description,
-    tags,
-    pinned,
-    isArchived,
-    visitCount,
-    createdAt,
-    lastVisited
-}: BookmarkListCardProps) {
+export function BookmarkListCard({ bookmark }: { bookmark: Bookmark }) {
 
     return (
         <div className="rounded-8 bg-neutral-0 dark:bg-neutral-d-800 h-68">
-            <BookmarkListCardContainer archived={isArchived} description={description}
-                title={title} tags={tags}
-                url={url} pinned={pinned} id={id}
-            />
+            <BookmarkListCardContainer bookmark={bookmark} />
             <div className="h-1O.25 flex flex-row justify-between items-center gap-x-2 px-4 py-3 border-t border-neutral-300 dark:border-neutral-d-500">
                 <div className="flex flex-row gap-x-4">
-                    <BookmarkListCardFooterInfo icon={iconVisitCount} iconDark={iconVisitCountDark} information={visitCount.toString()} />
-                    <BookmarkListCardFooterInfo icon={iconTime} iconDark={iconTimeDark} information={createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
-                    {lastVisited !== null &&
-                        <BookmarkListCardFooterInfo icon={iconDate} iconDark={iconDateDark} information={lastVisited.toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
+                    <BookmarkListCardFooterInfo icon={iconVisitCount} iconDark={iconVisitCountDark} information={bookmark.visitsCount.toString()} />
+                    <BookmarkListCardFooterInfo icon={iconTime} iconDark={iconTimeDark} information={bookmark.creationTime.toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
+                    {bookmark.lastVisitTime !== null &&
+                        <BookmarkListCardFooterInfo icon={iconDate} iconDark={iconDateDark} information={bookmark.lastVisitTime.toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
                     }
                 </div>
-                {!isArchived && pinned && <img src={iconPin} className="size-4 dark:hidden" alt="icon pin" />}
-                {!isArchived && pinned && <img src={iconPinDark} className="size-4 hidden dark:block" alt="icon pin" />}
-                {isArchived &&
+                {!bookmark.isArchived && bookmark.isPinned && <img src={iconPin} className="size-4 dark:hidden" alt="icon pin" />}
+                {!bookmark.isArchived && bookmark.isPinned && <img src={iconPinDark} className="size-4 hidden dark:block" alt="icon pin" />}
+                {bookmark.isArchived &&
                     <span className="text-center text-preset-5 text-neutral-800 dark:text-neutral-d-100 bg-neutral-100 dark:bg-neutral-d-600 rounded-4 px-1.5">Archived</span>
                 }
             </div>
@@ -180,20 +128,11 @@ export function BookmarkListCard({ id,
     )
 }
 
-type BookmarkListCardContainerProps = {
-    id: number,
-    title: string,
-    url: string,
-    description: string,
-    tags: string[],
-    pinned: boolean,
-    archived: boolean
-}
 
-export function BookmarkListCardContainer({ id, title, url, description, tags, pinned, archived }: BookmarkListCardContainerProps) {
+export function BookmarkListCardContainer({ bookmark }: { bookmark: Bookmark }) {
     const [isBookmarkActionDropdownOpen, setIsBookmarkActionDropdownOpen] = useState(false)
 
-    const urlObject = new URL(url)
+    const urlObject = new URL(bookmark.url)
     const formattedUrl = urlObject.pathname === "/"
         ? `${urlObject.host}${urlObject.search}`
         : `${urlObject.host}${urlObject.pathname}${urlObject.search}`
@@ -210,7 +149,7 @@ export function BookmarkListCardContainer({ id, title, url, description, tags, p
                         <img src={`https://www.faviconextractor.com/favicon/${urlObject.host}`} className="w-11 h-11" alt="icon logo" />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <span className="text-preset-2 text-neutral-900 dark:text-neutral-0">{title}</span>
+                        <span className="text-preset-2 text-neutral-900 dark:text-neutral-0">{bookmark.title}</span>
                         <span className="text-preset-5 text-neutral-800 dark:text-neutral-d-100">{formattedUrl}</span>
                     </div>
                 </div>
@@ -222,16 +161,16 @@ export function BookmarkListCardContainer({ id, title, url, description, tags, p
                     <img src={iconLeading} className="size-5 dark:hidden" alt="icon logo" />
                     <img src={iconLeadingDark} className="size-5 hidden dark:block" alt="icon logo" />
                     {isBookmarkActionDropdownOpen &&
-                        <BookmarkActionDropdown pinned={pinned} id={id} url={url} archived={archived} />
+                        <BookmarkActionDropdown pinned={bookmark.isPinned} id={bookmark.bookmarkId} url={bookmark.url} archived={bookmark.isArchived} />
                     }
                 </div>
             </div>
             <div className="h-px bg-neutral-300 dark:bg-neutral-d-500" />
             <span className="text-preset-4-md text-neutral-800 dark:text-neutral-d-100 text-left">
-                {description}
+                {bookmark.description}
             </span>
             <div className="flex flex-row gap-x-2">
-                {tags.map((tag, index) => (
+                {bookmark.tags.map((tag, index) => (
                     <span key={index} className="text-center text-preset-5 text-neutral-800 dark:text-neutral-d-100 bg-neutral-100 dark:bg-neutral-d-600 rounded-4 px-2 py-0.5">{tag}</span>
                 ))}
             </div>
@@ -263,8 +202,17 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
     })
     const { mutate: toggleArchiveFn } = useMutation({
         mutationFn: toggleArchive,
-        onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
+        onSuccess: async () => await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ["bookmarks"] }),
+            queryClient.invalidateQueries({ queryKey: ["tags"] })
+        ])
     })
+
+    const { setIsDeleteDialogOpen } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            setIsDeleteDialogOpen: store.setIsDeleteDialogOpen
+        }))
+    )
 
     function handleVisit() {
         visitBookmarkFn({ bookmarkId: id, visitTime: new Date() })
@@ -288,7 +236,7 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
     }
 
     function handleDelete() {
-
+        setIsDeleteDialogOpen(true)
     }
 
     return (

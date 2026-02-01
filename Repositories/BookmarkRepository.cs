@@ -8,10 +8,10 @@ public class BookmarkRepository(BookmarkDbContext context)
 {
     public async Task<bool> ExistsByBookmarkId(long bookmarkId) =>
         await context.Bookmarks.AsNoTracking().AnyAsync(x => x.BookmarkId == bookmarkId);
-    
+
     public async Task<bool> ExistsByUserIdAndTitleAndUrl(long userId, string title, string url) =>
         await context.Bookmarks.AsNoTracking().AnyAsync(x => x.UserId == userId && x.Title == title && x.Url == url);
-    
+
     public async Task<Bookmark> CreateAsync(Bookmark bookmark)
     {
         await context.Bookmarks.AddAsync(bookmark);
@@ -32,18 +32,25 @@ public class BookmarkRepository(BookmarkDbContext context)
             .Include(bt => bt.Tags)
             .Include(bt => bt.Visits)
             .ToListAsync();
-    
-    public async Task TogglePinAsync(long bookmarkId) => 
+
+    public async Task TogglePinAsync(long bookmarkId) =>
         await context.Bookmarks
             .Where(b => b.BookmarkId == bookmarkId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(b => b.IsPinned, b => !b.IsPinned)
             );
 
-    public async Task ToggleArchiveAsync(long bookmarkId) => 
+    public async Task ToggleArchiveAsync(long bookmarkId) =>
         await context.Bookmarks
             .Where(b => b.BookmarkId == bookmarkId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(b => b.IsArchived, b => !b.IsArchived)
             );
+
+    public async Task DeleteAsync(long bookmarkId)
+    {
+        await context.Bookmarks
+            .Where(b => b.BookmarkId == bookmarkId)
+            .ExecuteDeleteAsync();
+    }
 }

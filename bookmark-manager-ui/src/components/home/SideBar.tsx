@@ -80,7 +80,7 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                                 <ContentItemNavigationSideBar
                                     key={tag.name}
                                     text={tag.name}
-                                    numberBadge={filterArchivedBookmarks? tag.archivedCount: tag.count}
+                                    numberBadge={filterArchivedBookmarks ? tag.archivedCount : tag.count}
                                 />
                             ))
                         }
