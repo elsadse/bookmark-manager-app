@@ -6,19 +6,40 @@ using bookmark_manager_app.Services.Utils;
 namespace bookmark_manager_app.Services;
 
 public class BookmarkService(
-    BookmarkRepository bookmarkRepository, VisitRepository visitRepository,
+    BookmarkRepository bookmarkRepository,
     UserContext userContext,
     TagRepository tagRepository)
 {
+
+    public async Task TogglePinAsync(long bookmarkId)
+    {
+        if (!await bookmarkRepository.ExistsByBookmarkId(bookmarkId))
+        {
+            throw new NotFoundException("Bookmark not found");
+        }
+        
+        await bookmarkRepository.TogglePinAsync(bookmarkId);
+    }
+
+    public async Task ToggleArchiveAsync(long bookmarkId)
+    {
+        if (!await bookmarkRepository.ExistsByBookmarkId(bookmarkId))
+        {
+            throw new NotFoundException("Bookmark not found");
+        }
+        
+        await bookmarkRepository.ToggleArchiveAsync(bookmarkId);
+    }
+    
     public async Task<IEnumerable<Bookmark>> GetAllByUserIdAsync() =>
         await bookmarkRepository.GetAllByUserIdAsync(userContext.UserId);
-
+    
     public async Task<Bookmark> GetByIdAsync(long bookmarkId)
     {
         var bookmark = await bookmarkRepository.GetByIdAsync(bookmarkId);
         return bookmark ?? throw new NotFoundException("Bookmark not found");
     }
-
+    
     public async Task<Bookmark> CreateAsync(CreateBookmarkCommand command)
     {
         if (await bookmarkRepository.ExistsByUserIdAndTitleAndUrl(userContext.UserId, command.Title, command.Url))
@@ -32,11 +53,11 @@ public class BookmarkService(
             Title = command.Title,
             Url = command.Url,
             Description = command.Description,
-            Tags = new List<Tag>(),
+            Tags = new List<Tag>()
         };
 
         if (command.TagNames.Length == 0) return await bookmarkRepository.CreateAsync(bookmark);
-
+        
         var existingTags = await tagRepository.GetByNames(command.TagNames);
         var existingTagsByNames = existingTags.ToDictionary(tag => tag.Name);
 
@@ -50,27 +71,6 @@ public class BookmarkService(
         }
 
         return await bookmarkRepository.CreateAsync(bookmark);
-    }
-
-    public async Task<Visit> CreateVisitAsync(long bookmarkId)
-    {
-        var bookmark = await GetByIdAsync(bookmarkId);
-        var visit = new Visit
-        {
-            BookmarkId = bookmarkId
-        };
-        bookmark.Visits.Add(visit);
-        return await visitRepository.CreateAsync(visit);
-    }
-
-    public async Task TogglePinAsync(long bookmarkId)
-    {
-        await bookmarkRepository.UpdateTogglePinAsync(bookmarkId);
-    }
-
-    public async Task ToggleArchiveAsync(long bookmarkId)
-    {
-        await bookmarkRepository.UpdateToggleArchiveAsync(bookmarkId);
     }
 }
 

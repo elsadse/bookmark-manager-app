@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using bookmark_manager_app.Persistence;
@@ -11,9 +12,11 @@ using bookmark_manager_app.Persistence;
 namespace bookmark_manager_app.Migrations
 {
     [DbContext(typeof(BookmarkDbContext))]
-    partial class BookmarkDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260201141348_DataBaseV6")]
+    partial class DataBaseV6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

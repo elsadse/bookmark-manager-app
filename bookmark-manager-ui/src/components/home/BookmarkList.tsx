@@ -19,11 +19,12 @@ import iconUnarchive from "@/assets/images/icon-unarchive.svg"
 import iconDelete from "@/assets/images/icon-delete.svg"
 import iconCheck from "@/assets/images/icon-check.svg"
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { fetchBookmarks } from "@/api/bookmarks"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { fetchBookmarks, toggleArchive, togglePin } from "@/api/bookmarks"
 import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
 import { useShallow } from "zustand/shallow"
 import type { Bookmark } from "@/api/bookmarks/schema"
+import { visitBookmark } from "@/api/visits"
 
 export function BookmarkList() {
     const { sortBookmarksBy, tagFilters } = useGlobalStore(
@@ -53,6 +54,8 @@ export function BookmarkList() {
             [
                 ...data.filter((bookmark: Bookmark): boolean => tagFilters.every((filter: string): boolean => bookmark.tags.includes(filter)))
             ].sort((a: Bookmark, b: Bookmark): number => {
+                const primarySort = Number(b.isPinned) - Number(a.isPinned)
+                if (primarySort !== 0) return primarySort
                 if (sortBookmarksBy === "recently-added") {
                     return b.creationTime.getTime() - a.creationTime.getTime()
                 } else if (sortBookmarksBy === "most-visited") {
@@ -125,10 +128,10 @@ export function BookmarkList() {
             }*/}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
                 {bookmarks?.map((boormark, index) => (
-                    <BookmarkListCard key={index} isOnArchivedPage={false} title={boormark.title} url={boormark.url}
+                    <BookmarkListCard key={index} title={boormark.title} url={boormark.url}
                         description={boormark.description} tags={boormark.tags} pinned={boormark.isPinned}
                         isArchived={boormark.isArchived} visitCount={boormark.visitsCount} createdAt={new Date(boormark.creationTime)}
-                        lastVisited={boormark.lastVisitTime === null ? null : new Date(boormark.lastVisitTime)}
+                        lastVisited={boormark.lastVisitTime === null ? null : new Date(boormark.lastVisitTime)} id={boormark.bookmarkId}
                     />
                 ))}
             </div>
@@ -137,6 +140,7 @@ export function BookmarkList() {
 }
 
 type BookmarkListCardProps = {
+    id: number,
     title: string,
     url: string,
     description: string,
@@ -145,11 +149,10 @@ type BookmarkListCardProps = {
     isArchived: boolean,
     visitCount: number,
     createdAt: Date,
-    lastVisited: Date | null,
-    isOnArchivedPage: boolean
+    lastVisited: Date | null
 }
 
-export function BookmarkListCard({
+export function BookmarkListCard({ id,
     title,
     url,
     description,
@@ -158,15 +161,14 @@ export function BookmarkListCard({
     isArchived,
     visitCount,
     createdAt,
-    lastVisited,
-    isOnArchivedPage
+    lastVisited
 }: BookmarkListCardProps) {
 
     return (
         <div className="rounded-8 bg-neutral-0 dark:bg-neutral-d-800 h-68">
-            <BookmarkListCardContainer isOnArchivedPage={isOnArchivedPage} description={description}
+            <BookmarkListCardContainer archived={isArchived} description={description}
                 title={title} tags={tags}
-                url={url} pinned={pinned}
+                url={url} pinned={pinned} id={id}
             />
             <div className="h-1O.25 flex flex-row justify-between items-center gap-x-2 px-4 py-3 border-t border-neutral-300 dark:border-neutral-d-500">
                 <div className="flex flex-row gap-x-4">
@@ -187,15 +189,16 @@ export function BookmarkListCard({
 }
 
 type BookmarkListCardContainerProps = {
+    id: number,
     title: string,
     url: string,
     description: string,
     tags: string[],
     pinned: boolean,
-    isOnArchivedPage: boolean
+    archived: boolean
 }
 
-export function BookmarkListCardContainer({ title, url, description, tags, pinned, isOnArchivedPage }: BookmarkListCardContainerProps) {
+export function BookmarkListCardContainer({ id, title, url, description, tags, pinned, archived }: BookmarkListCardContainerProps) {
     const [isBookmarkActionDropdownOpen, setIsBookmarkActionDropdownOpen] = useState(false)
 
     const urlObject = new URL(url)
@@ -226,11 +229,8 @@ export function BookmarkListCardContainer({ title, url, description, tags, pinne
                         `}>
                     <img src={iconLeading} className="size-5 dark:hidden" alt="icon logo" />
                     <img src={iconLeadingDark} className="size-5 hidden dark:block" alt="icon logo" />
-                    {isBookmarkActionDropdownOpen && !isOnArchivedPage &&
-                        <BookmarkActionDropdown pinned={pinned} />
-                    }
-                    {isBookmarkActionDropdownOpen && isOnArchivedPage &&
-                        <BookmarkArchivedActionDropdown />
+                    {isBookmarkActionDropdownOpen &&
+                        <BookmarkActionDropdown pinned={pinned} id={id} url={url} archived={archived} />
                     }
                 </div>
             </div>
@@ -259,36 +259,65 @@ export function BookmarkListCardFooterInfo({ icon, iconDark, information }: { ic
 }
 
 
-export function BookmarkActionDropdown({ pinned }: { pinned: boolean }) {
+export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: number, pinned: boolean, archived: boolean, url: string }) {
+    const queryClient = useQueryClient()
+    const { mutate: visitBookmarkFn } = useMutation({
+        mutationFn: visitBookmark,
+        onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
+    })
+    const { mutate: pinToggleFn } = useMutation({
+        mutationFn: togglePin,
+        onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
+    })
+    const { mutate: toggleArchiveFn } = useMutation({
+        mutationFn: toggleArchive,
+        onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
+    })
+
+    function handleVisit() {
+        visitBookmarkFn({ bookmarkId: id, visitTime: new Date() })
+        window.open(url, "_blank", "noopener,noreferrer")
+    }
+
+    function handlePin() {
+        pinToggleFn({ bookmarkId: id })
+    }
+
+    function handleArchive() {
+        toggleArchiveFn({ bookmarkId: id })
+    }
+
+    function handleCopy() {
+        navigator.clipboard.writeText(url)
+    }
+
+    function handleEdit() {
+
+    }
+
+    function handleDelete() {
+
+    }
 
     return (
         <div className="absolute top-10 right-0 w-50 flex flex-col gap-y-1 p-2 rounded-8 bg-neutral-0 border border-neutral-100">
-            <BookmarkActionDropdownMenu icon={iconVisit} text="Visit" />
-            <BookmarkActionDropdownMenu icon={iconCopy} text="Copy Url" />
-            {pinned && <BookmarkActionDropdownMenu icon={iconUnpin} text="Unpin" />}
-            {!pinned && <BookmarkActionDropdownMenu icon={iconPin} text="Pin" />}
-            <BookmarkActionDropdownMenu icon={iconEdit} text="Edit" />
-            <BookmarkActionDropdownMenu icon={iconArchive} text="Archive" />
+            <BookmarkActionDropdownMenu icon={iconVisit} text="Visit" onClick={handleVisit} />
+            <BookmarkActionDropdownMenu icon={iconCopy} text="Copy Url" onClick={handleCopy} />
+            {!archived && pinned && <BookmarkActionDropdownMenu icon={iconUnpin} text="Unpin" onClick={handlePin} />}
+            {!archived && !pinned && <BookmarkActionDropdownMenu icon={iconPin} text="Pin" onClick={handlePin} />}
+            {!archived && <BookmarkActionDropdownMenu icon={iconEdit} text="Edit" onClick={handleEdit} />}
+            {!archived && <BookmarkActionDropdownMenu icon={iconArchive} text="Archive" onClick={handleArchive} />}
+            {archived && <BookmarkActionDropdownMenu icon={iconUnarchive} text="Unarchive" onClick={handleArchive} />}
+            {archived && <BookmarkActionDropdownMenu icon={iconDelete} text="Delete Permanently" onClick={handleDelete} />}
         </div>
     )
 }
 
-export function BookmarkArchivedActionDropdown() {
+export function BookmarkActionDropdownMenu({ icon, text, onClick }: { icon: string, text: string, onClick: () => void }) {
 
     return (
-        <div className="absolute top-10 right-0 w-50 flex flex-col gap-y-1 p-2 rounded-8 bg-neutral-0 border border-neutral-100">
-            <BookmarkActionDropdownMenu icon={iconVisit} text="Visit" />
-            <BookmarkActionDropdownMenu icon={iconCopy} text="Copy Url" />
-            <BookmarkActionDropdownMenu icon={iconUnarchive} text="Unarchive" />
-            <BookmarkActionDropdownMenu icon={iconDelete} text="Delete Permanently" />
-        </div>
-    )
-}
-
-export function BookmarkActionDropdownMenu({ icon, text }: { icon: string, text: string }) {
-
-    return (
-        <div className="flex flex-row items-center gap-x-2.5 p-2 rounded-8 cursor-pointer hover:ring ring-teal-700">
+        <div onClick={onClick}
+            className="flex flex-row items-center gap-x-2.5 p-2 rounded-8 cursor-pointer hover:ring ring-teal-700">
             <img src={icon} alt="icon" />
             <span className="text-preset-4 text-neutral-800">{text}</span>
         </div>

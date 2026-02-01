@@ -43,13 +43,6 @@ public class BookmarkController(
         return Ok(bookmarks.Select(GetBookmarkResponse.FromModel));
     }
 
-    [HttpPost("{id:long}/visits")]
-    public async Task<ActionResult<Visit>> AddVisitAsync(long id)
-    {
-        var visit = await bookmarkService.CreateVisitAsync(id);
-        return StatusCode(StatusCodes.Status201Created, visit);
-    }
-
     [HttpPatch("{id:long}/pin")]
     public async Task<IActionResult> TogglePinAsync(long id)
     {

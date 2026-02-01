@@ -50,6 +50,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<BookmarkService>();
 builder.Services.AddScoped<TagService>();
+builder.Services.AddScoped<VisitService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
