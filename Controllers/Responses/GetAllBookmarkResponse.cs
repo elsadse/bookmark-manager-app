@@ -26,7 +26,7 @@ public record GetBookmarkResponse(
             .Select(t => t.Name)
             .ToArray(),
         bookmark.CreationTime,
-        bookmark.Visits.Count,
-        bookmark.Visits.OrderByDescending(v => v.VisitTime).FirstOrDefault()?.VisitTime
+        bookmark.Visits.Count(),
+        bookmark.Visits.OrderByDescending(v => v.VisitTime).Select(v => (DateTimeOffset?)v.VisitTime).FirstOrDefault()
     );
 }

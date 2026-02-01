@@ -11,7 +11,7 @@ import iconLogout from "@/assets/images/icon-logout.svg"
 import { useState } from "react"
 import { useAuthContext } from "@/hooks/useAuthContext"
 
-export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, onAddClick:()=>void }) {
+export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, onAddClick: () => void }) {
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
     //const { searchQuery, setSearchQuery } = useBookmarkList()

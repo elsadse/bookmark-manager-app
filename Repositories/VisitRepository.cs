@@ -12,18 +12,4 @@ public class VisitRepository(BookmarkDbContext context)
         await context.SaveChangesAsync();
         return visit;
     }
-
-    public async Task<int> GetVisitCountByBookmarkIdAsync(long bookmarkId)
-    {
-        return await context.Visits.AsNoTracking().CountAsync(v => v.BookmarkId == bookmarkId);
-    }
-
-    public async Task<DateTimeOffset?> GetLastVisitDateByBookmarkIdAsync(long bookmarkId)
-    {
-        return await context.Visits.AsNoTracking()
-            .Where(v => v.BookmarkId == bookmarkId)
-            .OrderByDescending(v => v.VisitTime)
-            .Select(v => v.VisitTime)
-            .FirstOrDefaultAsync();
-    }
 }

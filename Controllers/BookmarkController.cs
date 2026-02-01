@@ -1,5 +1,6 @@
 using bookmark_manager_app.Controllers.Requests;
 using bookmark_manager_app.Controllers.Responses;
+using bookmark_manager_app.Models;
 using bookmark_manager_app.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -40,5 +41,26 @@ public class BookmarkController(
     {
         var bookmarks = await bookmarkService.GetAllByUserIdAsync();
         return Ok(bookmarks.Select(GetBookmarkResponse.FromModel));
+    }
+
+    [HttpPost("{id:long}/visits")]
+    public async Task<ActionResult<Visit>> AddVisitAsync(long id)
+    {
+        var visit = await bookmarkService.CreateVisitAsync(id);
+        return StatusCode(StatusCodes.Status201Created, visit);
+    }
+
+    [HttpPatch("{id:long}/pin")]
+    public async Task<IActionResult> TogglePinAsync(long id)
+    {
+        await bookmarkService.TogglePinAsync(id);
+        return NoContent();
+    }
+
+    [HttpPatch("{id:long}/archive")]
+    public async Task<IActionResult> ToggleArchiveAsync(long id)
+    {
+        await bookmarkService.ToggleArchiveAsync(id);
+        return NoContent();
     }
 }

@@ -12,13 +12,13 @@ public class BookmarkService(
 {
     public async Task<IEnumerable<Bookmark>> GetAllByUserIdAsync() =>
         await bookmarkRepository.GetAllByUserIdAsync(userContext.UserId);
-    
+
     public async Task<Bookmark> GetByIdAsync(long bookmarkId)
     {
         var bookmark = await bookmarkRepository.GetByIdAsync(bookmarkId);
         return bookmark ?? throw new NotFoundException("Bookmark not found");
     }
-    
+
     public async Task<Bookmark> CreateAsync(CreateBookmarkCommand command)
     {
         if (await bookmarkRepository.ExistsByUserIdAndTitleAndUrl(userContext.UserId, command.Title, command.Url))
@@ -36,7 +36,7 @@ public class BookmarkService(
         };
 
         if (command.TagNames.Length == 0) return await bookmarkRepository.CreateAsync(bookmark);
-        
+
         var existingTags = await tagRepository.GetByNames(command.TagNames);
         var existingTagsByNames = existingTags.ToDictionary(tag => tag.Name);
 
@@ -54,27 +54,24 @@ public class BookmarkService(
 
     public async Task<Visit> CreateVisitAsync(long bookmarkId)
     {
-        var bookmark= await GetByIdAsync(bookmarkId);
-        var visit= new Visit
+        var bookmark = await GetByIdAsync(bookmarkId);
+        var visit = new Visit
         {
-            BookmarkId= bookmarkId
+            BookmarkId = bookmarkId
         };
         bookmark.Visits.Add(visit);
-       return await visitRepository.CreateAsync(visit);
+        return await visitRepository.CreateAsync(visit);
     }
 
-    public async Task<int> GetVisitCount(long bookmarkId)
+    public async Task TogglePinAsync(long bookmarkId)
     {
-        await GetByIdAsync(bookmarkId);
-        return await visitRepository.GetVisitCountByBookmarkIdAsync(bookmarkId);
+        await bookmarkRepository.UpdateTogglePinAsync(bookmarkId);
     }
 
-    public async Task<DateTimeOffset?> GetLastDateVisit(long bookmarkId)
+    public async Task ToggleArchiveAsync(long bookmarkId)
     {
-        await GetByIdAsync(bookmarkId);
-        return await visitRepository.GetLastVisitDateByBookmarkIdAsync(bookmarkId);
+        await bookmarkRepository.UpdateToggleArchiveAsync(bookmarkId);
     }
-
 }
 
 public record CreateBookmarkCommand(string Title, string Url, string Description, string[] TagNames);

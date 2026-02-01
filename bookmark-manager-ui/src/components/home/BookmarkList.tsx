@@ -36,7 +36,6 @@ export function BookmarkList() {
     //const { bookmarkList, searchQuery } = useBookmarkList()
     const [isSortByDropdownOpen, setIsSortByDropdownOpen] = useState(false)
 
-
     function getTitleBookmarkList(): string {
         if (tagFilters.length > 0) {
             return "Bookmarks tagged:"
@@ -52,8 +51,7 @@ export function BookmarkList() {
         queryFn: fetchBookmarks,
         select: (data: Bookmark[]): Bookmark[] =>
             [
-                ...data
-                    .filter((bookmark: Bookmark): boolean => tagFilters.every((filter: string): boolean => bookmark.tags.includes(filter)))
+                ...data.filter((bookmark: Bookmark): boolean => tagFilters.every((filter: string): boolean => bookmark.tags.includes(filter)))
             ].sort((a: Bookmark, b: Bookmark): number => {
                 if (sortBookmarksBy === "recently-added") {
                     return b.creationTime.getTime() - a.creationTime.getTime()
@@ -67,7 +65,6 @@ export function BookmarkList() {
     })
 
     function handleClickSortBy() {
-        console.log(fetchBookmarks())
         setIsSortByDropdownOpen(!isSortByDropdownOpen)
     }
 
