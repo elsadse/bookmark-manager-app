@@ -17,6 +17,7 @@ export function AddBookmark({ onClose }: { onClose: () => void }) {
 
     function handleAddBookmark(data: { title: string, description: string, url: string, tags: string[] }) {
         addBookmarkFn(data)
+        onClose()
     }
 
     return (

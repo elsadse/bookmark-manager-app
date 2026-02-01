@@ -5,15 +5,16 @@ import { SideBar } from "@/components/home/SideBar"
 import { AddBookmark } from "@/components/modals/Modals"
 import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
 import { useShallow } from "zustand/shallow"
-import { DeleteDialog } from "@/components/dialog/Dialogs"
+import { ArchiveDialog, DeleteDialog, UnArchiveDialog } from "@/components/dialog/Dialogs"
 
 export function HomeLayout(): JSX.Element {
     const [isMobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false)
     const [isAddBookmarkOpen, setIsAddBookmarkOpen] = useState<boolean>(false)
-    const { isDeleteDialogOpen, setIsDeleteDialogOpen } = useGlobalStore(
+    const { isDialogOpen, setIsDialogOpen, dialogAction } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
-            isDeleteDialogOpen:store.isDeleteDialogOpen,
-            setIsDeleteDialogOpen: store.setIsDeleteDialogOpen
+            isDialogOpen: store.isDialogOpen,
+            setIsDialogOpen: store.setIsDialogOpen,
+            dialogAction: store.dialogAction
         })))
 
     return (
@@ -32,9 +33,19 @@ export function HomeLayout(): JSX.Element {
                         <AddBookmark onClose={() => setIsAddBookmarkOpen(false)} />
                     </div>
                 }
-                {isDeleteDialogOpen &&
+                {isDialogOpen && dialogAction === "delete" &&
                     <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#131313]/70">
-                        <DeleteDialog onClose={() => setIsDeleteDialogOpen(false)} />
+                        <DeleteDialog onClose={() => setIsDialogOpen(false)} />
+                    </div>
+                }
+                {isDialogOpen && dialogAction === "archive" &&
+                    <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#131313]/70">
+                        <ArchiveDialog onClose={() => setIsDialogOpen(false)} />
+                    </div>
+                }
+                {isDialogOpen && dialogAction === "unarchive" &&
+                    <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#131313]/70">
+                        <UnArchiveDialog onClose={() => setIsDialogOpen(false)} />
                     </div>
                 }
                 <Header onMenuClick={() => setMobileSidebarOpen(true)} onAddClick={() => setIsAddBookmarkOpen(true)} />

@@ -1,6 +1,9 @@
+import type { Bookmark } from "@/api/bookmarks/schema"
+import type { Nullable } from "@/types"
 import { create } from "zustand"
 
 export type SortBookmarksBy = "recently-added" | "most-visited" | "recently-visited"
+export type DialogAction = "delete" | "archive" | "unarchive"
 
 export type GlobalStore = {
     headerTitle: string,
@@ -11,8 +14,12 @@ export type GlobalStore = {
     removeTagFilter: (tag: string) => void,
     filterArchivedBookmarks: boolean,
     setFilterArchivedBookmarks: (filterArchivedBookmarks: boolean) => void,
-    isDeleteDialogOpen: boolean,
-    setIsDeleteDialogOpen: (isDeleteDialogOpen: boolean) => void
+    isDialogOpen: boolean,
+    setIsDialogOpen: (isDialogOpen: boolean) => void,
+    dialogAction: Nullable<DialogAction>,
+    setDialogAction:(dialogAction:DialogAction)=>void,
+    bookmarkSelected: Nullable<Bookmark>,
+    setBookmarkSelected: (bookmarkSelected: Bookmark) => void
 }
 
 export const useGlobalStore = create<GlobalStore>((set) => ({
@@ -50,6 +57,10 @@ export const useGlobalStore = create<GlobalStore>((set) => ({
         headerTitle = `${prefix} ${headerTitle}`
         return { headerTitle, filterArchivedBookmarks }
     }),
-    isDeleteDialogOpen: false,
-    setIsDeleteDialogOpen: (isDeleteDialogOpen: boolean) => set({ isDeleteDialogOpen })
+    isDialogOpen: false,
+    setIsDialogOpen: (isDialogOpen: boolean) => set({ isDialogOpen }),
+    dialogAction: null,
+    setDialogAction:(dialogAction:DialogAction)=>set({dialogAction}),
+    bookmarkSelected: null,
+    setBookmarkSelected: (bookmarkSelected: Bookmark) => set({ bookmarkSelected })
 }))

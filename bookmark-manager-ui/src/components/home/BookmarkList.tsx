@@ -137,8 +137,15 @@ export function BookmarkListCardContainer({ bookmark }: { bookmark: Bookmark }) 
         ? `${urlObject.host}${urlObject.search}`
         : `${urlObject.host}${urlObject.pathname}${urlObject.search}`
 
+    const { setBookmarkSelected } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            setBookmarkSelected: store.setBookmarkSelected
+        }))
+    )
+
     function handleActionDropdown() {
         setIsBookmarkActionDropdownOpen(!isBookmarkActionDropdownOpen)
+        setBookmarkSelected(bookmark)
     }
 
     return (
@@ -200,17 +207,11 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
         mutationFn: togglePin,
         onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
     })
-    const { mutate: toggleArchiveFn } = useMutation({
-        mutationFn: toggleArchive,
-        onSuccess: async () => await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["bookmarks"] }),
-            queryClient.invalidateQueries({ queryKey: ["tags"] })
-        ])
-    })
 
-    const { setIsDeleteDialogOpen } = useGlobalStore(
+    const { setIsDialogOpen, setDialogAction } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
-            setIsDeleteDialogOpen: store.setIsDeleteDialogOpen
+            setIsDialogOpen: store.setIsDialogOpen,
+            setDialogAction: store.setDialogAction
         }))
     )
 
@@ -224,7 +225,13 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
     }
 
     function handleArchive() {
-        toggleArchiveFn({ bookmarkId: id })
+        setDialogAction("archive")
+        setIsDialogOpen(true)
+    }
+
+    function handleUnarchive() {
+        setDialogAction("unarchive")
+        setIsDialogOpen(true)
     }
 
     function handleCopy() {
@@ -232,11 +239,11 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
     }
 
     function handleEdit() {
-
     }
 
     function handleDelete() {
-        setIsDeleteDialogOpen(true)
+        setDialogAction("delete")
+        setIsDialogOpen(true)
     }
 
     return (
@@ -247,7 +254,7 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
             {!archived && !pinned && <BookmarkActionDropdownMenu icon={iconPin} text="Pin" onClick={handlePin} />}
             {!archived && <BookmarkActionDropdownMenu icon={iconEdit} text="Edit" onClick={handleEdit} />}
             {!archived && <BookmarkActionDropdownMenu icon={iconArchive} text="Archive" onClick={handleArchive} />}
-            {archived && <BookmarkActionDropdownMenu icon={iconUnarchive} text="Unarchive" onClick={handleArchive} />}
+            {archived && <BookmarkActionDropdownMenu icon={iconUnarchive} text="Unarchive" onClick={handleUnarchive} />}
             {archived && <BookmarkActionDropdownMenu icon={iconDelete} text="Delete Permanently" onClick={handleDelete} />}
         </div>
     )

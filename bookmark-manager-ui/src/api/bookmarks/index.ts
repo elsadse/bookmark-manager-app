@@ -22,9 +22,7 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
     return parsedResponse.data
 }
 
-export async function togglePin({ bookmarkId }: {
-    bookmarkId: number
-}): Promise<void> {
+export async function togglePin({ bookmarkId }: {bookmarkId: number}): Promise<void> {
     if (!apiUrl) throw new Error("BOOKMARK_MANAGER_API_URL environment variable is not set")
 
     const response = await fetch(`${apiUrl}/bookmarks/${bookmarkId}/pin`, {
@@ -36,9 +34,7 @@ export async function togglePin({ bookmarkId }: {
     }
 }
 
-export async function toggleArchive({ bookmarkId }: {
-    bookmarkId: number
-}): Promise<void> {
+export async function toggleArchive({ bookmarkId }: {bookmarkId: number}): Promise<void> {
     if (!apiUrl) throw new Error("BOOKMARK_MANAGER_API_URL environment variable is not set")
 
     const response = await fetch(`${apiUrl}/bookmarks/${bookmarkId}/archive`, {
@@ -69,4 +65,16 @@ export async function addBookmark({ title, url, description, tags }: { title: st
     }
 
     return parsedResponse.data
+}
+
+export async function deleteBookmark({ bookmarkId }: {bookmarkId: number}): Promise<void> {
+    if (!apiUrl) throw new Error("BOOKMARK_MANAGER_API_URL environment variable is not set")
+
+    const response = await fetch(`${apiUrl}/bookmarks/${bookmarkId}`, {
+        method: "DELETE",
+        credentials: "include"
+    })
+    if (response.status !== 204) {
+        throw new Error(`Unexpected status code: ${response.status}`)
+    }
 }
