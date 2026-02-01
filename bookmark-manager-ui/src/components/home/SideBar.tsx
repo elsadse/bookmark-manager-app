@@ -12,7 +12,12 @@ import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
 
 export function SideBar({ onClose }: { onClose?: () => void }) {
     const [selectedItem, setSelectedItem] = useState<"Home" | "Archived">("Home")
-
+    const { setFilterArchivedBookmarks, filterArchivedBookmarks } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            setFilterArchivedBookmarks: store.setFilterArchivedBookmarks,
+            filterArchivedBookmarks: store.filterArchivedBookmarks
+        }))
+    )
     const { data: tags, isLoading } = useQuery({
         queryKey: ["tags"],
         queryFn: fetchTagCount,
@@ -36,7 +41,10 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                 <div className="flex flex-col gap-y-1">
                     <div
                         onClick={() => {
-                            if (selectedItem === "Archived") setSelectedItem("Home")
+                            if (selectedItem === "Archived") {
+                                setSelectedItem("Home")
+                                setFilterArchivedBookmarks(false)
+                            }
                         }}
                         className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 
                         cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
@@ -48,7 +56,10 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                     </div>
                     <div
                         onClick={() => {
-                            if (selectedItem === "Home") setSelectedItem("Archived")
+                            if (selectedItem === "Home") {
+                                setSelectedItem("Archived")
+                                setFilterArchivedBookmarks(true)
+                            }
                         }}
                         className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 
                         cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600 
@@ -69,7 +80,7 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                                 <ContentItemNavigationSideBar
                                     key={tag.name}
                                     text={tag.name}
-                                    numberBadge={tag.count}
+                                    numberBadge={filterArchivedBookmarks? tag.archivedCount: tag.count}
                                 />
                             ))
                         }

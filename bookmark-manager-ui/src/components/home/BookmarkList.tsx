@@ -27,32 +27,24 @@ import type { Bookmark } from "@/api/bookmarks/schema"
 import { visitBookmark } from "@/api/visits"
 
 export function BookmarkList() {
-    const { sortBookmarksBy, tagFilters } = useGlobalStore(
+    const { sortBookmarksBy, tagFilters, filterArchivedBookmarks, headerTitle } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
+            headerTitle: store.headerTitle,
             sortBookmarksBy: store.sortBookmarksBy,
-            tagFilters: store.tagFilters
+            tagFilters: store.tagFilters,
+            filterArchivedBookmarks: store.filterArchivedBookmarks
         }))
     )
-    //const { selectedTagsList, filteredBookmarkList } = useFilterTagsContext()
-    //const { bookmarkList, searchQuery } = useBookmarkList()
     const [isSortByDropdownOpen, setIsSortByDropdownOpen] = useState(false)
-
-    function getTitleBookmarkList(): string {
-        if (tagFilters.length > 0) {
-            return "Bookmarks tagged:"
-        }
-        /*if (searchQuery.length > 0) {
-            return "Results For:"
-        }*/
-        return "All Bookmarks"
-    }
 
     const { data: bookmarks } = useQuery({
         queryKey: ["bookmarks"],
         queryFn: fetchBookmarks,
         select: (data: Bookmark[]): Bookmark[] =>
             [
-                ...data.filter((bookmark: Bookmark): boolean => tagFilters.every((filter: string): boolean => bookmark.tags.includes(filter)))
+                ...data
+                    .filter((bookmark: Bookmark): boolean => filterArchivedBookmarks ? bookmark.isArchived : !bookmark.isArchived)
+                    .filter((bookmark: Bookmark): boolean => tagFilters.every((filter: string): boolean => bookmark.tags.includes(filter)))
             ].sort((a: Bookmark, b: Bookmark): number => {
                 const primarySort = Number(b.isPinned) - Number(a.isPinned)
                 if (primarySort !== 0) return primarySort
@@ -75,8 +67,8 @@ export function BookmarkList() {
         <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16 h-screen overflow-y-auto">
             <div className="flex flex-row justify-between items-center gap-x-4">
                 <div className="flex flex-col md:flex-row">
-                    <span className="text-preset-2 md:text-preset-1 text-neutral-900 dark:text-neutral-0">{getTitleBookmarkList()}</span>
-                    {tagFilters.length !== 0 && (
+                    <span className="text-preset-2 md:text-preset-1 text-neutral-900 dark:text-neutral-0">{headerTitle}</span>
+                    {/*{tagFilters.length !== 0 && (
                         <div className="flex flex-row">
                             {tagFilters.map((tag, index) => (
                                 <span key={index} className="text-preset-2 md:text-preset-1 text-teal-700">
@@ -86,7 +78,7 @@ export function BookmarkList() {
                             ))}
                         </div>
                     )}
-                    {/*{searchQuery.length > 0 && (
+                    {searchQuery.length > 0 && (
                         <span className="text-preset-2 md:text-preset-1 text-teal-700">
                             &nbsp;{'"' + searchQuery + '"'}
                         </span>
@@ -178,8 +170,8 @@ export function BookmarkListCard({ id,
                         <BookmarkListCardFooterInfo icon={iconDate} iconDark={iconDateDark} information={lastVisited.toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
                     }
                 </div>
-                {pinned && <img src={iconPin} className="size-4 dark:hidden" alt="icon pin" />}
-                {pinned && <img src={iconPinDark} className="size-4 hidden dark:block" alt="icon pin" />}
+                {!isArchived && pinned && <img src={iconPin} className="size-4 dark:hidden" alt="icon pin" />}
+                {!isArchived && pinned && <img src={iconPinDark} className="size-4 hidden dark:block" alt="icon pin" />}
                 {isArchived &&
                     <span className="text-center text-preset-5 text-neutral-800 dark:text-neutral-d-100 bg-neutral-100 dark:bg-neutral-d-600 rounded-4 px-1.5">Archived</span>
                 }

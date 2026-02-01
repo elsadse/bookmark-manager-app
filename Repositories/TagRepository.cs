@@ -6,15 +6,11 @@ namespace bookmark_manager_app.Repositories;
 
 public class TagRepository(BookmarkDbContext context)
 {
-    public async Task<IEnumerable<Tag>> GetByNames(IEnumerable<string> names)
-    {
-        return await context.Tags.Where(t => names.Contains(t.Name)).ToListAsync();
-    }
+    public async Task<bool> ExistsByName(string name) =>
+        await context.Tags.AsNoTracking().AnyAsync(t => t.Name == name);
 
-    public async Task<bool> ExistsByName(string name)
-    {
-        return await context.Tags.AsNoTracking().AnyAsync(t => t.Name == name);
-    }
+    public async Task<IEnumerable<Tag>> GetByNames(IEnumerable<string> names) =>
+        await context.Tags.Where(t => names.Contains(t.Name)).ToListAsync();
 
     public async Task<IEnumerable<TagCount>> GetCountByUserIdAsync(long userId)
     {
@@ -34,7 +30,8 @@ public class TagRepository(BookmarkDbContext context)
             {
                 Id = g.Key.TagId,
                 g.Key.Name,
-                Count = g.Select(x => x.BookmarkId).Distinct().Count(),
+                Count = g.Where(x => !x.IsArchived)
+                    .Select(x => x.BookmarkId).Distinct().Count(),
                 ArchivedCount = g.Where(x => x.IsArchived)
                     .Select(x => x.BookmarkId).Distinct().Count()
             })

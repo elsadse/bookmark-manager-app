@@ -13,11 +13,17 @@ public class BookmarkService(
 
     public async Task TogglePinAsync(long bookmarkId)
     {
-        if (!await bookmarkRepository.ExistsByBookmarkId(bookmarkId))
+        var bookmark = await bookmarkRepository.GetByIdAsync(bookmarkId);
+        if (bookmark == null)
         {
             throw new NotFoundException("Bookmark not found");
         }
-        
+
+        if (bookmark.IsArchived)
+        {
+            throw new ForbiddenException("Cannot pin an archived bookmark");
+        }
+
         await bookmarkRepository.TogglePinAsync(bookmarkId);
     }
 
@@ -27,19 +33,19 @@ public class BookmarkService(
         {
             throw new NotFoundException("Bookmark not found");
         }
-        
+
         await bookmarkRepository.ToggleArchiveAsync(bookmarkId);
     }
-    
+
     public async Task<IEnumerable<Bookmark>> GetAllByUserIdAsync() =>
         await bookmarkRepository.GetAllByUserIdAsync(userContext.UserId);
-    
+
     public async Task<Bookmark> GetByIdAsync(long bookmarkId)
     {
         var bookmark = await bookmarkRepository.GetByIdAsync(bookmarkId);
         return bookmark ?? throw new NotFoundException("Bookmark not found");
     }
-    
+
     public async Task<Bookmark> CreateAsync(CreateBookmarkCommand command)
     {
         if (await bookmarkRepository.ExistsByUserIdAndTitleAndUrl(userContext.UserId, command.Title, command.Url))
@@ -57,7 +63,7 @@ public class BookmarkService(
         };
 
         if (command.TagNames.Length == 0) return await bookmarkRepository.CreateAsync(bookmark);
-        
+
         var existingTags = await tagRepository.GetByNames(command.TagNames);
         var existingTagsByNames = existingTags.ToDictionary(tag => tag.Name);
 

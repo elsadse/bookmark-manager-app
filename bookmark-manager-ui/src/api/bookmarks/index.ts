@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { type Bookmark, FetchBookmarkApiResponseSchema } from "@/api/bookmarks/schema"
+import { type AddBookmarkApiResponse, AddBookmarkApiResponseSchema, type Bookmark, FetchBookmarkApiResponseSchema } from "@/api/bookmarks/schema"
 
 const apiUrl = import.meta.env.VITE_BOOKMARK_MANAGER_API_URL
 
@@ -48,4 +48,25 @@ export async function toggleArchive({ bookmarkId }: {
     if (response.status !== 204) {
         throw new Error(`Unexpected status code: ${response.status}`)
     }
+}
+
+export async function addBookmark({ title, url, description, tags }: { title: string, url: string, description: string, tags: string[] }): Promise<AddBookmarkApiResponse> {
+    if (!apiUrl) throw new Error("BOOKMARK_MANAGER_API_URL environment variable is not set")
+
+    const response = await fetch(`${apiUrl}/bookmarks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, url, description, tags }),
+        credentials: "include"
+    })
+    if (response.status !== 201) {
+        throw new Error(`Unexpected status code: ${response.status}`)
+    }
+
+    const parsedResponse = AddBookmarkApiResponseSchema.safeParse(await response.json())
+    if (!parsedResponse.success) {
+        throw parsedResponse.error
+    }
+
+    return parsedResponse.data
 }
