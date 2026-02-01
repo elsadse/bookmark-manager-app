@@ -18,28 +18,56 @@ import iconArchive from "@/assets/images/icon-archive.svg"
 import iconUnarchive from "@/assets/images/icon-unarchive.svg"
 import iconDelete from "@/assets/images/icon-delete.svg"
 import iconCheck from "@/assets/images/icon-check.svg"
-import { useFilterTagsContext } from "@/context/FilterTagsContext"
-import { Link } from "react-router"
-import { useBookmarkList } from "@/context/BookmarkListContext"
 import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { fetchBookmarks } from "@/api/bookmarks"
+import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
+import { useShallow } from "zustand/shallow"
+import type { Bookmark } from "@/api/bookmarks/schema"
 
 export function BookmarkList() {
-    const { selectedTagsList, filteredBookmarkList } = useFilterTagsContext()
-    const { bookmarkList, searchQuery } = useBookmarkList()
+    const { sortBookmarksBy, tagFilters } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            sortBookmarksBy: store.sortBookmarksBy,
+            tagFilters: store.tagFilters
+        }))
+    )
+    //const { selectedTagsList, filteredBookmarkList } = useFilterTagsContext()
+    //const { bookmarkList, searchQuery } = useBookmarkList()
     const [isSortByDropdownOpen, setIsSortByDropdownOpen] = useState(false)
 
 
     function getTitleBookmarkList(): string {
-        if (selectedTagsList.length > 0) {
+        if (tagFilters.length > 0) {
             return "Bookmarks tagged:"
         }
-        if (searchQuery.length > 0) {
+        /*if (searchQuery.length > 0) {
             return "Results For:"
-        }
+        }*/
         return "All Bookmarks"
     }
 
+    const { data: bookmarks } = useQuery({
+        queryKey: ["bookmarks"],
+        queryFn: fetchBookmarks,
+        select: (data: Bookmark[]): Bookmark[] =>
+            [
+                ...data
+                    .filter((bookmark: Bookmark): boolean => tagFilters.every((filter: string): boolean => bookmark.tags.includes(filter)))
+            ].sort((a: Bookmark, b: Bookmark): number => {
+                if (sortBookmarksBy === "recently-added") {
+                    return b.creationTime.getTime() - a.creationTime.getTime()
+                } else if (sortBookmarksBy === "most-visited") {
+                    return b.visitsCount - a.visitsCount
+                } else if (sortBookmarksBy === "recently-visited") {
+                    return b.lastVisitTime.getTime() - a.lastVisitTime.getTime()
+                }
+                return 0
+            })
+    })
+
     function handleClickSortBy() {
+        console.log(fetchBookmarks())
         setIsSortByDropdownOpen(!isSortByDropdownOpen)
     }
 
@@ -48,21 +76,21 @@ export function BookmarkList() {
             <div className="flex flex-row justify-between items-center gap-x-4">
                 <div className="flex flex-col md:flex-row">
                     <span className="text-preset-2 md:text-preset-1 text-neutral-900 dark:text-neutral-0">{getTitleBookmarkList()}</span>
-                    {selectedTagsList.length !== 0 && (
+                    {tagFilters.length !== 0 && (
                         <div className="flex flex-row">
-                            {selectedTagsList.map((tag, index) => (
+                            {tagFilters.map((tag, index) => (
                                 <span key={index} className="text-preset-2 md:text-preset-1 text-teal-700">
                                     &nbsp;{tag}
-                                    {index < selectedTagsList.length - 1 && ","}&nbsp;
+                                    {index < tagFilters.length - 1 && ","}&nbsp;
                                 </span>
                             ))}
                         </div>
                     )}
-                    {searchQuery.length > 0 && (
+                    {/*{searchQuery.length > 0 && (
                         <span className="text-preset-2 md:text-preset-1 text-teal-700">
                             &nbsp;{'"' + searchQuery + '"'}
                         </span>
-                    )}
+                    )}*/}
                 </div>
                 <button onClick={handleClickSortBy}
                     className={`relative flex justify-center 
@@ -76,9 +104,9 @@ export function BookmarkList() {
                     {isSortByDropdownOpen && <SortByDropdown />}
                 </button>
             </div>
-            {selectedTagsList.length === 0 &&
+            {/*{tagFilters.length === 0 &&
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
-                    {bookmarkList.map((boormark, index) => (
+                    {bookmarks?.map((boormark, index) => (
                         <BookmarkListCard key={index} isOnArchivedPage={false} title={boormark.title} url={boormark.url} favicon={boormark.favicon}
                             description={boormark.description} tags={boormark.tags} pinned={boormark.pinned}
                             isArchived={boormark.isArchived} visitCount={boormark.visitCount} createdAt={new Date(boormark.createdAt)}
@@ -87,7 +115,7 @@ export function BookmarkList() {
                     ))}
                 </div>
             }
-            {selectedTagsList.length > 0 &&
+            {tagFilters.length > 0 &&
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
                     {filteredBookmarkList.map((boormark, index) => (
                         <BookmarkListCard key={index} isOnArchivedPage={false} title={boormark.title} url={boormark.url} favicon={boormark.favicon}
@@ -97,7 +125,16 @@ export function BookmarkList() {
                         />
                     ))}
                 </div>
-            }
+            }*/}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
+                {bookmarks?.map((boormark, index) => (
+                    <BookmarkListCard key={index} isOnArchivedPage={false} title={boormark.title} url={boormark.url}
+                        description={boormark.description} tags={boormark.tags} pinned={boormark.isPinned}
+                        isArchived={boormark.isArchived} visitCount={boormark.visitsCount} createdAt={new Date(boormark.creationTime)}
+                        lastVisited={boormark.lastVisitTime === null ? null : new Date(boormark.lastVisitTime)}
+                    />
+                ))}
+            </div>
         </div>
     )
 }
@@ -105,7 +142,6 @@ export function BookmarkList() {
 type BookmarkListCardProps = {
     title: string,
     url: string,
-    favicon: string,
     description: string,
     tags: string[],
     pinned: boolean,
@@ -119,7 +155,6 @@ type BookmarkListCardProps = {
 export function BookmarkListCard({
     title,
     url,
-    favicon,
     description,
     tags,
     pinned,
@@ -133,7 +168,7 @@ export function BookmarkListCard({
     return (
         <div className="rounded-8 bg-neutral-0 dark:bg-neutral-d-800 h-68">
             <BookmarkListCardContainer isOnArchivedPage={isOnArchivedPage} description={description}
-                favicon={favicon} title={title} tags={tags}
+                title={title} tags={tags}
                 url={url} pinned={pinned}
             />
             <div className="h-1O.25 flex flex-row justify-between items-center gap-x-2 px-4 py-3 border-t border-neutral-300 dark:border-neutral-d-500">
@@ -155,7 +190,6 @@ export function BookmarkListCard({
 }
 
 type BookmarkListCardContainerProps = {
-    favicon: string,
     title: string,
     url: string,
     description: string,
@@ -164,8 +198,13 @@ type BookmarkListCardContainerProps = {
     isOnArchivedPage: boolean
 }
 
-export function BookmarkListCardContainer({ favicon, title, url, description, tags, pinned, isOnArchivedPage }: BookmarkListCardContainerProps) {
+export function BookmarkListCardContainer({ title, url, description, tags, pinned, isOnArchivedPage }: BookmarkListCardContainerProps) {
     const [isBookmarkActionDropdownOpen, setIsBookmarkActionDropdownOpen] = useState(false)
+
+    const urlObject = new URL(url)
+    const formattedUrl = urlObject.pathname === "/"
+        ? `${urlObject.host}${urlObject.search}`
+        : `${urlObject.host}${urlObject.pathname}${urlObject.search}`
 
     function handleActionDropdown() {
         setIsBookmarkActionDropdownOpen(!isBookmarkActionDropdownOpen)
@@ -176,11 +215,11 @@ export function BookmarkListCardContainer({ favicon, title, url, description, ta
             <div className="flex flex-row justify-between gap-x-3">
                 <div className="flex flex-row gap-x-3">
                     <div className="size-11 flex items-center rounded-8 border border-neutral-100 dark:border-neutral-d-500">
-                        <img src={favicon} className="w-11 h-11" alt="icon logo" />
+                        <img src={`https://www.faviconextractor.com/favicon/${urlObject.host}`} className="w-11 h-11" alt="icon logo" />
                     </div>
                     <div className="flex flex-col gap-1">
                         <span className="text-preset-2 text-neutral-900 dark:text-neutral-0">{title}</span>
-                        <Link to={url}><span className="text-preset-5 text-neutral-800 dark:text-neutral-d-100">{new URL(url).hostname}</span></Link>
+                        <span className="text-preset-5 text-neutral-800 dark:text-neutral-d-100">{formattedUrl}</span>
                     </div>
                 </div>
                 <div onClick={handleActionDropdown}
@@ -260,18 +299,41 @@ export function BookmarkActionDropdownMenu({ icon, text }: { icon: string, text:
 }
 
 export function SortByDropdown() {
+    const { sortBookmarksBy, setSortBookmarksBy } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            sortBookmarksBy: store.sortBookmarksBy,
+            setSortBookmarksBy: store.setSortBookmarksBy
+        }))
+    )
 
     return (
         <div className="absolute right-0 top-12 w-50 flex flex-col gap-y-p-2 rounded-8 bg-neutral-0 border border-neutral-100 z-10">
-            <div className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
+            <div onClick={(): void => {
+                if (sortBookmarksBy !== "recently-added") {
+                    setSortBookmarksBy("recently-added")
+                }
+            }}
+                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
                 <span className="text-preset-4 text-neutral-800">Recently added</span>
-                <img src={iconCheck} alt="icon check" />
+                {sortBookmarksBy === "recently-added" && <img src={iconCheck} alt="icon check" />}
             </div>
-            <div className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
+            <div onClick={(): void => {
+                if (sortBookmarksBy !== "recently-visited") {
+                    setSortBookmarksBy("recently-visited")
+                }
+            }}
+                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
                 <span className="text-preset-4 text-neutral-800">Recently visited</span>
+                {sortBookmarksBy === "recently-visited" && <img src={iconCheck} alt="icon check" />}
             </div>
-            <div className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
-                <span className="text-preset-4 text-neutral-800">Most added</span>
+            <div onClick={(): void => {
+                if (sortBookmarksBy !== "most-visited") {
+                    setSortBookmarksBy("most-visited")
+                }
+            }}
+                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
+                <span className="text-preset-4 text-neutral-800">Most visited</span>
+                {sortBookmarksBy === "most-visited" && <img src={iconCheck} alt="icon check" />}
             </div>
         </div>
     )

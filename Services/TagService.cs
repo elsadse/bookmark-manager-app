@@ -5,8 +5,8 @@ namespace bookmark_manager_app.Services;
 
 public class TagService(TagRepository tagRepository, UserContext userContext)
 {
-    public async Task<IDictionary<string, int>> GetTagUsageCountsAsync()
+    public async Task<IEnumerable<TagCount>> GetTagsByUserIdAsync()
     {
-        return await tagRepository.GetTagUsageCountsAsync(userContext.UserId);
+        return await tagRepository.GetCountByUserIdAsync(userContext.UserId);
     }
 }

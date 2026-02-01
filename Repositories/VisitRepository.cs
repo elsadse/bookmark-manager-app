@@ -15,12 +15,12 @@ public class VisitRepository(BookmarkDbContext context)
 
     public async Task<int> GetVisitCountByBookmarkIdAsync(long bookmarkId)
     {
-        return await context.Visits.CountAsync(v => v.BookmarkId == bookmarkId);
+        return await context.Visits.AsNoTracking().CountAsync(v => v.BookmarkId == bookmarkId);
     }
 
     public async Task<DateTimeOffset?> GetLastVisitDateByBookmarkIdAsync(long bookmarkId)
     {
-        return await context.Visits
+        return await context.Visits.AsNoTracking()
             .Where(v => v.BookmarkId == bookmarkId)
             .OrderByDescending(v => v.VisitTime)
             .Select(v => v.VisitTime)

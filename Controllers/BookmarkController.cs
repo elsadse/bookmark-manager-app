@@ -1,6 +1,5 @@
 using bookmark_manager_app.Controllers.Requests;
 using bookmark_manager_app.Controllers.Responses;
-using bookmark_manager_app.Models;
 using bookmark_manager_app.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -26,30 +25,20 @@ public class BookmarkController(
             .ToArray();
 
         return CreatedAtRoute(nameof(GetByIdAsync), new { Id = bookmark.BookmarkId },
-            new CreateBookmarkResponse(bookmark.Title, bookmark.Url, bookmark.Description, tagNames, 0, null));
+            new CreateBookmarkResponse(bookmark.Title, bookmark.Url, bookmark.Description, tagNames));
     }
 
     [HttpGet("{id:long}", Name = nameof(GetByIdAsync))]
-    public async Task<ActionResult<GetBookmarkByIdResponse>> GetByIdAsync(long id)
+    public async Task<ActionResult<GetBookmarkResponse>> GetByIdAsync(long id)
     {
         var bookmark = await bookmarkService.GetByIdAsync(id);
-        var visitCount = await bookmarkService.GetVisitCount(id);
-        var lastVisitTime = await bookmarkService.GetLastDateVisit(id);
-        return Ok(new GetBookmarkByIdResponse(bookmark.Title, bookmark.Url, bookmark.Description, bookmark.IsPinned,
-            bookmark.IsArchived, bookmark.Tags.Select(x => x.Name).ToArray(), visitCount, lastVisitTime));
+        return Ok(GetBookmarkResponse.FromModel(bookmark));
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GetAllBookmarksResponse>>> GetAllByUserIdAsync()
+    public async Task<ActionResult<IEnumerable<GetBookmarkResponse>>> GetAllByUserIdAsync()
     {
         var bookmarks = await bookmarkService.GetAllByUserIdAsync();
-        return Ok(bookmarks.Select(GetAllBookmarksResponse.FromModel));
-    }
-
-    [HttpPost("{id:long}/visits")]
-    public async Task<ActionResult<Visit>> AddVisitAsync(long id)
-    {
-        var visit = await bookmarkService.CreateVisitAsync(id);
-        return StatusCode(StatusCodes.Status201Created, visit);
+        return Ok(bookmarks.Select(GetBookmarkResponse.FromModel));
     }
 }

@@ -16,22 +16,32 @@ public class TagRepository(BookmarkDbContext context)
         return await context.Tags.AsNoTracking().AnyAsync(t => t.Name == name);
     }
 
-    public async Task<IDictionary<string, int>> GetTagUsageCountsAsync(long userId)
+    public async Task<IEnumerable<TagCount>> GetCountByUserIdAsync(long userId)
     {
-        return await context.Bookmarks
-            .Where(b => b.UserId == userId)
-            .SelectMany(b => b.Tags)
-            .GroupBy(tag => tag.Name)
+        var result = await context.Tags
+            .AsNoTracking()
+            .SelectMany(t => t.Bookmarks
+                .Where(b => b.UserId == userId)
+                .Select(b => new
+                {
+                    t.TagId,
+                    t.Name,
+                    b.BookmarkId,
+                    b.IsArchived
+                }))
+            .GroupBy(x => new { x.TagId, x.Name })
             .Select(g => new
             {
-                TagName = g.Key,
-                Count = g.Count()
+                Id = g.Key.TagId,
+                g.Key.Name,
+                Count = g.Select(x => x.BookmarkId).Distinct().Count(),
+                ArchivedCount = g.Where(x => x.IsArchived)
+                    .Select(x => x.BookmarkId).Distinct().Count()
             })
-            .OrderBy(x => x.TagName)
-            .ToDictionaryAsync(
-                x => x.TagName,
-                x => x.Count
-            );
-    }
+            .ToListAsync();
 
+        return result.Select(x => new TagCount(x.Id, x.Name, x.Count, x.ArchivedCount)).ToList();
+    }
 }
+
+public record TagCount(long? Id, string Name, int Count, int ArchivedCount);

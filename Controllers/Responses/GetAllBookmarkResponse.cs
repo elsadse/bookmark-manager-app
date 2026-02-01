@@ -2,7 +2,7 @@ using bookmark_manager_app.Models;
 
 namespace bookmark_manager_app.Controllers.Responses;
 
-public record GetAllBookmarksResponse(
+public record GetBookmarkResponse(
     long? BookmarkId,
     string Title,
     string Url,
@@ -10,12 +10,12 @@ public record GetAllBookmarksResponse(
     bool IsPinned,
     bool IsArchived,
     string[] Tags,
-    int VisitCount,
-    DateTimeOffset? LastVisitTime,
-    DateTimeOffset CreationTime
+    DateTimeOffset CreationTime,
+    int VisitsCount,
+    DateTimeOffset? LastVisitTime
 )
 {
-    public static GetAllBookmarksResponse FromModel(Bookmark bookmark) => new(
+    public static GetBookmarkResponse FromModel(Bookmark bookmark) => new(
         bookmark.BookmarkId,
         bookmark.Title,
         bookmark.Url,
@@ -25,8 +25,8 @@ public record GetAllBookmarksResponse(
         bookmark.Tags
             .Select(t => t.Name)
             .ToArray(),
-        bookmark.Visits.Count(),
-        bookmark.Visits.OrderByDescending(v => v.VisitTime).Select(v => v.VisitTime).FirstOrDefault(),
-        bookmark.CreationTime
+        bookmark.CreationTime,
+        bookmark.Visits.Count,
+        bookmark.Visits.OrderByDescending(v => v.VisitTime).FirstOrDefault()?.VisitTime
     );
 }

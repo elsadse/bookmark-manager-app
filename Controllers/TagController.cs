@@ -1,3 +1,5 @@
+using bookmark_manager_app.Models;
+using bookmark_manager_app.Repositories;
 using bookmark_manager_app.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +12,6 @@ namespace bookmark_manager_app.Controllers;
 public class TagController(TagService tagService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IDictionary<string, int>>> GetTagUsageCountsAsync()
-    {
-        return Ok(await tagService.GetTagUsageCountsAsync());
-    }
+    public async Task<ActionResult<IEnumerable<TagCount>>> RetrieveAllAsync() => 
+        Ok(await tagService.GetTagsByUserIdAsync());
 }

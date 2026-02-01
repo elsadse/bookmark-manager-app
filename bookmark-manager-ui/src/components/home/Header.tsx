@@ -9,12 +9,12 @@ import iconThemeLight from "@/assets/images/icon-light-theme.svg"
 import iconThemeDark from "@/assets/images/icon-dark-theme.svg"
 import iconLogout from "@/assets/images/icon-logout.svg"
 import { useState } from "react"
-import { useBookmarkList } from "@/context/BookmarkListContext"
 import { useAuthContext } from "@/hooks/useAuthContext"
 
 export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, onAddClick:()=>void }) {
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
-    const { searchQuery, setSearchQuery } = useBookmarkList()
+    const [searchQuery, setSearchQuery] = useState("")
+    //const { searchQuery, setSearchQuery } = useBookmarkList()
 
     return (
         <div className="absolute top-0 w-full flex justify-center sm:items-start md:justify-between gap-x-2.5 md:gap-x-auto px-4 py-3 md:px-8 md:py-4 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500">

@@ -12,7 +12,8 @@ export async function authLogin({ email, password }: { email: string, password: 
     const response = await fetch(`${apiUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
+        credentials: "include"
     })
     if (response.status === 400) {
         const parsedResponse = BadRequestApiResponseSchema.safeParse(await response.json())
@@ -57,7 +58,8 @@ export async function authRegister({ fullname, email, password }: { fullname: st
     const response = await fetch(`${apiUrl}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullname, email, password })
+        body: JSON.stringify({ fullname, email, password }),
+        credentials: "include"
     })
     if (response.status === 400) {
         const parsedResponse = BadRequestApiResponseSchema.safeParse(await response.json())
