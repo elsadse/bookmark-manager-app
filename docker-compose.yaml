@@ -1,20 +1,68 @@
 services:
-  db:
-    image: postgres:16-alpine
-    ports:
-      - "5433:5432"  
+  postgres:
+    image: postgres:latest
+    container_name: database
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: bookmark
+    ports:
+      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: [ "CMD-SHELL", "pg_isready -U admin -d bookmark" ]
+      interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
-
-volumes:
-  pgdata:
+      start_period: 30s
+  
+  migration:
+    build:
+      context: .
+      dockerfile: migration.Dockerfile
+    image: bookmark-manager-database-migration
+    container_name: migration
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=bookmark;Username=admin;Password=secret"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+  
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bookmark-manager-api
+    container_name: api
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=bookmark;Username=admin;Password=secret"
+      Jwt__Key: a-string-secret-at-least-256-bits-long
+      Jwt__Issuer: bookmark-manager-api
+      Jwt__Audience: bookmark-manager-client
+      Jwt__DurationInMinutes: 60
+      AllowedCorsOrigins__0: "http://localhost"
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: [ "CMD-SHELL", "bash -lc 'echo >/dev/tcp/127.0.0.1/8080'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  
+  ui:
+    build:
+      context: bookmark-manager-ui/
+      dockerfile: Dockerfile
+      args:
+        VITE_BOOKMARK_MANAGER_API_URL: http://localhost:8080/api
+    image: bookmark-manager-ui 
+    container_name: ui
+    ports:
+      - "80:80"
+    depends_on:
+      api:
+        condition: service_healthy

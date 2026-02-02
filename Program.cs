@@ -5,6 +5,7 @@ using bookmark_manager_app.Persistence;
 using bookmark_manager_app.Repositories;
 using bookmark_manager_app.Services;
 using bookmark_manager_app.Services.Utils;
+using dotenv.net;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -12,7 +13,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
+DotEnv.Load();
+
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHealthChecks();
 
 builder.Services.AddProblemDetails(options =>
 {
@@ -127,17 +133,15 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+
+app.MapOpenApi();
+app.MapScalarApiReference();
 
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseExceptionHandler();
-
+app.MapHealthChecks("/api/health");
 app.MapControllers();
 app.Run();
