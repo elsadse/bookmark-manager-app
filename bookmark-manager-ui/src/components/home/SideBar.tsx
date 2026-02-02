@@ -2,31 +2,33 @@ import iconHome from "@/assets/images/icon-home.svg"
 import iconArchived from "@/assets/images/icon-archive.svg"
 import iconArchivedDark from "@/assets/images/icon-archive-dark.svg"
 import iconClose from "@/assets/images/icon-close.svg"
-import { Logo } from "@/components/connexion/FormContainerSignIn"
+import { Logo } from "@/components/auth/FormContainerSignIn"
 import { useState } from "react"
-import { useNavigate } from "react-router"
-import { useFilterTagsContext } from "@/context/FilterTagsContext"
+import { useQuery } from "@tanstack/react-query"
+import { fetchTagCount } from "@/api/tags"
+import type { TagCount } from "@/api/tags/schema"
+import { useShallow } from "zustand/shallow"
+import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
 
-export function SideBar({ page, onClose, showCloseButton = false }: { page: "Home" | "Archived", onClose?: () => void, showCloseButton?: boolean }) {
-    const [selectedItem, setSelectedItem] = useState<"Home" | "Archived">(page === "Archived" ? "Archived" : "Home")
-    const navigate = useNavigate()
-    const availableTags = [
-        { name: "AI", count: 1 },
-        { name: "Community", count: 5 },
-        { name: "Compatibility", count: 1 },
-        { name: "CSS", count: 6 },
-        { name: "Design", count: 1 },
-        { name: "React", count: 3 },
-        { name: "JavaScript", count: 4 },
-        { name: "TypeScript", count: 2 },
-        { name: "Tailwind", count: 3 },
-        { name: "Learning", count: 2 }
-    ]
+export function SideBar({ onClose }: { onClose?: () => void }) {
+    const [selectedItem, setSelectedItem] = useState<"Home" | "Archived">("Home")
+    const { setFilterArchivedBookmarks, filterArchivedBookmarks } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            setFilterArchivedBookmarks: store.setFilterArchivedBookmarks,
+            filterArchivedBookmarks: store.filterArchivedBookmarks
+        }))
+    )
+    const { data: tags, isLoading } = useQuery({
+        queryKey: ["tags"],
+        queryFn: fetchTagCount,
+        select: (tags: TagCount[]): TagCount[] =>
+            [...tags].sort((a: TagCount, b: TagCount): number => a.name.localeCompare(b.name))
+    })
 
     return (
         <div className="flex flex-col gap-y-10 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500 w-74 h-screen max-h-screen overflow-y-auto">
             <div className="relative flex flex-col gap-y-5 px-5 pt-5 pb-2.5">
-                {showCloseButton && (
+                {onClose && (
                     <div onClick={onClose}
                         className="absolute right-0 top-0 size-8 flex justify-center items-center gap-x-1 cursor-pointer">
                         <img src={iconClose} className="size-5" alt="icon close" />
@@ -39,9 +41,10 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
                 <div className="flex flex-col gap-y-1">
                     <div
                         onClick={() => {
-                            setSelectedItem("Home")
-                            navigate("/bookmark-manager-app/home")
-
+                            if (selectedItem === "Archived") {
+                                setSelectedItem("Home")
+                                setFilterArchivedBookmarks(false)
+                            }
                         }}
                         className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 
                         cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
@@ -53,8 +56,10 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
                     </div>
                     <div
                         onClick={() => {
-                            setSelectedItem("Archived")
-                            navigate("/bookmark-manager-app/archived")
+                            if (selectedItem === "Home") {
+                                setSelectedItem("Archived")
+                                setFilterArchivedBookmarks(true)
+                            }
                         }}
                         className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 
                         cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600 
@@ -69,13 +74,16 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
                 <div>
                     <span className="h-5.25 items-center px-3 pb-1 text-[#34D4D4D] text-xs font-bold">TAGS</span>
                     <div>
-                        {availableTags.map(tag => (
-                            <ContentItemNavigationSideBar
-                                key={tag.name}
-                                text={tag.name}
-                                numberBadge={tag.count}
-                            />
-                        ))}
+                        {isLoading ?
+                            <p className="px-3 text-preset-3 text-neutral-800">Loading tags...</p> :
+                            tags?.map(tag => (
+                                <ContentItemNavigationSideBar
+                                    key={tag.name}
+                                    text={tag.name}
+                                    numberBadge={filterArchivedBookmarks ? tag.archivedCount : tag.count}
+                                />
+                            ))
+                        }
                     </div>
                 </div>
             </div>
@@ -84,14 +92,20 @@ export function SideBar({ page, onClose, showCloseButton = false }: { page: "Hom
 }
 
 export function ContentItemNavigationSideBar({ text, numberBadge }: { text: string, numberBadge: number }) {
-    const { selectedTagsList, addTag, deleteTag } = useFilterTagsContext()
-    const isChecked = selectedTagsList.includes(text)
+    const { tagFilters, addFilter, removeFilter } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            tagFilters: store.tagFilters,
+            addFilter: store.addTagFilter,
+            removeFilter: store.removeTagFilter,
+        }))
+    )
+    const isChecked = tagFilters.includes(text)
 
     function handleChangeInput(event: React.ChangeEvent<HTMLInputElement>) {
         if (event.target.checked) {
-            addTag(text);
+            addFilter(text);
         } else {
-            deleteTag(text);
+            removeFilter(text);
         }
     }
 
@@ -99,8 +113,8 @@ export function ContentItemNavigationSideBar({ text, numberBadge }: { text: stri
         <div className="flex justify-between px-3 py-2.5">
             <div className="flex flex-row items-center gap-x-2">
                 <input type="checkbox" checked={isChecked} onChange={handleChangeInput}
-                    className= {`size-4 border border-neutral-500 cursor-pointer
-                         ${isChecked? "accent-teal-700": ""}`}
+                    className={`size-4 border border-neutral-500 cursor-pointer
+                         ${isChecked ? "accent-teal-700" : ""}`}
                 />
                 <span className="text-preset-3 text-neutral-800"> {text} </span>
             </div>

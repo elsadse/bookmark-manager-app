@@ -1,62 +1,23 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace bookmark_manager_app.Models;
 
-[Table("bookmarks", Schema = "bookmark")]
-public class Bookmark
+public sealed class Bookmark : BaseModel
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public long? BookmarkId { get; init; }
 
-    [Required]
-    [ForeignKey("User")]
-    [Column("user_id")]
-    public int UserId { get; set; }
+    public long UserId { get; init; }
 
-    [Required]
-    [Column("title")]
-    public string? Title { get; set; }
+    public string Title { get; init; } = string.Empty;
 
-    [Required]
-    [Url]
-    [Column("url")]
-    public string? Url { get; set; }
+    public string Url { get; init; } = string.Empty;
 
-    [Required]
-    [Column("description")]
-    public string? Description { get; set; }
+    public string Description { get; init; } = string.Empty;
 
-    [Column("tags", TypeName = "text[]")]
-    public List<string> Tags { get; set; } = new List<string>();
+    public bool IsPinned { get; init; }
 
-    [Column("is_pinned")]
-    public bool IsPinned { get; set; } = false;
+    public bool IsArchived { get; init; }
 
-    [Column("is_archived")]
-    public bool IsArchived { get; set; } = false;
+    public User? User { get; init; }
 
-    [Column("visit_count")]
-    public int VisitCount { get; set; } = 0;
-
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    [Column("visited_last_at")]
-    public DateTime VisitedLastAt { get; set; } = DateTime.UtcNow;
-}
-
-public class BookmarkCreateDto
-{
-    [Required]
-    public string Title { get; set; } = string.Empty;
-
-    [Required]
-    [Url]
-    public string Url { get; set; } = string.Empty;
-
-    public string? Description { get; set; }
-
-    public List<string> Tags { get; set; } = new List<string>();
+    public ICollection<Tag> Tags { get; init; } = new List<Tag>();
+    public ICollection<Visit> Visits { get; init; } = new List<Visit>();
 }
