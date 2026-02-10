@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useShallow } from "zustand/shallow"
 
 
-export function ArchiveDialog({ onClose }: { onClose: () => void }) {
+export function ToggleArchiveDialog({ onClose }: { onClose: () => void }) {
     const queryClient = useQueryClient()
     const { mutate: toggleArchiveFn } = useMutation({
         mutationFn: toggleArchive,
@@ -14,47 +14,24 @@ export function ArchiveDialog({ onClose }: { onClose: () => void }) {
             queryClient.invalidateQueries({ queryKey: ["tags"] })
         ])
     })
-    const { bookmarkSelected } = useGlobalStore(
+    const { bookmarkSelected, setBookmarkSelected, setIsNotificationOpen } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
-            bookmarkSelected: store.bookmarkSelected
+            bookmarkSelected: store.bookmarkSelected,
+            setBookmarkSelected: store.setBookmarkSelected,
+            setIsNotificationOpen: store.setIsNotificationOpen,
         }))
     )
 
-    function handleArchive() {
-        toggleArchiveFn({bookmarkId:bookmarkSelected!.bookmarkId})
+    function handleToggleArchive() {
+        toggleArchiveFn({ bookmarkId: bookmarkSelected!.bookmarkId })
         onClose()
+        setBookmarkSelected(null)
+        setIsNotificationOpen(true, "bookmark-archived")
     }
 
     return (
-        <Dialog title="Archive bookmark" titleButton="Archive" onClose={onClose} onClickDialog={handleArchive}
-            isDelete={false} description={`Are you sure you want to archive ${bookmarkSelected?.title}?`}
-        />
-    )
-}
-
-export function UnArchiveDialog({ onClose }: { onClose: () => void }) {
-    const queryClient = useQueryClient()
-    const { mutate: toggleArchiveFn } = useMutation({
-        mutationFn: toggleArchive,
-        onSuccess: async () => await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["bookmarks"] }),
-            queryClient.invalidateQueries({ queryKey: ["tags"] })
-        ])
-    })
-    const { bookmarkSelected } = useGlobalStore(
-        useShallow((store: GlobalStore) => ({
-            bookmarkSelected: store.bookmarkSelected
-        }))
-    )
-
-    function handleUnarchive() {
-        toggleArchiveFn({bookmarkId:bookmarkSelected!.bookmarkId})
-        onClose()
-    }
-
-    return (
-        <Dialog title="UnArchive bookmark" titleButton="Unarchive" onClose={onClose} onClickDialog={handleUnarchive}
-            isDelete={false} description={`Move ${bookmarkSelected?.title} back to your active list?`}
+        <Dialog title={bookmarkSelected?.isArchived ? "UnArchive bookmark" : "Archive bookmark"} titleButton={bookmarkSelected?.isArchived ? "Unarchive" : "Archive"} onClose={onClose} onClickDialog={handleToggleArchive}
+            isDelete={false} description={bookmarkSelected?.isArchived ? `Move ${bookmarkSelected?.title} back to your active list?` : `Are you sure you want to archive ${bookmarkSelected?.title}?`}
         />
     )
 }
@@ -68,15 +45,20 @@ export function DeleteDialog({ onClose }: { onClose: () => void }) {
             queryClient.invalidateQueries({ queryKey: ["tags"] }),
         ])
     })
-    const { bookmarkSelected } = useGlobalStore(
+
+    const { bookmarkSelected, setBookmarkSelected, setIsNotificationOpen } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
-            bookmarkSelected: store.bookmarkSelected
+            bookmarkSelected: store.bookmarkSelected,
+            setBookmarkSelected: store.setBookmarkSelected,
+            setIsNotificationOpen: store.setIsNotificationOpen
         }))
     )
 
     function handleDelete() {
         deleteFn({ bookmarkId: bookmarkSelected!.bookmarkId })
         onClose()
+        setBookmarkSelected(null)
+        setIsNotificationOpen(true, "bookmark-deleted")
     }
 
     return (
