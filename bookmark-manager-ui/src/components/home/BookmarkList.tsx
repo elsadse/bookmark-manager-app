@@ -27,7 +27,7 @@ import type { Bookmark } from "@/api/bookmarks/schema"
 import { visitBookmark } from "@/api/visits"
 
 export function BookmarkList() {
-    const { sortBookmarksBy, tagFilters, filterArchivedBookmarks, headerTitle, isToastOpen, toastDescription } = useGlobalStore(
+    const { sortBookmarksBy, tagFilters, filterArchivedBookmarks, headerTitle } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
             headerTitle: store.headerTitle,
             sortBookmarksBy: store.sortBookmarksBy,
