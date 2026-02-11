@@ -27,12 +27,14 @@ import type { Bookmark } from "@/api/bookmarks/schema"
 import { visitBookmark } from "@/api/visits"
 
 export function BookmarkList() {
-    const { sortBookmarksBy, tagFilters, filterArchivedBookmarks, headerTitle } = useGlobalStore(
+    const { sortBookmarksBy, tagFilters, filterArchivedBookmarks, headerTitle, isToastOpen, toastDescription } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
             headerTitle: store.headerTitle,
             sortBookmarksBy: store.sortBookmarksBy,
             tagFilters: store.tagFilters,
-            filterArchivedBookmarks: store.filterArchivedBookmarks
+            filterArchivedBookmarks: store.filterArchivedBookmarks,
+            isToastOpen: store.isToastOpen,
+            toastDescription: store.toastDescription,
         }))
     )
     const [isSortByDropdownOpen, setIsSortByDropdownOpen] = useState(false)
@@ -95,6 +97,7 @@ export function BookmarkList() {
                     <span className="text-preset-3 text-neutral-900 dark:text-neutral-0">Sort by</span>
                     {isSortByDropdownOpen && <SortByDropdown />}
                 </button>
+
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
                 {bookmarks?.map((bookmark, index) => (
@@ -208,10 +211,11 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
         onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
     })
 
-    const { setIsDialogOpen, setDialogAction } = useGlobalStore(
+    const { setIsDialogOpen, setIsToastOpen, setIsNotificationOpen } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
+            setIsNotificationOpen: store.setIsNotificationOpen,
             setIsDialogOpen: store.setIsDialogOpen,
-            setDialogAction: store.setDialogAction
+            setIsToastOpen: store.setIsToastOpen,
         }))
     )
 
@@ -225,25 +229,25 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
     }
 
     function handleArchive() {
-        setDialogAction("archive")
-        setIsDialogOpen(true)
+        setIsDialogOpen("archive")
     }
 
     function handleUnarchive() {
-        setDialogAction("unarchive")
-        setIsDialogOpen(true)
+        setIsDialogOpen("unarchive")
     }
 
     function handleCopy() {
         navigator.clipboard.writeText(url)
+        setIsToastOpen("bookmark-link-copied")
+        setIsNotificationOpen(true, "bookmark-link-copied")
     }
 
     function handleEdit() {
+        setIsNotificationOpen(true, "bookmark-link-copied")
     }
 
     function handleDelete() {
-        setDialogAction("delete")
-        setIsDialogOpen(true)
+        setIsDialogOpen("delete")
     }
 
     return (

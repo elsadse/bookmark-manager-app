@@ -1,8 +1,12 @@
 import { InputField } from "@/components/auth/FormContainerSignIn"
 import iconClose from "@/assets/images/icon-close.svg"
 import { useState } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { addBookmark } from "@/api/bookmarks"
+import { useShallow } from "zustand/shallow"
+import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
+import { fetchTagCount } from "@/api/tags"
+import type { TagCount } from "@/api/tags/schema"
 
 export function AddBookmark({ onClose }: { onClose: () => void }) {
 
@@ -14,10 +18,16 @@ export function AddBookmark({ onClose }: { onClose: () => void }) {
             queryClient.invalidateQueries({ queryKey: ["tags"] })
         ])
     })
+    const { setIsNotificationOpen } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            setIsNotificationOpen: store.setIsNotificationOpen,
+        }))
+    )
 
     function handleAddBookmark(data: { title: string, description: string, url: string, tags: string[] }) {
         addBookmarkFn(data)
         onClose()
+        setIsNotificationOpen(true, "bookmark-added")
     }
 
     return (
@@ -56,7 +66,6 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
     const [url, setUrl] = useState("")
-    const [tags, setTags] = useState<string>("")
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -64,9 +73,18 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
             title,
             description,
             url,
-            tags: tags.split(",").map(t => t.trim()),
+            tags: tags.map(t => t.trim())
         })
     }
+
+    const [tags, setTags] = useState<string[]>([])
+    const [currentTag, setCurrentTag] = useState<string>("")
+    const { data: tagSuggestions } = useQuery({
+        queryKey: ["tags"],
+        queryFn: fetchTagCount,
+        select: (tags: TagCount[]): TagCount[] =>
+            [...tags].sort((a: TagCount, b: TagCount): number => a.name.localeCompare(b.name))
+    })
 
     return (
         <>
@@ -110,12 +128,39 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                             labelInput="Website Url*"
                         />
                         <div className="flex flex-col gap-y-1.5">
-                            <span className="text-preset-4">Tags*</span>
-                            <input type="text"
-                                name="tags"
-                                onChange={e => setTags(e.target.value)}
-                                value={tags}
-                                className="p-3 rounded-8 border border-neutral-500 focus:outline-none placeholder:text-preset-4" placeholder="e.g. design, learning, tools"
+                            {
+                                tags.map((tag: string, index: number)=> (
+                                    <div key={index}
+                                        className="bg-teal-700 text-neutral-0 px-2 py-1 rounded-8 flex items-center gap-x-1.5 text-preset-4">
+                                        {tag}
+                                        <button
+                                            onClick={(): void => setTags(tags.filter((_: string, i: number): boolean => i !== index))}
+                                            className="text-neutral-0 cursor-pointer"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))
+                            }
+                            <input
+                                type="text"
+                                value={currentTag}
+                                onChange={(e): void => setCurrentTag(e.target.value)}
+                                onKeyDown={(e): void => {
+                                    if (e.key === "," || e.key === "Enter") {
+                                        e.preventDefault()
+                                        if (currentTag.trim()) {
+                                            setTags([...tags, currentTag.trim()])
+                                            setCurrentTag("")
+                                        }
+                                    }
+                                }}
+                                onBlur={(): void => {
+                                    if (currentTag.trim()) {
+                                        setTags([...tags, currentTag.trim()])
+                                        setCurrentTag("")
+                                    }
+                                }}
                             />
                         </div>
                     </div>
