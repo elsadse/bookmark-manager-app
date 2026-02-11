@@ -128,8 +128,9 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                             labelInput="Website Url*"
                         />
                         <div className="flex flex-col gap-y-1.5">
+                            <span className="text-preset-4">Tags*</span>
                             {
-                                tags.map((tag: string, index: number)=> (
+                                tags.map((tag: string, index: number) => (
                                     <div key={index}
                                         className="bg-teal-700 text-neutral-0 px-2 py-1 rounded-8 flex items-center gap-x-1.5 text-preset-4">
                                         {tag}
@@ -142,7 +143,8 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                     </div>
                                 ))
                             }
-                            <input
+                            <input className="p-3 rounded-8 border border-neutral-500 dark:border-neutral-d-300 dark:bg-neutral-d-600 focus:outline-none
+                focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500"
                                 type="text"
                                 value={currentTag}
                                 onChange={(e): void => setCurrentTag(e.target.value)}
@@ -161,7 +163,15 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                         setCurrentTag("")
                                     }
                                 }}
+                                list="SUGGESTIONS_LIST_ID"
                             />
+                            <datalist id="SUGGESTIONS_LIST_ID">
+                                {tagSuggestions
+                                    ?.filter((s) => s.name.toLowerCase().includes(currentTag.toLowerCase().trim()))
+                                    ?.map((suggestion) => (
+                                        <option key={suggestion.id} value={suggestion.name} />
+                                    ))}
+                            </datalist>
                         </div>
                     </div>
                     <div className="flex flex-row justify-end gap-x-4">
