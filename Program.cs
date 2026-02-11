@@ -138,7 +138,6 @@ app.MapOpenApi();
 app.MapScalarApiReference();
 
 app.UseCors("AllowFrontend");
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseExceptionHandler();

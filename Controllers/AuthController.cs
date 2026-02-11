@@ -13,7 +13,7 @@ public class AuthController(
     AuthService authService,
     IValidator<UserRegistrationRequest> userRegistrationRequestValidator,
     IValidator<UserLoginRequest> userLoginRequestValidator,
-    IConfiguration configuration) : ControllerBase
+    IConfiguration configuration, IWebHostEnvironment env) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<ActionResult<UserRegistrationResponse>> RegisterUserAsync(
@@ -36,9 +36,10 @@ public class AuthController(
         var durationInMinutes = configuration.GetValue("Jwt:DurationInMinutes", 5);
         var cookieOptions = new CookieOptions
         {
+            //config du https
             HttpOnly = true,
-            Secure = false,
-            SameSite = SameSiteMode.Strict,
+            Secure = !env.IsDevelopment(),
+            SameSite = env.IsDevelopment() ? SameSiteMode.Strict : SameSiteMode.None,
             MaxAge = TimeSpan.FromMinutes(durationInMinutes)
         };
 
@@ -52,8 +53,8 @@ public class AuthController(
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = false,
-            SameSite = SameSiteMode.Strict,
+            Secure = !env.IsDevelopment(),
+            SameSite = env.IsDevelopment() ? SameSiteMode.Strict : SameSiteMode.None,
             Path = "/"
         };
         Response.Cookies.Delete("token", cookieOptions);
