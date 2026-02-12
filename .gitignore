@@ -1,2 +1,5 @@
 .vscode/
 bookmark-manager-ui/node_modules/
+
+bin/
+obj/
