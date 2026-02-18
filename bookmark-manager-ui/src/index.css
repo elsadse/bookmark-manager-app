@@ -89,11 +89,11 @@
   }
 
   body {
-    @apply min-w-93.75 max-w-360 min-h-screen mx-auto
+    @apply min-w-93.75 min-h-screen mx-auto
   }
 
   #root {
-    @apply min-h-screen w-full flex flex-col
+    @apply min-h-screen w-full
   }
 }
 

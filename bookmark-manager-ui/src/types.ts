@@ -1,14 +1,18 @@
-export type Bookmark = {
-    id: string,
-    title: string,
-    url: string,
-    favicon: string,
-    description: string,
-    tags: string[],
-    pinned: boolean,
-    isArchived: boolean,
-    visitCount: number,
-    createdAt: string,
-    lastVisited: string | null
-}
+export type Nullable<T> = T | null
 
+export type SortBookmarksBy = "recently-added" | "most-visited" | "recently-visited"
+export type DialogAction = "delete" | "archive" | "unarchive"
+export type ToastAction = "bookmark-added"
+    | "bookmark-edited"
+    | "bookmark-link-copied"
+    | "bookmark-pinned"
+    | "bookmark-archived"
+    | "bookmark-unarchived"
+    | "bookmark-deleted"
+
+export type NotificationType =
+    | ToastAction
+    | "bookmark-updated"
+    | "bookmark-pinned"
+    | "bookmark-restored"
+    | "bookmark-unpinned"

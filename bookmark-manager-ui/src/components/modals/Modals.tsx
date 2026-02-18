@@ -1,66 +1,256 @@
-import { InputField } from "@/components/connexion/FormContainerSignIn"
+import { InputField } from "@/components/auth/FormContainerSignIn"
 import iconClose from "@/assets/images/icon-close.svg"
+import LoadingIcon from "@/assets/images/icon-loading.svg"
+import { useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { addBookmark } from "@/api/bookmarks"
+import { useShallow } from "zustand/shallow"
+import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
+import { fetchTagCount } from "@/api/tags"
+import type { TagCount } from "@/api/tags/schema"
+import type { Nullable } from "@/types"
+import type { ErrorApiResponse } from "@/api/errors/schema"
+import { ApiError } from "@/api/errors/ApiError"
 
 export function AddBookmark({ onClose }: { onClose: () => void }) {
 
+    const queryClient = useQueryClient()
+    const { mutate, isPending, error: mutationError } = useMutation({
+        mutationFn: addBookmark,
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ["bookmarks"] }),
+                queryClient.invalidateQueries({ queryKey: ["tags"] })
+            ])
+            onClose()
+            setIsNotificationOpen(true, "bookmark-added")
+        },
+        onError: (err) => {
+            console.error("Erreur complète de la mutation :", err)
+            console.log("Response de l’erreur :", (err as any).response)
+        },
+    })
+    const error: Nullable<ErrorApiResponse> = mutationError instanceof ApiError ? mutationError.response : null
+
+    const { setIsNotificationOpen } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            setIsNotificationOpen: store.setIsNotificationOpen,
+        }))
+    )
+
+    function handleAddBookmark(data: { title: string, description: string, url: string, tags: string[] }) {
+        mutate(data)
+    }
+
     return (
-        <BookmarkForm onClose={onClose} titleButton="Add Bookmark"
-            title="Add a Bookmark" description="Save a link with details to keep your collection organized."
+        <BookmarkForm onClose={onClose} titleButton="Add Bookmark" onsubmit={handleAddBookmark}
+            titleForm="Add a Bookmark" descriptionForm="Save a link with details to keep your collection organized."
+            error={error} isPending={isPending}
         />
     )
 }
 
-export function EditBookmark({ onClose }: { onClose: () => void }) {
+/*export function EditBookmark({ onClose }: { onClose: () => void }) {
+
+    function handleEditBookmark() { }
 
     return (
-        <BookmarkForm onClose={onClose} titleButton="Save Bookmark"
-            title="Edit bookmark" description="Update your saved link details — change the title, description, URL, or tags anytime."
+        <BookmarkForm onClose={onClose} titleButton="Save Bookmark" onsubmit={handleEditBookmark}
+            titleForm="Edit bookmark" descriptionForm="Update your saved link details — change the title, description, URL, or tags anytime."
         />
     )
+}*/
+
+type BookmarkFormProps = {
+    onsubmit: (data: {
+        title: string,
+        description: string,
+        url: string,
+        tags: string[]
+    }) => void,
+    onClose: () => void,
+    titleForm: string,
+    descriptionForm: string,
+    titleButton: string,
+    error?: Nullable<ErrorApiResponse>,
+    isPending: boolean
 }
 
 
-export function BookmarkForm({ onClose, title, description, titleButton }: { onClose: () => void, title: string, description: string, titleButton: string }) {
+export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, titleButton, error, isPending }: BookmarkFormProps) {
+    const [title, setTitle] = useState("")
+    const [description, setDescription] = useState("")
+    const [url, setUrl] = useState("")
+
+    function handleSubmit(e: React.FormEvent) {
+        e.preventDefault()
+        onsubmit({
+            title,
+            description,
+            url,
+            tags: tags.map(t => t.trim())
+        })
+    }
+
+    const [tags, setTags] = useState<string[]>([])
+    const [currentTag, setCurrentTag] = useState<string>("")
+    const { data: tagSuggestions } = useQuery({
+        queryKey: ["tags"],
+        queryFn: fetchTagCount,
+        select: (tags: TagCount[]): TagCount[] =>
+            [...tags].sort((a: TagCount, b: TagCount): number => a.name.localeCompare(b.name))
+    })
 
     return (
         <>
-            <div className="fixed inset-0 bg-[#131313] opacity-63 h-screen w-screen" />
-            <div className="absolute flex flex-col w-85.75 md:w-142.5 gap-y-8 px-5 py-6 md:p-8 rounded-16 bg-neutral-0">
+            <div className="relative flex flex-col w-85.75 md:w-142.5 gap-y-8 px-5 py-6 md:p-8 rounded-16 bg-neutral-0">
                 <div className="flex flex-col gap-y-2">
-                    <div className="">
-                        <div onClick={onClose}
-                            className="absolute right-4 top-4 size-8 flex justify-center items-center gap-x-1 rounded-8 border border-neutral-400 cursor-pointer">
-                            <img src={iconClose} className="size-5" alt="icon close" />
-                        </div>
-                        <span className="text-preset-1 text-neutral-900">{title}</span>
+                    <div onClick={onClose}
+                        className="absolute right-4 top-4 size-8 flex justify-center items-center gap-x-1 rounded-8 border border-neutral-400 cursor-pointer">
+                        <img src={iconClose} className="size-5" alt="icon close" />
                     </div>
-                    <span className="text-preset-4-md text-neutral-800"> {description}</span>
+                    <span className="text-preset-1 text-neutral-900">{titleForm}</span>
+                    <span className="text-preset-4-md text-neutral-800"> {descriptionForm}</span>
                 </div>
-                <div className="flex flex-col gap-y-5">
-                    <InputField typeInput="text" labelInput="Title*" />
-                    <div className="flex flex-col gap-y-1.5">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-y-8">
+                    <div className="flex flex-col gap-y-5">
+                        <InputField
+                            name="title"
+                            onChange={e => setTitle(e.target.value)}
+                            value={title}
+                            typeInput="text"
+                            labelInput="Title*"
+                        />
+                        {
+                            error !== null && "errors" in error! && "Title" in error.errors &&
+                            <div className="flex flex-col gap-y-1.5">
+                                {
+                                    error.errors["Title"].map((error: string, index: number) => (
+                                        <span key={index} className="text-preset-4 text-red-800">{error}</span>
+                                    ))
+                                }
+                            </div>
+                        }
                         <div className="flex flex-col gap-y-1.5">
-                            <span className="text-preset-4">Description*</span>
-                            <textarea className="p-3 rounded-8 border border-neutral-500 focus:outline-none " />
+                            <div className="flex flex-col gap-y-1.5">
+                                <span className="text-preset-4">Description*</span>
+                                <textarea
+                                    name="description"
+                                    onChange={e => setDescription(e.target.value)}
+                                    value={description}
+                                    className="p-3 rounded-8 border border-neutral-500 focus:outline-none "
+                                />
+                                {
+                                    error !== null && "errors" in error! && "Description" in error.errors &&
+                                    <div className="flex flex-col gap-y-1.5">
+                                        {
+                                            error.errors["Description"].map((error: string, index: number) => (
+                                                <span key={index} className="text-preset-4 text-red-800">{error}</span>
+                                            ))
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div className="flex justify-end gap-x-2.5">
+                                <span className="text-preset-5 text-neutral-800">0/280</span>
+                            </div>
                         </div>
-                        <div className="flex justify-end gap-x-2.5">
-                            <span className="text-preset-5 text-neutral-800">0/280</span>
+                        <InputField
+                            name="url"
+                            onChange={e => setUrl(e.target.value)}
+                            value={url}
+                            typeInput="url"
+                            labelInput="Website Url*"
+                        />
+                        {
+                            error !== null && "errors" in error! && "Url" in error.errors &&
+                            <div className="flex flex-col gap-y-1.5">
+                                {
+                                    error.errors["Url"].map((error: string, index: number) => (
+                                        <span key={index} className="text-preset-4 text-red-800">{error}</span>
+                                    ))
+                                }
+                            </div>
+                        }
+                        <div className="flex flex-col gap-y-1.5">
+                            <span className="text-preset-4">Tags*</span>
+                            {tags.length !== 0 &&
+                                <div className="flex flex-row gap-x-1.5">
+                                    {tags.map((tag: string, index: number) => (
+                                        <div key={index}
+                                            className="bg-teal-700 text-neutral-0 px-2 py-1 rounded-8 flex items-center gap-x-1.5 text-preset-4">
+                                            {tag}
+                                            <button
+                                                onClick={(): void => setTags(tags.filter((_: string, i: number): boolean => i !== index))}
+                                                className="text-neutral-0 cursor-pointer"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            }
+                            <input className="p-3 rounded-8 border border-neutral-500 dark:border-neutral-d-300 dark:bg-neutral-d-600 focus:outline-none
+                focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500"
+                                type="text"
+                                value={currentTag}
+                                onChange={(e): void => setCurrentTag(e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1).toLowerCase())}
+                                onKeyDown={(e): void => {
+                                    if (e.key === "," || e.key === "Enter") {
+                                        e.preventDefault()
+                                        if (currentTag.trim()) {
+                                            setTags([...tags, currentTag.trim()])
+                                            setCurrentTag("")
+                                        }
+                                    }
+                                }}
+                                onBlur={(): void => {
+                                    if (currentTag.trim()) {
+                                        setTags([...tags, currentTag.trim()])
+                                        setCurrentTag("")
+                                    }
+                                }}
+                                list="SUGGESTIONS_LIST_ID"
+                            />
+                            {
+                                error !== null && "errors" in error! && "Tags" in error.errors &&
+                                <div className="flex flex-col gap-y-1.5">
+                                    {
+                                        error.errors["Tags"].map((error: string, index: number) => (
+                                            <span key={index} className="text-preset-4 text-red-800">{error}</span>
+                                        ))
+                                    }
+                                </div>
+                            }
+                            <datalist id="SUGGESTIONS_LIST_ID">
+                                {tagSuggestions
+                                    ?.filter((s) => s.name.toLowerCase().includes(currentTag.toLowerCase().trim()))
+                                    ?.map((suggestion) => (
+                                        <option key={suggestion.id} value={suggestion.name} />
+                                    ))}
+                            </datalist>
                         </div>
                     </div>
-                    <InputField typeInput="url" labelInput="Website Url*" />
-                    <div className="flex flex-col gap-y-1.5">
-                        <span className="text-preset-4">Tags*</span>
-                        <input type="text" className="p-3 rounded-8 border border-neutral-500 focus:outline-none placeholder:text-preset-4" placeholder="e.g. design, learning, tools" />
+                    {
+                        error !== null && "detail" in error! &&
+                        <div className="flex flex-col gap-y-1.5">
+                            <span className="text-preset-4 text-red-800">{error.detail}</span>
+                        </div>
+                    }
+                    <div className="flex flex-row justify-end gap-x-4">
+                        <button onClick={onClose} type="button"
+                            className="w-35.5 flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-neutral-0 border border-neutral-400 cursor-pointer">
+                            <span className="text-center px-0.5 text-neutral-900">Cancel</span>
+                        </button>
+                        <button type="submit"
+                            className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-teal-700 cursor-pointer">
+                            {
+                                isPending && <img src={LoadingIcon} alt="Loading Icon" className="w-4 h-4 spin-slow" />
+                            }
+                            <span className="text-center px-0.5 text-neutral-0">{titleButton}</span>
+                        </button>
                     </div>
-                </div>
-                <div className="flex flex-row justify-end gap-x-4">
-                    <button className="w-35.5 flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-neutral-0 border border-neutral-400">
-                        <span className="text-center px-0.5 text-neutral-900">Cancel</span>
-                    </button>
-                    <button className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-teal-700">
-                        <span className="text-center px-0.5 text-neutral-0">{titleButton}</span>
-                    </button>
-                </div>
+                </form>
             </div>
         </>
     )

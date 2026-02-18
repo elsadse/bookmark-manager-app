@@ -18,5 +18,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src")
     }
   },
-  base: "/bookmark-manager-app/"
+  base: "/bookmark-manager-app"
 })

@@ -1,48 +1,13 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace bookmark_manager_app.Models;
 
-[Table("users", Schema = "bookmark")]
-public class User
+public sealed class User : BaseModel
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column("id")]
-    public int Id { get; set; }
+    public long? UserId { get; init; }
+    public string Fullname { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
 
-    [Required]
-    [Column("username")]
-    public string Username { get; set; }= string.Empty;
-
-    [Required]
-    [EmailAddress]
-    [Column("email")]
-    public string Email { get; set; }= string.Empty;
-
-    [Required]
-    [Column("password_hash")]
-    public string PasswordHash { get; set; }= string.Empty;
-
+    public ICollection<Bookmark> Bookmarks { get; init; } = new List<Bookmark>();
 }
 
-public class UserCreateDto
-{
-    [Required]
-    public string Username { get; set; }= string.Empty;
 
-    [Required]
-    [EmailAddress]
-    public string Email { get; set; }= string.Empty;
-
-    [Required]
-    public string Password { get; set; }= string.Empty;
-}
-
-public class UserUpdateDto
-{
-    [EmailAddress]
-    public string Email { get; set; }= string.Empty;
-
-    public string Password { get; set; }= string.Empty;
-}
