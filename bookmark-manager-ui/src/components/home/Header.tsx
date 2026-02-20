@@ -10,6 +10,7 @@ import iconThemeDark from "@/assets/images/icon-dark-theme.svg"
 import iconLogout from "@/assets/images/icon-logout.svg"
 import { useState } from "react"
 import { useAuthContext } from "@/hooks/useAuthContext"
+import { useThemeContext } from "@/hooks/useThemeContext"
 
 export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, onAddClick: () => void }) {
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
@@ -36,7 +37,7 @@ export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, o
                     <img src={iconSearch} className="w-5 h-5 dark:hidden" alt="icon search" />
                     <img src={iconSearchDark} className="w-5 h-5 hidden dark:block" alt="icon search" />
                     <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                        className="placeholder:text-preset-4-md focus:outline-none" placeholder="Search by title..."
+                        className="placeholder:text-preset-4-md focus:outline-none w-full" placeholder="Search by title..."
                     />
                 </div>
             </div>
@@ -60,6 +61,11 @@ export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, o
 
 export function ProfileMenuDropdown() {
     const { logout } = useAuthContext()
+    const { theme, setTheme } = useThemeContext()
+
+    function toggleTheme() {
+        setTheme(theme === "dark" ? "light" : "dark")
+    }
 
     return (
         <div className="absolute top-15 right-8 md:top-17 
@@ -79,11 +85,12 @@ export function ProfileMenuDropdown() {
                     <img src={iconTheme} className="size-4" alt="icon theme" />
                     <span className="text-preset-4 text-neutral-800">Theme</span>
                 </div>
-                <div className="flex flex-row p-0.5 rounded-4 bg-neutral-300 border border-neutral-300 cursor-pointer hover:ring ring-teal-700">
-                    <div className="flex justify-center items-center px-2 py-1.5 rounded-4 bg-neutral-0">
+                <div onClick={toggleTheme}
+                    className="flex flex-row p-0.5 rounded-4 bg-neutral-300 border border-neutral-300 cursor-pointer hover:ring ring-teal-700">
+                    <div className={`flex justify-center items-center px-2 py-1.5 rounded-4 bg-neutral-0`}>
                         <img src={iconThemeLight} className="size-3.5" alt="icon light theme" />
                     </div>
-                    <div className="flex justify-center items-center px-2 py-1.5 rounded-4 bg-neutral-300">
+                    <div className={`flex justify-center items-center px-2 py-1.5 rounded-4 bg-neutral-300`}>
                         <img src={iconThemeDark} className="size-3.5" alt="icon light dark" />
                     </div>
                 </div>

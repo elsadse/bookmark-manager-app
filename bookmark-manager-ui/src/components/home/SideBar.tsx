@@ -1,4 +1,5 @@
 import iconHome from "@/assets/images/icon-home.svg"
+import iconHomeDark from "@/assets/images/icon-home-dark.svg"
 import iconArchived from "@/assets/images/icon-archive.svg"
 import iconArchivedDark from "@/assets/images/icon-archive-dark.svg"
 import iconClose from "@/assets/images/icon-close.svg"
@@ -60,7 +61,8 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                         cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
                         ${selectedItem === "Home" ? 'bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-100 dark:border-neutral-d-500 text-neutral-900 dark:text-neutral-0 ring ring-teal-700' : 'text-neutral-800 dark:text-neutral-d-100'}`}>
                         <div className="flex flex-row items-center gap-x-2">
-                            <img src={iconHome} className="size-5" alt="icon navigation" />
+                            <img src={iconHome} className="size-5 dark:hidden" alt="icon navigation" />
+                            <img src={iconHomeDark} className="size-5 hidden dark:block" alt="icon navigation" />
                             <span className="text-preset-3">Home</span>
                         </div>
                     </div>
@@ -82,10 +84,10 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                     </div>
                 </div>
                 <div>
-                    <span className="h-5.25 items-center px-3 pb-1 text-[#34D4D4D] text-xs font-bold">TAGS</span>
+                    <span className="h-5.25 items-center px-3 pb-1 text-[#4D4D4D] text-xs font-bold dark:text-neutral-d-100">TAGS</span>
                     <div>
                         {isLoading ?
-                            <p className="px-3 text-preset-3 text-neutral-800">Loading tags...</p> :
+                            <p className="px-3 text-preset-3 text-neutral-800 dark:text-neutral-d-100">Loading tags...</p> :
                             tags?.map(tag => (
                                 <ContentItemNavigationSideBar
                                     key={tag.name}
@@ -125,13 +127,13 @@ export function ContentItemNavigationSideBar({ text, numberBadge, inputId }: { t
             <div className="flex flex-row items-center gap-x-2">
                 <input id={inputId}
                     type="checkbox" checked={isChecked} onChange={handleChangeInput}
-                    className={`size-4 border border-neutral-500 cursor-pointer
+                    className={`size-4 border border-neutral-500 dark:border-neutral-d-300 dark:bg-transparent cursor-pointer 
                          ${isChecked ? "accent-teal-700" : ""}`}
                 />
-                <label htmlFor={inputId} className="text-preset-3 text-neutral-800 cursor-pointer"> {text} </label>
+                <label htmlFor={inputId} className="text-preset-3 text-neutral-800 cursor-pointer dark:text-neutral-d-100"> {text} </label>
             </div>
-            <div className="items-center px-2 pb-0.5 rounded-full bg-neutral-100 border border-neutral-300">
-                <span className="text-neutral-800 text-xs font-bold">{numberBadge}</span>
+            <div className="items-center px-2 pb-0.5 rounded-full bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-300 dark:border-neutral-d-300">
+                <span className="text-neutral-800 dark:text-neutral-d-100 text-xs font-bold">{numberBadge}</span>
             </div>
         </div>
     )
