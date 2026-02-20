@@ -36,7 +36,7 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
     }, [error, isError, logout])
 
     return (
-        <div className="flex flex-col gap-y-10 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500 w-74 h-screen max-h-screen overflow-y-auto">
+        <div className="flex flex-col gap-y-10 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500 w-74 h-screen overflow-y-auto">
             <div className="relative flex flex-col gap-y-5 px-5 pt-5 pb-2.5">
                 {onClose && (
                     <div onClick={onClose}

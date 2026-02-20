@@ -103,7 +103,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
 
     return (
         <>
-            <div className="relative flex flex-col w-85.75 md:w-142.5 gap-y-8 px-5 py-6 md:p-8 rounded-16 bg-neutral-0">
+            <div className="relative flex flex-col w-85.75 md:w-142.5 gap-y-8 px-5 py-6 md:p-8 rounded-16 bg-neutral-0 max-h-screen overflow-y-auto">
                 <div className="flex flex-col gap-y-2">
                     <div onClick={onClose}
                         className="absolute right-4 top-4 size-8 flex justify-center items-center gap-x-1 rounded-8 border border-neutral-400 cursor-pointer">
@@ -140,20 +140,20 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                     value={description}
                                     className="p-3 rounded-8 border border-neutral-500 focus:outline-none "
                                 />
-                                {
-                                    error !== null && "errors" in error! && "Description" in error.errors &&
-                                    <div className="flex flex-col gap-y-1.5">
-                                        {
-                                            error.errors["Description"].map((error: string, index: number) => (
-                                                <span key={index} className="text-preset-4 text-red-800">{error}</span>
-                                            ))
-                                        }
-                                    </div>
-                                }
                             </div>
                             <div className="flex justify-end gap-x-2.5">
-                                <span className="text-preset-5 text-neutral-800">0/280</span>
+                                <span className="text-preset-5 text-neutral-800">{description.length}/1024</span>
                             </div>
+                            {
+                                error !== null && "errors" in error! && "Description" in error.errors &&
+                                <div className="flex flex-col gap-y-1.5">
+                                    {
+                                        error.errors["Description"].map((error: string, index: number) => (
+                                            <span key={index} className="text-preset-4 text-red-800">{error}</span>
+                                        ))
+                                    }
+                                </div>
+                            }
                         </div>
                         <InputField
                             name="url"

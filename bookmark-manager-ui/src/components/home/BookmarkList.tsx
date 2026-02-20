@@ -80,7 +80,7 @@ export function BookmarkList() {
     }
 
     return (
-        <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16 h-screen overflow-y-auto">
+        <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16 max-h-screen overflow-y-auto">
             <div className="flex flex-row justify-between items-center gap-x-4">
                 <div className="flex flex-col md:flex-row">
                     <span className="text-preset-2 md:text-preset-1 text-neutral-900 dark:text-neutral-0">{headerTitle}</span>
@@ -113,7 +113,7 @@ export function BookmarkList() {
                 </button>
 
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8">
                 {isLoading ?
                     <p className="px-3 text-preset-2 text-neutral-800">Loading bookmarks...</p> :
                     bookmarks?.map((bookmark, index) => (

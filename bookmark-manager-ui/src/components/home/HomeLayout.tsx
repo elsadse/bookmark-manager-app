@@ -22,7 +22,7 @@ export function HomeLayout(): JSX.Element {
         })))
 
     return (
-        <div className="flex flex-row p-0">
+        <div className="flex flex-row p-0 max-h-screen">
             <div className="max-xl:hidden">
                 <SideBar />
             </div>
