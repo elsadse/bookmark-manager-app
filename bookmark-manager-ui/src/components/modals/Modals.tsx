@@ -1,5 +1,4 @@
 import { InputField } from "@/components/auth/FormContainerSignIn"
-import iconClose from "@/assets/images/icon-close.svg"
 import LoadingIcon from "@/assets/images/icon-loading.svg"
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -11,6 +10,7 @@ import type { TagCount } from "@/api/tags/schema"
 import type { Nullable } from "@/types"
 import type { ErrorApiResponse } from "@/api/errors/schema"
 import { ApiError } from "@/api/errors/ApiError"
+import { CloseIcon } from "@/components/icons/CloseIcon"
 
 export function AddBookmark({ onClose }: { onClose: () => void }) {
 
@@ -107,7 +107,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                 <div className="flex flex-col gap-y-2">
                     <div onClick={onClose}
                         className="absolute right-4 top-4 size-8 flex justify-center items-center gap-x-1 rounded-8 border border-neutral-400 cursor-pointer">
-                        <img src={iconClose} className="size-5" alt="icon close" />
+                        <CloseIcon className="size-5"/>
                     </div>
                     <span className="text-preset-1 text-neutral-900">{titleForm}</span>
                     <span className="text-preset-4-md text-neutral-800"> {descriptionForm}</span>

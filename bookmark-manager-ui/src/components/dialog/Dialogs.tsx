@@ -1,5 +1,5 @@
 import { deleteBookmark, toggleArchive } from "@/api/bookmarks"
-import iconClose from "@/assets/images/icon-close.svg"
+import { CloseIcon } from "@/components/icons/CloseIcon"
 import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useShallow } from "zustand/shallow"
@@ -82,7 +82,7 @@ export function Dialog({ titleBookmark, title, description, titleButton, isDelet
                 <div className="flex flex-col gap-y-2">
                     <div onClick={onClose}
                         className="absolute right-0 top-0 size-8 flex justify-center items-center gap-x-1 cursor-pointer">
-                        <img src={iconClose} className="size-5" alt="icon close" />
+                        <CloseIcon className="size-5" />
                     </div>
                     <div className="flex flex-col gap-y-2">
                         <span className="text-preset-1 text-neutral-900">{title}</span>
