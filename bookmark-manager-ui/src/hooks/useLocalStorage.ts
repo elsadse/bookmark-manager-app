@@ -1,5 +1,5 @@
 import type { Nullable } from "@/types"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export function useLocalStorage<T>(key: string, initialValue: Nullable<T> = null): {
     value: Nullable<T>,
@@ -28,6 +28,14 @@ export function useLocalStorage<T>(key: string, initialValue: Nullable<T> = null
         if (storedValue === null) return initialValue
         return JSON.parse(storedValue) as Nullable<T>
     }
+
+    useEffect(() => {
+        const timeout: number = setTimeout((): void => {
+            setLocalStorageValue(null)
+        }, 60 * 60 * 1000)
+
+        return (): void => clearTimeout(timeout)
+    }, [setLocalStorageValue])
 
     return { value, setLocalStorageValue, getLocalStorageValue }
 }

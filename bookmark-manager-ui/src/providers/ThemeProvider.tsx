@@ -1,31 +1,33 @@
 import { ThemeContext, type Theme } from "@/context/ThemeContext";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useEffect, type ReactNode } from "react";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    const [theme, setTheme] = useState<Theme>("light")
-    const isDark = theme === "dark"
-
-    useEffect(() => {
-        const root = document.documentElement;
-        if (isDark) {
-            root.classList.add("dark");
-        } else {
-            root.classList.remove("dark");
+    function initialTheme(): Theme {
+        const savedTheme = localStorage.getItem("hs_theme") as Theme | null
+        if (savedTheme === "light" || savedTheme === "dark") {
+            return savedTheme
         }
-        localStorage.setItem("hs_theme", theme);
-    }, [theme]);
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            return "dark"
+        }
+        return "light"
+    }
 
-    const value = useMemo(
-        () => ({
-            theme,
-            setTheme,
-            isDark,
-        }),
-        [theme]
-    )
+    const { value, setLocalStorageValue } = useLocalStorage<Theme>("hs_theme", initialTheme())
+
+    useEffect((): void => {
+        if (value === "dark") {
+            document.documentElement.classList.add("dark")
+        } else {
+            document.documentElement.classList.remove("dark")
+        }
+
+        setLocalStorageValue(value)
+    }, [value])
 
     return (
-        <ThemeContext.Provider value={value}>
+        <ThemeContext.Provider value={{ theme: value!, setTheme: setLocalStorageValue }}>
             {children}
         </ThemeContext.Provider>
     )

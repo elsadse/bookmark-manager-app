@@ -17,7 +17,7 @@ export function FormContainerSignIn() {
     }
 
     return (
-        <div className="flex flex-col gap-y-8 px-5 py-8 md:w-112 md:h-auto md:px-8 md:py-10 rounded-12 bg-neutral-0 dark:bg-neutral-d-800 dark:border border-neutral-d-500">
+        <div className="flex flex-col gap-y-8 px-5 py-8 md:w-112 md:h-auto md:px-8 md:py-10 rounded-12 bg-neutral-0">
             <Logo />
             <FormHeader text="Log in your account" supportingText="Welcome back! Please enter your details." />
             <form className="flex flex-col gap-y-4" onSubmit={handleSubmit}>
@@ -98,7 +98,7 @@ export function InputField({ typeInput, labelInput, value, onChange, name }: { n
                 name={name}
                 value={value}
                 onChange={onChange}
-                className="p-3 rounded-8 border border-neutral-500 dark:border-neutral-d-300 dark:bg-neutral-d-600 focus:outline-none
+                className="p-3 rounded-8 border border-neutral-500 focus:outline-none
                 focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500"
             />
         </div>
@@ -112,7 +112,7 @@ export function ButtonForm({ textButton, isLoading }: { textButton: string, isLo
             {
                 isLoading && <img src={LoadingIcon} alt="Loading Icon" className="w-4 h-4 spin-slow" />
             }
-            <span className="text-center px-0.5 text-preset-3 text-neutral-0">{textButton}</span>
+            <span className="text-center px-0.5 text-preset-3 text-neutral-0 dark:text-neutral-d-0">{textButton}</span>
         </button>
     )
 }
