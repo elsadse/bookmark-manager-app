@@ -1,17 +1,17 @@
-import iconMenu from "@/assets/images/icon-menu-hamburger.svg"
-import iconSearch from "@/assets/images/icon-search.svg"
 import iconAdd from "@/assets/images/icon-add.svg"
 import iconAvatar from "@/assets/images/image-avatar.webp"
-import iconTheme from "@/assets/images/icon-theme.svg"
-import iconThemeLight from "@/assets/images/icon-light-theme.svg"
-import iconThemeDark from "@/assets/images/icon-dark-theme.svg"
-import iconLogout from "@/assets/images/icon-logout.svg"
 import { useRef, useState } from "react"
 import { useAuthContext } from "@/hooks/useAuthContext"
 import { useThemeContext } from "@/hooks/useThemeContext"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import type { AuthenticatedUser } from "@/context/AuthContext"
 import { useCloseDropdown } from "@/hooks/useCloseDropdown"
+import { MenuHamburgerIcon } from "@/components/icons/MenuHamburgerIcon"
+import { SearchIcon } from "@/components/icons/SearchIcon"
+import { ThemeIcon } from "@/components/icons/ThemeIcon"
+import { LightThemeIcon } from "@/components/icons/LightThemeIcon"
+import { DarkThemeIcon } from "@/components/icons/DarkThemeIcon"
+import { LogoutIcon } from "@/components/icons/LogoutIcon"
 
 export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, onAddClick: () => void }) {
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
@@ -26,13 +26,13 @@ export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, o
                 <div
                     onClick={onMenuClick}
                     className="flex flex-row justify-center items-center xl:hidden gap-x-1 p-2.5 md:p-3 rounded-8 bg-neutral-0 border border-neutral-400 dark:border-neutral-500 cursor-pointer">
-                    <img src={iconMenu} className="w-5 h-5" alt="icon menu" />
+                    <MenuHamburgerIcon className="w-5 h-5" />
                 </div>
                 <div className={`flex flex-row justify-center items-center dark:bg-neutral-d-500
                     gap-x-1.5 md:gap-x-2 md:p-3 border border-neutral-300 dark:border-neutral-d-400
                     rounded-8 cursor-pointer hover:bg-neutral-100 
                    ${searchQuery.length > 0 ? "ring ring-teal-700" : ""} `}>
-                    <img src={iconSearch} className="w-5 h-5" alt="icon search" />
+                    <SearchIcon className="w-5 h-5" />
                     <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                         className="placeholder:text-preset-4-md focus:outline-none w-full" placeholder="Search by title..."
                     />
@@ -80,22 +80,22 @@ export function ProfileMenuDropdown() {
             </div>
             <div className="flex items-center justify-between flex-row  px-4">
                 <div className="flex items-center flex-row gap-x-2">
-                    <img src={iconTheme} className="size-4" alt="icon theme" />
+                    <ThemeIcon className="w-4 h-4" />
                     <span className="text-preset-4 text-neutral-800">Theme</span>
                 </div>
                 <div onClick={toggleTheme}
                     className="flex flex-row p-0.5 rounded-4 bg-neutral-300 border border-neutral-300 cursor-pointer hover:ring ring-teal-700">
                     <div className={`flex justify-center items-center px-2 py-1.5 rounded-4 bg-neutral-0`}>
-                        <img src={iconThemeLight} className="size-3.5" alt="icon light theme" />
+                        <LightThemeIcon className="w-3.5 h-3.5" />
                     </div>
                     <div className={`flex justify-center items-center px-2 py-1.5 rounded-4 bg-neutral-300`}>
-                        <img src={iconThemeDark} className="size-3.5" alt="icon light dark" />
+                        <DarkThemeIcon className="w-3.5 h-3.5" />
                     </div>
                 </div>
             </div>
             <div onClick={logout}
                 className="flex flex-row gap-x-2 px-4 py-3 border-t border-[#E9EAEB] cursor-pointer">
-                <img src={iconLogout} className="size-4" alt="icon logout" />
+                <LogoutIcon className="size-4"/>
                 <span className="text-preset-4 text-neutral-800">Logout</span>
             </div>
         </div>
