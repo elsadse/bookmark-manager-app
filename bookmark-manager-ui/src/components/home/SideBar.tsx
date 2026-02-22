@@ -59,7 +59,7 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                         }}
                         className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 
                         cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
-                        ${selectedItem === "Home" ? 'bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-100 dark:border-neutral-d-500 text-neutral-900 ring ring-teal-700' : 'text-neutral-800'}`}>
+                        ${selectedItem === "Home" ? 'bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-100 dark:border-neutral-d-500 text-neutral-900 ring ring-teal-700 dark:ring-neutral-d-0' : 'text-neutral-800'}`}>
                         <div className="flex flex-row items-center gap-x-2">
                             <HomeIcon className="size-5"/>
                             <span className="text-preset-3">Home</span>
@@ -74,7 +74,7 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                         }}
                         className={`flex flex-row items-center gap-x-2 px-3 py-2 rounded-6 
                         cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600 
-                        ${selectedItem === "Archived" ? 'bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-100 dark:border-neutral-d-500 text-neutral-900 ring ring-teal-700' : 'text-neutral-800'}`}>
+                        ${selectedItem === "Archived" ? 'bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-100 dark:border-neutral-d-500 text-neutral-900 ring ring-teal-700 dark:ring-neutral-d-0' : 'text-neutral-800'}`}>
                         <div className="flex flex-row items-center gap-x-2">
                             <ArchivedIcon className="size-5"/>
                             <span className="text-preset-3">Archived</span>

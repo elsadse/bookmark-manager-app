@@ -26,6 +26,7 @@ export function FormContainerSignIn() {
                     typeInput="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
+                    className={`${error !== null && "errors" in error && "Email" in error.errors? "border border-red-600 focus:border-none":""}`}
                 />
                 {
                     error !== null && "errors" in error && "Email" in error.errors &&
@@ -42,6 +43,7 @@ export function FormContainerSignIn() {
                     typeInput="password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
+                    className={`${error !== null && "errors" in error && "Password" in error.errors? "border border-red-600 focus:border-none":""}`}
                 />
                 {
                     error !== null && "errors" in error && "Password" in error.errors &&
@@ -89,7 +91,7 @@ export function FormHeader({ text, supportingText }: { text: string, supportingT
     )
 }
 
-export function InputField({ typeInput, labelInput, value, onChange, name }: { name: string, typeInput: string, labelInput: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
+export function InputField({ typeInput, labelInput, value, onChange, name, className }: { name: string, typeInput: string, labelInput: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, className?: string }) {
 
     return (
         <div className="flex flex-col gap-y-1.5">
@@ -98,8 +100,8 @@ export function InputField({ typeInput, labelInput, value, onChange, name }: { n
                 name={name}
                 value={value}
                 onChange={onChange}
-                className="p-3 rounded-8 border border-neutral-500 focus:outline-none dark:bg-neutral-d-500
-                focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500"
+                className={`p-3 rounded-8 border border-neutral-500 focus:outline-none dark:bg-neutral-d-600 ${className}
+                focus:ring ring-teal-700 dark:ring-neutral-d-0 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500`}
             />
         </div>
     )
@@ -108,7 +110,7 @@ export function InputField({ typeInput, labelInput, value, onChange, name }: { n
 export function ButtonForm({ textButton, isLoading }: { textButton: string, isLoading: boolean }) {
 
     return (
-        <button className="flex justify-center items-center px-4 py-3 gap-1 bg-teal-700 rounded-8 cursor-pointer ring ring-teal-700" type="submit">
+        <button className="flex justify-center items-center px-4 py-3 gap-1 bg-teal-700 rounded-8 cursor-pointer focus:ring ring-teal-700 dark:ring-neutral-d-0" type="submit">
             {
                 isLoading && <img src={LoadingIcon} alt="Loading Icon" className="w-4 h-4 spin-slow" />
             }

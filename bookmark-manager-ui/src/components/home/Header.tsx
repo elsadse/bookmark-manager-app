@@ -30,8 +30,8 @@ export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, o
                 </div>
                 <div className={`flex flex-row justify-center items-center dark:bg-neutral-d-500
                     gap-x-1.5 md:gap-x-2 md:p-3 border border-neutral-300 dark:border-neutral-d-400
-                    rounded-8 cursor-pointer hover:bg-neutral-100 
-                   ${searchQuery.length > 0 ? "ring ring-teal-700" : ""} `}>
+                    rounded-8 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-400
+                   ${searchQuery.length > 0 ? "ring ring-teal-700 dark:ring-neutral-d-0" : ""} `}>
                     <SearchIcon className="w-5 h-5" />
                     <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                         className="placeholder:text-preset-4-md focus:outline-none w-full" placeholder="Search by title..."
@@ -41,13 +41,13 @@ export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, o
             <div className="relative flex flex-row justify-center items-center gap-x-2.5 md:gap-4" ref={ref}>
                 <button onClick={onAddClick}
                     className="flex justify-center items-center 
-                    gap-1 p-2.5 md:px-4 md:py-3 rounded-8 bg-teal-700 
-                    border-none dark:border border-neutral-d-400 cursor-pointer ring ring-teal-700">
+                    gap-1 p-2.5 md:px-4 md:py-3 rounded-8 bg-teal-700 hover:bg-teal-800
+                    border-none dark:border border-neutral-d-400 cursor-pointer focus:ring ring-teal-700 dark:ring-neutral-d-0">
                     <img src={iconAdd} className="w-5 h-5" alt="icon add" />
                     <span className="hidden md:inline text-neutral-0 dark:text-neutral-d-0 text-preset-3 text-center md:px-0.5">Add Bookmark</span>
                 </button>
                 <div onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                    className={`flex justify-center gap-x-1.25 rounded-45.45 cursor-pointer ${isProfileDropdownOpen ? "rounded-full ring ring-teal-700" : ""}`}>
+                    className={`flex justify-center gap-x-1.25 rounded-45.45 cursor-pointer ${isProfileDropdownOpen ? "rounded-full ring ring-teal-700 dark:ring-neutral-d-0" : ""}`}>
                     <img src={iconAvatar} className="h-10 w-10" alt="icon avatar" />
                 </div>
                 {isProfileDropdownOpen && <ProfileMenuDropdown />}
@@ -68,7 +68,7 @@ export function ProfileMenuDropdown() {
     return (
         <div className="absolute top-15 right-0 
             w-62 flex flex-col gap-y-4 rounded-8 bg-neutral-0 border 
-            border-neutral-100 z-20">
+            border-neutral-100 z-10">
             <div className="flex flex-row items-center gap-x-3 px-4 py-3 border-b border-[#E9EAEB]">
                 <div className="flex items-center gap-x-1.25 rounded-45.45 ">
                     <img src={iconAvatar} className="h-10 w-10" alt="icon avatar" />
@@ -84,7 +84,7 @@ export function ProfileMenuDropdown() {
                     <span className="text-preset-4 text-neutral-800">Theme</span>
                 </div>
                 <div onClick={toggleTheme}
-                    className="flex flex-row p-0.5 rounded-4 bg-neutral-300 border border-neutral-300 cursor-pointer hover:ring ring-teal-700">
+                    className="flex flex-row p-0.5 rounded-4 bg-neutral-300 border border-neutral-300 cursor-pointer hover:ring ring-teal-700 dark:ring-neutral-d-0">
                     <div className={`flex justify-center items-center px-2 py-1.5 rounded-4 bg-neutral-0`}>
                         <LightThemeIcon className="w-3.5 h-3.5" />
                     </div>

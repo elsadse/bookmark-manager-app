@@ -24,6 +24,7 @@ export function FormContainerSignUp() {
                     typeInput="text"
                     value={fullname}
                     onChange={e => setFullname(e.target.value)}
+                    className={`${error !== null && "errors" in error && "Fullname" in error.errors? "border border-red-600 focus:border-none":""}`}
                 />
                 {
                     error !== null && "errors" in error && "Fullname" in error.errors &&
@@ -40,6 +41,7 @@ export function FormContainerSignUp() {
                     typeInput="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
+                    className={`${error !== null && "errors" in error && "Email" in error.errors? "border border-red-600 focus:border-none":""}`}
                 />
                 {
                     error !== null && "errors" in error && "Email" in error.errors &&
@@ -56,6 +58,7 @@ export function FormContainerSignUp() {
                     typeInput="password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
+                    className={`${error !== null && "errors" in error && "Password" in error.errors? "border border-red-600 focus:border-none":""}`}
                 />
                 {
                     error !== null && "errors" in error && "Password" in error.errors &&

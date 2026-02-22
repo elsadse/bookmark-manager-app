@@ -33,7 +33,7 @@ export function HomeLayout(): JSX.Element {
                     </div>
                 }
                 {isAddBookmarkOpen &&
-                    <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#131313]/70">
+                    <div className="fixed inset-0 z-20 flex items-center justify-center bg-[#131313]/70">
                         <AddBookmark onClose={() => setIsAddBookmarkOpen(false)} />
                     </div>
                 }

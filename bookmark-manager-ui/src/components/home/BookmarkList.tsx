@@ -101,21 +101,24 @@ export function BookmarkList() {
                 <button onClick={handleClickSortBy}
                     className={`relative flex justify-center 
                     items-center gap-x-4 px-3 py-2.5 bg-neutral-0 dark:bg-neutral-d-800
-                    rounded-8 border border-neutral-400 dark:border-neutral-d-400 cursor-pointer hover:bg-neutral-100
-                    ${isSortByDropdownOpen ? "ring ring-teal-700" : ""}
+                    rounded-8 border border-neutral-400 dark:border-neutral-d-400 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
+                    ${isSortByDropdownOpen ? "ring ring-teal-700 dark:ring-neutral-d-0" : ""}
                     `} ref={ref}>
                     <SwitchVerticalIcon className="w-5 h-5" />
                     <span className="text-preset-3 text-neutral-900">Sort by</span>
                     {isSortByDropdownOpen && <SortByDropdown />}
                 </button>
-
             </div>
             <div className="flex flex-wrap gap-8 pt-8 items-center justify-center">
                 {isLoading ?
                     <p className="px-3 text-preset-2 text-neutral-800">Loading bookmarks...</p> :
                     bookmarks?.map((bookmark, index) => (
                         <BookmarkListCard key={index} bookmark={bookmark} />
-                    ))}
+                    ))
+                }
+                {bookmarks?.length === 0 &&
+                    <p className="px-3 text-preset-2 text-neutral-800">No bookmarks to display</p>
+                }
             </div>
         </div>
     )
@@ -176,9 +179,9 @@ export function BookmarkListCardContainer({ bookmark }: { bookmark: Bookmark }) 
                     </div>
                 </div>
                 <div onClick={handleActionDropdown} ref={ref}
-                    className={`${isBookmarkActionDropdownOpen ? "ring ring-teal-700" : ""}
+                    className={`${isBookmarkActionDropdownOpen ? "ring ring-teal-700 dark:ring-neutral-d-0" : ""}
                         relative flex justify-center items-center size-8 gap-x-1 rounded-8 
-                      bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-400 dark:border-neutral-d-500 cursor-pointer hover:bg-neutral-100
+                      bg-neutral-0 border border-neutral-400 dark:border-neutral-d-500 cursor-pointer hover:bg-neutral-100
                         `}>
                     <LeadingIcon className="size-5" />
                     {isBookmarkActionDropdownOpen &&
@@ -278,7 +281,7 @@ export function BookmarkActionDropdownMenu({ Icon, text, onClick }: { Icon: Comp
 
     return (
         <div onClick={onClick}
-            className="flex flex-row items-center gap-x-2.5 p-2 rounded-8 cursor-pointer hover:ring ring-teal-700">
+            className="flex flex-row items-center gap-x-2.5 p-2 rounded-8 cursor-pointer hover:ring ring-teal-700 dark:ring-neutral-d-0">
             <Icon className="size-4" />
             <span className="text-preset-4 text-neutral-800">{text}</span>
         </div>
@@ -301,7 +304,7 @@ export function SortByDropdown() {
                     setSortBookmarksBy("recently-added")
                 }
             }}
-                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
+                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700 dark:ring-neutral-d-0">
                 <span className="text-preset-4 text-neutral-800">Recently added</span>
                 {sortBookmarksBy === "recently-added" && <CheckIcon className="w-4 h-4" />}
             </div>
@@ -310,7 +313,7 @@ export function SortByDropdown() {
                     setSortBookmarksBy("recently-visited")
                 }
             }}
-                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
+                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700 dark:ring-neutral-d-0">
                 <span className="text-preset-4 text-neutral-800">Recently visited</span>
                 {sortBookmarksBy === "recently-visited" && <CheckIcon className="w-4 h-4" />}
             </div>
@@ -319,7 +322,7 @@ export function SortByDropdown() {
                     setSortBookmarksBy("most-visited")
                 }
             }}
-                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
+                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700 dark:ring-neutral-d-0">
                 <span className="text-preset-4 text-neutral-800">Most visited</span>
                 {sortBookmarksBy === "most-visited" && <CheckIcon className="w-4 h-4" />}
             </div>

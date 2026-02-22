@@ -107,7 +107,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                 <div className="flex flex-col gap-y-2">
                     <div onClick={onClose}
                         className="absolute right-4 top-4 size-8 flex justify-center items-center gap-x-1 rounded-8 border border-neutral-400 cursor-pointer">
-                        <CloseIcon className="size-5"/>
+                        <CloseIcon className="size-5" />
                     </div>
                     <span className="text-preset-1 text-neutral-900">{titleForm}</span>
                     <span className="text-preset-4-md text-neutral-800"> {descriptionForm}</span>
@@ -120,6 +120,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                             value={title}
                             typeInput="text"
                             labelInput="Title*"
+                            className={`${error !== null && "errors" in error! && "Title" in error.errors ? "border border-red-600 focus:border-none" : ""}`}
                         />
                         {
                             error !== null && "errors" in error! && "Title" in error.errors &&
@@ -138,7 +139,9 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                     name="description"
                                     onChange={e => setDescription(e.target.value)}
                                     value={description}
-                                    className="p-3 rounded-8 border border-neutral-500 focus:outline-none focus:ring ring-teal-700 hover:bg-neutral-100 dark:hover:bg-neutral-d-500 dark:bg-neutral-d-500"
+                                    className={`p-3 rounded-8 border border-neutral-500 focus:outline-none focus:ring ring-teal-700 hover:bg-neutral-100 dark:hover:bg-neutral-d-500 dark:bg-neutral-d-600
+                                        ${error !== null && "errors" in error! && "Description" in error.errors ? "border border-red-600 focus:border-none" : ""}
+                                        `}
                                 />
                             </div>
                             <div className="flex justify-end gap-x-2.5">
@@ -161,6 +164,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                             value={url}
                             typeInput="url"
                             labelInput="Website Url*"
+                            className={`${error !== null && "errors" in error! && "Url" in error.errors ? "border border-red-600 focus:border-none" : ""}`}
                         />
                         {
                             error !== null && "errors" in error! && "Url" in error.errors &&
@@ -190,8 +194,10 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                     ))}
                                 </div>
                             }
-                            <input className="p-3 rounded-8 border border-neutral-500 dark:border-neutral-d-300 dark:bg-neutral-d-500 focus:outline-none
-                focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500 "
+                            <input className={`p-3 rounded-8 border border-neutral-500 dark:border-neutral-d-300 dark:bg-neutral-d-600 focus:outline-none
+                                focus:ring ring-teal-700 dark:ring-neutral-d-0 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500
+                                ${error !== null && "errors" in error! && "Tags" in error.errors ? "border-red-600 dark:border-red-600 focus:border-none" : ""}
+                                `}
                                 type="text"
                                 value={currentTag}
                                 onChange={(e): void => setCurrentTag(e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1).toLowerCase())}
