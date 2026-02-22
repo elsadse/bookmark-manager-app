@@ -23,8 +23,8 @@ export function NotificationContainer({ notificationType, closeNotification }: {
 
     return (
         <div
-            className="w-85 h-10.25 flex flex-row gap-x-2 px-3 py-2.5 items-center justify-between rounded-8 bg-neutral-0 border border-neutral-300">
-            <Icon className="w-5 h-5"/>
+            className="w-85 h-10.25 flex flex-row gap-x-2 px-3 py-2.5 items-center justify-between rounded-8 bg-neutral-0 dark:bg-neutral-d-500 border border-neutral-300">
+            <Icon className="w-5 h-5 dark:fill-neutral-d-500"/>
             <p className="text-preset-4-md text-neutral-900">{text}</p>
             <button onClick={closeNotification} className="cursor-pointer">
                 <CloseIcon className="w-4 h-4"/>

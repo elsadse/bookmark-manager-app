@@ -138,7 +138,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                     name="description"
                                     onChange={e => setDescription(e.target.value)}
                                     value={description}
-                                    className="p-3 rounded-8 border border-neutral-500 focus:outline-none "
+                                    className="p-3 rounded-8 border border-neutral-500 focus:outline-none focus:ring ring-teal-700 hover:bg-neutral-100 dark:hover:bg-neutral-d-500 dark:bg-neutral-d-500"
                                 />
                             </div>
                             <div className="flex justify-end gap-x-2.5">
@@ -178,11 +178,11 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                 <div className="flex flex-row gap-x-1.5">
                                     {tags.map((tag: string, index: number) => (
                                         <div key={index}
-                                            className="bg-teal-700 text-neutral-0 px-2 py-1 rounded-8 flex items-center gap-x-1.5 text-preset-4">
+                                            className="bg-teal-700 text-neutral-0 dark:text-neutral-d-0 px-2 py-1 rounded-8 flex items-center gap-x-1.5 text-preset-4">
                                             {tag}
                                             <button
                                                 onClick={(): void => setTags(tags.filter((_: string, i: number): boolean => i !== index))}
-                                                className="text-neutral-0 cursor-pointer"
+                                                className="text-neutral-0 dark:text-neutral-d-0 cursor-pointer"
                                             >
                                                 ×
                                             </button>
@@ -190,8 +190,8 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                     ))}
                                 </div>
                             }
-                            <input className="p-3 rounded-8 border border-neutral-500 dark:border-neutral-d-300 dark:bg-neutral-d-600 focus:outline-none
-                focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500"
+                            <input className="p-3 rounded-8 border border-neutral-500 dark:border-neutral-d-300 dark:bg-neutral-d-500 focus:outline-none
+                focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500 "
                                 type="text"
                                 value={currentTag}
                                 onChange={(e): void => setCurrentTag(e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1).toLowerCase())}
@@ -247,7 +247,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                             {
                                 isPending && <img src={LoadingIcon} alt="Loading Icon" className="w-4 h-4 spin-slow" />
                             }
-                            <span className="text-center px-0.5 text-neutral-0">{titleButton}</span>
+                            <span className="text-center px-0.5 text-neutral-0 dark:text-neutral-d-0">{titleButton}</span>
                         </button>
                     </div>
                 </form>

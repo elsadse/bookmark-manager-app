@@ -98,7 +98,7 @@ export function InputField({ typeInput, labelInput, value, onChange, name }: { n
                 name={name}
                 value={value}
                 onChange={onChange}
-                className="p-3 rounded-8 border border-neutral-500 focus:outline-none
+                className="p-3 rounded-8 border border-neutral-500 focus:outline-none dark:bg-neutral-d-500
                 focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500"
             />
         </div>

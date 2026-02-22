@@ -101,7 +101,7 @@ export function Dialog({ titleBookmark, title, description, titleButton, isDelet
                         className={`flex justify-center items-center 
                         gap-x-1 px-4 py-3 rounded-8 cursor-pointer
                         ${isDelete ? "bg-red-800" : "bg-teal-700"}`}>
-                        <span className="text-center px-0.5 text-neutral-0">{titleButton}</span>
+                        <span className="text-center px-0.5 text-neutral-0 dark:text-neutral-d-0">{titleButton}</span>
                     </button>
                 </div>
             </div>
