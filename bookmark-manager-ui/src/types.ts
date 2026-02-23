@@ -12,7 +12,6 @@ export type ToastAction = "bookmark-added"
 
 export type NotificationType =
     | ToastAction
-    | "bookmark-updated"
     | "bookmark-pinned"
     | "bookmark-restored"
     | "bookmark-unpinned"

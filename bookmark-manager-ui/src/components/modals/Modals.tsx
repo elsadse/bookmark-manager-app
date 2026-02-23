@@ -87,7 +87,6 @@ export function EditBookmark({ onClose }: { onClose: () => void }) {
 
 type BookmarkFormProps = {
     onsubmit: (data: {
-        bookmarkId?: number,
         title: string,
         description: string,
         url: string,
@@ -210,7 +209,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                         <div key={index}
                                             className="bg-teal-700 text-neutral-0 dark:text-neutral-d-0 px-2 py-1 rounded-8 flex items-center gap-x-1.5 text-preset-4">
                                             {tag}
-                                            <button
+                                            <button type="button"
                                                 onClick={(): void => setTags(tags.filter((_: string, i: number): boolean => i !== index))}
                                                 className="text-neutral-0 dark:text-neutral-d-0 cursor-pointer"
                                             >

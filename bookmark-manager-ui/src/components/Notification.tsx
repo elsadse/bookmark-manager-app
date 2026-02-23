@@ -42,7 +42,7 @@ function getLogoAndTextNotificationFrom(type: Nullable<NotificationType>): Notif
     switch (type) {
         case "bookmark-added":
             return { Icon: CheckIcon, text: "Bookmark added successfully." }
-        case "bookmark-updated":
+        case "bookmark-edited":
             return { Icon: CheckIcon, text: "Bookmark updated successfully" }
         case "bookmark-link-copied":
             return { Icon: CopyIcon, text: "Bookmark link copied to clipboard." }
