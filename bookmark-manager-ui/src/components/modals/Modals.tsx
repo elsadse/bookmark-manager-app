@@ -1,7 +1,7 @@
 import { InputField } from "@/components/auth/FormContainerSignIn"
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { addBookmark } from "@/api/bookmarks"
+import { addBookmark, updateBookmark } from "@/api/bookmarks"
 import { useShallow } from "zustand/shallow"
 import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
 import { fetchTagCount } from "@/api/tags"
@@ -11,6 +11,7 @@ import type { ErrorApiResponse } from "@/api/errors/schema"
 import { ApiError } from "@/api/errors/ApiError"
 import { CloseIcon } from "@/components/icons/CloseIcon"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
+import type { Bookmark } from "@/api/bookmarks/schema"
 
 export function AddBookmark({ onClose }: { onClose: () => void }) {
 
@@ -50,19 +51,43 @@ export function AddBookmark({ onClose }: { onClose: () => void }) {
     )
 }
 
-/*export function EditBookmark({ onClose }: { onClose: () => void }) {
+export function EditBookmark({ onClose }: { onClose: () => void }) {
+    const queryClient = useQueryClient()
+    const { setIsNotificationOpen, bookmarkSelected } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            setIsNotificationOpen: store.setIsNotificationOpen,
+            bookmarkSelected: store.bookmarkSelected
+        }))
+    )
+    const { mutate, isPending, error: mutationError } = useMutation({
+        mutationFn: updateBookmark,
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ["bookmarks"] }),
+                queryClient.invalidateQueries({ queryKey: ["tags"] })
+            ])
+            onClose()
+            setIsNotificationOpen(true, "bookmark-edited")
+        },
+    })
+    const error: Nullable<ErrorApiResponse> = mutationError instanceof ApiError ? mutationError.response : null
 
-    function handleEditBookmark() { }
+    function handleEditBookmark(data: { title: string, description: string, url: string, tags: string[] }) {
+        if (bookmarkSelected)
+            mutate({ ...data, bookmarkId: bookmarkSelected.bookmarkId })
+    }
 
     return (
-        <BookmarkForm onClose={onClose} titleButton="Save Bookmark" onsubmit={handleEditBookmark}
+        <BookmarkForm onClose={onClose} titleButton="Save Bookmark" onsubmit={handleEditBookmark} bookmark={bookmarkSelected}
             titleForm="Edit bookmark" descriptionForm="Update your saved link details — change the title, description, URL, or tags anytime."
+            error={error} isPending={isPending}
         />
     )
-}*/
+}
 
 type BookmarkFormProps = {
     onsubmit: (data: {
+        bookmarkId?: number,
         title: string,
         description: string,
         url: string,
@@ -73,14 +98,15 @@ type BookmarkFormProps = {
     descriptionForm: string,
     titleButton: string,
     error?: Nullable<ErrorApiResponse>,
-    isPending: boolean
+    isPending: boolean,
+    bookmark?: Nullable<Bookmark>
 }
 
 
-export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, titleButton, error, isPending }: BookmarkFormProps) {
-    const [title, setTitle] = useState("")
-    const [description, setDescription] = useState("")
-    const [url, setUrl] = useState("")
+export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, titleButton, error, isPending, bookmark }: BookmarkFormProps) {
+    const [title, setTitle] = useState(bookmark ? bookmark.title : "")
+    const [description, setDescription] = useState(bookmark ? bookmark.description : "")
+    const [url, setUrl] = useState(bookmark ? bookmark.url : "")
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -92,7 +118,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
         })
     }
 
-    const [tags, setTags] = useState<string[]>([])
+    const [tags, setTags] = useState<string[]>(bookmark ? bookmark.tags : [])
     const [currentTag, setCurrentTag] = useState<string>("")
     const { data: tagSuggestions } = useQuery({
         queryKey: ["tags"],
@@ -177,7 +203,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                             </div>
                         }
                         <div className="flex flex-col gap-y-1.5">
-                            <span className="text-preset-4">Tags*</span>
+                            <span className="text-preset-4">Tags (comma or Enter separated)*</span>
                             {tags.length !== 0 &&
                                 <div className="flex flex-row gap-x-1.5">
                                     {tags.map((tag: string, index: number) => (
@@ -200,7 +226,19 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                 `}
                                 type="text"
                                 value={currentTag}
-                                onChange={(e): void => setCurrentTag(e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1).toLowerCase())}
+                                onChange={(e) => {
+                                    const value = e.target.value
+                                    // Transforme chaque mot : première lettre majuscule, reste minuscule
+                                    const capitalized = value
+                                        .split(" ")
+                                        .map(word =>
+                                            word.trim()
+                                                .charAt(0).toUpperCase() +
+                                            word.slice(1).toLowerCase()
+                                        )
+                                        .join(" ");
+                                    setCurrentTag(capitalized)
+                                }}
                                 onKeyDown={(e): void => {
                                     if (e.key === "," || e.key === "Enter") {
                                         e.preventDefault()

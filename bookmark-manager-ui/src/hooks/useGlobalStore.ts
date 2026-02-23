@@ -1,5 +1,5 @@
 import type { Bookmark } from "@/api/bookmarks/schema"
-import type { DialogAction, NotificationType, Nullable, SortBookmarksBy, ToastAction } from "@/types"
+import type { Action, NotificationType, Nullable, SortBookmarksBy, ToastAction } from "@/types"
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
@@ -16,9 +16,9 @@ export type GlobalStore = {
     filterArchivedBookmarks: boolean,
     setFilterArchivedBookmarks: (filterArchivedBookmarks: boolean) => void,
 
-    isDialogOpen: boolean,
-    dialogAction: Nullable<DialogAction>,
-    setIsDialogOpen: (dialogAction: Nullable<DialogAction>) => void,
+    isDialogOrModalOpen: boolean,
+    action: Nullable<Action>,
+    setIsDialogOrModalOpen: (action: Nullable<Action>) => void,
 
     bookmarkSelected: Nullable<Bookmark>,
     setBookmarkSelected: (bookmarkSelected: Nullable<Bookmark>) => void,
@@ -73,11 +73,11 @@ export const useGlobalStore = create<GlobalStore>()(
                 return { headerTitle, filterArchivedBookmarks }
             }),
 
-            isDialogOpen: false,
-            dialogAction: null,
-            setIsDialogOpen: (dialogAction: Nullable<DialogAction>) => set(() => {
-                const dialogOpenAndAction = getIsDialogOpen({ dialogAction })
-                return { isDialogOpen: dialogOpenAndAction.isDialogOpen, dialogAction: dialogOpenAndAction.dialogAction }
+            isDialogOrModalOpen: false,
+            action: null,
+            setIsDialogOrModalOpen: (action: Nullable<Action>) => set(() => {
+                const dialogOpenAndAction = getIsDialogOrModalOpen({ action })
+                return { isDialogOrModalOpen: dialogOpenAndAction.isDialogOrModalOpen, action: dialogOpenAndAction.action }
             }),
 
             bookmarkSelected: null,
@@ -105,17 +105,20 @@ export const useGlobalStore = create<GlobalStore>()(
 )
 
 
-export function getIsDialogOpen({ dialogAction }: { dialogAction: Nullable<DialogAction> }): { isDialogOpen: boolean, dialogAction: Nullable<DialogAction> } {
-    if (dialogAction === "delete") {
-        return { isDialogOpen: true, dialogAction: "delete" }
+export function getIsDialogOrModalOpen({ action }: { action: Nullable<Action> }): { isDialogOrModalOpen?: boolean, action: Nullable<Action> } {
+    if (action === "delete") {
+        return { isDialogOrModalOpen: true, action: "delete" }
     }
-    if (dialogAction === "archive") {
-        return { isDialogOpen: true, dialogAction: "archive" }
+    if (action === "archive") {
+        return { isDialogOrModalOpen: true, action: "archive" }
     }
-    if (dialogAction === "unarchive") {
-        return { isDialogOpen: true, dialogAction: "unarchive" }
+    if (action === "unarchive") {
+        return { isDialogOrModalOpen: true, action: "unarchive" }
     }
-    return { isDialogOpen: false, dialogAction: null }
+    if (action === "edit") {
+        return { isDialogOrModalOpen: true, action: "edit" }
+    }
+    return { isDialogOrModalOpen: false, action: null }
 }
 
 export function getIsToastOpenAndToastDescription(toastAction: Nullable<ToastAction>): { isToastOpen: boolean, toastDescription: Nullable<string> } {

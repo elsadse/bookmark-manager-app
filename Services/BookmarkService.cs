@@ -59,9 +59,49 @@ public class BookmarkService(
         return bookmark ?? throw new NotFoundException("Bookmark not found");
     }
 
-    public async Task<Bookmark> CreateAsync(CreateBookmarkCommand command)
+     public async Task UpdateAsync(long bookmarkId, CreateOrUpdateBookmarkCommand command)
     {
-        if (await bookmarkRepository.ExistsByUserIdAndTitleAndUrl(userContext.UserId, command.Title, command.Url))
+        var bookmark = await bookmarkRepository.GetByIdForUpdateAsync(bookmarkId);
+        if (bookmark == null)
+        {
+            throw new NotFoundException("Bookmark not found");
+        }
+
+        if (bookmark.Title != command.Title
+            && await bookmarkRepository.ExistsByUserIdAndTitle(userContext.UserId, command.Title))
+        {
+            throw new ConflictException("Bookmark with this title already exists");
+        }
+
+        if (bookmark.Url != command.Url &&
+            await bookmarkRepository.ExistsByUserIdAndUrl(userContext.UserId, command.Url))
+        {
+            throw new ConflictException("Bookmark with this url already exists");
+        }
+
+        bookmark.Title = command.Title;
+        bookmark.Url = command.Url;
+        bookmark.Description = command.Description;
+
+        var existingTags = await tagRepository.GetByNamesForUpdate(command.TagNames);
+        var existingTagNames = existingTags.ToDictionary(tag => tag.Name);
+
+        bookmark.Tags.Clear();
+        foreach (var tagName in command.TagNames)
+        {
+            bookmark.Tags.Add(
+                existingTagNames.TryGetValue(tagName, out var existingTag)
+                    ? existingTag
+                    : new Tag { Name = tagName }
+            );
+        }
+
+        await bookmarkRepository.UpdateAsync();
+    }
+
+    public async Task<Bookmark> CreateAsync(CreateOrUpdateBookmarkCommand command)
+    {
+        if (await bookmarkRepository.ExistsByUserIdAndTitleOrUrl(userContext.UserId, command.Title, command.Url))
         {
             throw new ConflictException("Bookmark with this title and/or url already exists");
         }
@@ -93,4 +133,4 @@ public class BookmarkService(
     }
 }
 
-public record CreateBookmarkCommand(string Title, string Url, string Description, string[] TagNames);
+public record CreateOrUpdateBookmarkCommand(string Title, string Url, string Description, string[] TagNames);

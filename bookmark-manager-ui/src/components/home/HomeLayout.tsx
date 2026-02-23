@@ -2,7 +2,7 @@ import { type JSX, useState } from "react"
 import { Outlet } from "react-router"
 import { Header } from "@/components/home/Header"
 import { SideBar } from "@/components/home/SideBar"
-import { AddBookmark } from "@/components/modals/Modals"
+import { AddBookmark, EditBookmark } from "@/components/modals/Modals"
 import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
 import { useShallow } from "zustand/shallow"
 import { DeleteDialog, ToggleArchiveDialog } from "@/components/dialog/Dialogs"
@@ -11,10 +11,10 @@ import { NotificationContainer } from "@/components/Notification"
 export function HomeLayout(): JSX.Element {
     const [isMobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false)
     const [isAddBookmarkOpen, setIsAddBookmarkOpen] = useState<boolean>(false)
-    const { setIsDialogOpen, dialogAction, bookmarkSelected, setIsNotificationOpen, isNotificationOpen, notificationType } = useGlobalStore(
+    const { setIsDialogOrModalOpen, action, bookmarkSelected, setIsNotificationOpen, isNotificationOpen, notificationType } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
-            setIsDialogOpen: store.setIsDialogOpen,
-            dialogAction: store.dialogAction,
+            setIsDialogOrModalOpen: store.setIsDialogOrModalOpen,
+            action: store.action,
             bookmarkSelected: store.bookmarkSelected,
             isNotificationOpen: store.isNotificationOpen,
             setIsNotificationOpen: store.setIsNotificationOpen,
@@ -37,14 +37,19 @@ export function HomeLayout(): JSX.Element {
                         <AddBookmark onClose={() => setIsAddBookmarkOpen(false)} />
                     </div>
                 }
-                {dialogAction === "delete" &&
+                {action === "edit" &&
                     <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#131313]/70">
-                        <DeleteDialog onClose={() => setIsDialogOpen(null)} />
+                        <EditBookmark onClose={() => setIsDialogOrModalOpen(null)} />
                     </div>
                 }
-                {dialogAction === (bookmarkSelected?.isArchived ? "unarchive" : "archive") &&
+                {action === "delete" &&
                     <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#131313]/70">
-                        <ToggleArchiveDialog onClose={() => setIsDialogOpen(null)} />
+                        <DeleteDialog onClose={() => setIsDialogOrModalOpen(null)} />
+                    </div>
+                }
+                {action === (bookmarkSelected?.isArchived ? "unarchive" : "archive") &&
+                    <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#131313]/70">
+                        <ToggleArchiveDialog onClose={() => setIsDialogOrModalOpen(null)} />
                     </div>
                 }
                 {

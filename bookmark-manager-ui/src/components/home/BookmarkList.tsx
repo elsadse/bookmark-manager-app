@@ -225,10 +225,10 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
         onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
     })
 
-    const { setIsDialogOpen, setIsToastOpen, setIsNotificationOpen } = useGlobalStore(
+    const { setIsDialogOrModalOpen, setIsToastOpen, setIsNotificationOpen } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
             setIsNotificationOpen: store.setIsNotificationOpen,
-            setIsDialogOpen: store.setIsDialogOpen,
+            setIsDialogOrModalOpen: store.setIsDialogOrModalOpen,
             setIsToastOpen: store.setIsToastOpen,
         }))
     )
@@ -243,11 +243,11 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
     }
 
     function handleArchive() {
-        setIsDialogOpen("archive")
+        setIsDialogOrModalOpen("archive")
     }
 
     function handleUnarchive() {
-        setIsDialogOpen("unarchive")
+        setIsDialogOrModalOpen("unarchive")
     }
 
     function handleCopy() {
@@ -257,11 +257,11 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
     }
 
     function handleEdit() {
-        //setIsNotificationOpen(true, "bookmark-edited")
+        setIsDialogOrModalOpen("edit")
     }
 
     function handleDelete() {
-        setIsDialogOpen("delete")
+        setIsDialogOrModalOpen("delete")
     }
 
     return (
