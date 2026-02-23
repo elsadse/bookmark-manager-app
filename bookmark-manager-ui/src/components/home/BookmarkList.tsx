@@ -25,7 +25,7 @@ import { DateIcon } from "@/components/icons/DateIcon"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 
 export function BookmarkList() {
-    const { sortBookmarksBy, tagFilters, filterArchivedBookmarks, headerTitle } = useGlobalStore(
+    const { sortBookmarksBy, tagFilters, filterArchivedBookmarks, headerTitle, searchQuery } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
             headerTitle: store.headerTitle,
             sortBookmarksBy: store.sortBookmarksBy,
@@ -33,6 +33,7 @@ export function BookmarkList() {
             filterArchivedBookmarks: store.filterArchivedBookmarks,
             isToastOpen: store.isToastOpen,
             toastDescription: store.toastDescription,
+            searchQuery: store.searchQuery,
         }))
     )
 
@@ -41,8 +42,8 @@ export function BookmarkList() {
     useCloseDropdown(ref, (): void => setIsSortByDropdownOpen(false))
 
     const { data: bookmarks, isLoading, isError, error } = useQuery({
-        queryKey: ["bookmarks"],
-        queryFn: fetchBookmarks,
+        queryKey: ["bookmarks", searchQuery],
+        queryFn: async (): Promise<Bookmark[]> => fetchBookmarks(searchQuery),
         select: (data: Bookmark[]): Bookmark[] =>
             [
                 ...data

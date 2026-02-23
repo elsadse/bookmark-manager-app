@@ -50,6 +50,9 @@ public class BookmarkService(
         await bookmarkRepository.ToggleArchiveAsync(bookmarkId);
     }
 
+    public async Task<IEnumerable<Bookmark>> GetAllByUserIdAndSearchTermAsync(string searchTerm) =>
+        await bookmarkRepository.GetAllByUserIdAndSearchTermAsync(userContext.UserId, searchTerm);
+
     public async Task<IEnumerable<Bookmark>> GetAllByUserIdAsync() =>
         await bookmarkRepository.GetAllByUserIdAsync(userContext.UserId);
 
@@ -59,7 +62,7 @@ public class BookmarkService(
         return bookmark ?? throw new NotFoundException("Bookmark not found");
     }
 
-     public async Task UpdateAsync(long bookmarkId, CreateOrUpdateBookmarkCommand command)
+    public async Task UpdateAsync(long bookmarkId, CreateOrUpdateBookmarkCommand command)
     {
         var bookmark = await bookmarkRepository.GetByIdForUpdateAsync(bookmarkId);
         if (bookmark == null)

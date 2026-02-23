@@ -1,6 +1,6 @@
 import iconAdd from "@/assets/images/icon-add.svg"
 import iconAvatar from "@/assets/images/image-avatar.webp"
-import { useRef, useState } from "react"
+import { useRef, useState, type ChangeEvent, type KeyboardEvent } from "react"
 import { useAuthContext } from "@/hooks/useAuthContext"
 import { useThemeContext } from "@/hooks/useThemeContext"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
@@ -12,13 +12,33 @@ import { ThemeIcon } from "@/components/icons/ThemeIcon"
 import { LightThemeIcon } from "@/components/icons/LightThemeIcon"
 import { DarkThemeIcon } from "@/components/icons/DarkThemeIcon"
 import { LogoutIcon } from "@/components/icons/LogoutIcon"
+import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
+import { useShallow } from "zustand/shallow"
+import { CloseIcon } from "@/components/icons/CloseIcon"
 
 export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, onAddClick: () => void }) {
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
     const ref = useRef<HTMLDivElement>(null)
     useCloseDropdown(ref, (): void => setIsProfileDropdownOpen(false))
-    const [searchQuery, setSearchQuery] = useState("")
-    //const { searchQuery, setSearchQuery } = useBookmarkList()
+
+    const [searchTerm, setSearchTerm] = useState("")
+    const { setSearchQuery } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            setSearchQuery: store.setSearchQuery,
+        }))
+    )
+
+    function handleSearch(event: KeyboardEvent<HTMLInputElement>) {
+        if (event.key === "Enter") {
+            event.preventDefault()
+            setSearchQuery(searchTerm.toLowerCase())
+        }
+    }
+
+    function handleChange(event: ChangeEvent<HTMLInputElement>): void {
+        setSearchTerm(event.target.value)
+        if (event.target.value.length === 0) setSearchQuery("")
+    }
 
     return (
         <div className="absolute top-0 w-full flex justify-between gap-x-2.5 md:gap-x-auto px-4 py-3 md:px-8 md:py-4 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500">
@@ -31,11 +51,12 @@ export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, o
                 <div className={`flex flex-row justify-center items-center dark:bg-neutral-d-500
                     gap-x-1.5 md:gap-x-2 md:p-3 border border-neutral-300 dark:border-neutral-d-400
                     rounded-8 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-400
-                   ${searchQuery.length > 0 ? "ring ring-teal-700 dark:ring-neutral-d-0" : ""} `}>
+                   ${searchTerm.length > 0 ? "ring ring-teal-700 dark:ring-neutral-d-0" : ""} `}>
                     <SearchIcon className="w-5 h-5" />
-                    <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                    <input type="text" value={searchTerm} onKeyDown={handleSearch} onChange={handleChange}
                         className="placeholder:text-preset-4-md focus:outline-none w-full" placeholder="Search by title..."
                     />
+                    {searchTerm.length > 0 && <CloseIcon className="w-5 h-5" onClick={() => { setSearchTerm(""); setSearchQuery("") }} />}
                 </div>
             </div>
             <div className="relative flex flex-row justify-center items-center gap-x-2.5 md:gap-4" ref={ref}>
@@ -95,7 +116,7 @@ export function ProfileMenuDropdown() {
             </div>
             <div onClick={logout}
                 className="flex flex-row gap-x-2 px-4 py-3 border-t border-[#E9EAEB] cursor-pointer">
-                <LogoutIcon className="size-4"/>
+                <LogoutIcon className="size-4" />
                 <span className="text-preset-4 text-neutral-800">Logout</span>
             </div>
         </div>

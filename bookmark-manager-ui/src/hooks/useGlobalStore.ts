@@ -9,6 +9,9 @@ export type GlobalStore = {
     sortBookmarksBy: SortBookmarksBy,
     setSortBookmarksBy: (sortBookmarksBy: SortBookmarksBy) => void,
 
+    searchQuery: string,
+    setSearchQuery: (searchQuery: string) => void,
+
     tagFilters: string[],
     addTagFilter: (tag: string) => void,
     removeTagFilter: (tag: string) => void,
@@ -39,6 +42,9 @@ export const useGlobalStore = create<GlobalStore>()(
 
             sortBookmarksBy: "recently-added",
             setSortBookmarksBy: (sortBookmarksBy: SortBookmarksBy) => set({ sortBookmarksBy }),
+
+            searchQuery: "",
+            setSearchQuery: (searchQuery: string) => set({ searchQuery }),
 
             tagFilters: [],
             addTagFilter: (tag: string) => set((store) => {

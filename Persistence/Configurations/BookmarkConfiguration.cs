@@ -11,6 +11,12 @@ public class BookmarkConfiguration : IEntityTypeConfiguration<Bookmark>
         builder.ToTable("bookmarks");
         builder.HasKey(x => x.BookmarkId);
         builder.HasIndex(x => new { x.UserId, x.Title, x.Url }).IsUnique();
+        //GIN = Generalized Inverted Index: index optimisé pour full-text (recherche plus rapide)
+        builder.HasGeneratedTsVectorColumn(
+           x => x.SearchVector,
+           "english",
+           x => new { x.Title, x.Description }
+       ).HasIndex(x => x.SearchVector).HasMethod("gin");
 
         builder.Property(x => x.Title).IsRequired().HasMaxLength(200);
         builder.Property(x => x.Url).IsRequired().HasMaxLength(2048);

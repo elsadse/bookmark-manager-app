@@ -6,6 +6,16 @@ namespace bookmark_manager_app.Repositories;
 
 public class BookmarkRepository(BookmarkDbContext context)
 {
+
+    public async Task<IEnumerable<Bookmark>> GetAllByUserIdAndSearchTermAsync(long userId, string searchTerm) =>
+        await context.Bookmarks.AsNoTracking()
+        //Trie les résultats par pertinence (score le plus haut en premier)
+            .Where(b => b.UserId == userId && b.SearchVector.Matches(EF.Functions.WebSearchToTsQuery(searchTerm)))
+            .OrderByDescending(b => b.SearchVector.Rank(EF.Functions.WebSearchToTsQuery("english", searchTerm)))
+            .Include(bt => bt.Tags)
+            .Include(bt => bt.Visits)
+            .ToListAsync();
+
     public async Task<bool> ExistsByBookmarkId(long bookmarkId) =>
         await context.Bookmarks.AsNoTracking().AnyAsync(x => x.BookmarkId == bookmarkId);
 
