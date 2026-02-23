@@ -22,6 +22,7 @@ import { DeleteIcon } from "@/components/icons/DeleteIcon"
 import { VisitCountIcon } from "@/components/icons/VisitCountIcon"
 import { TimeIcon } from "@/components/icons/TimeIcon"
 import { DateIcon } from "@/components/icons/DateIcon"
+import { LoadingIcon } from "@/components/icons/LoadingIcon"
 
 export function BookmarkList() {
     const { sortBookmarksBy, tagFilters, filterArchivedBookmarks, headerTitle } = useGlobalStore(
@@ -78,7 +79,7 @@ export function BookmarkList() {
     }
 
     return (
-        <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16 max-h-screen overflow-y-auto">
+        <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16 h-full overflow-hidden">
             <div className="flex flex-row justify-between items-center gap-x-4">
                 <div className="flex flex-col md:flex-row">
                     <span className="text-preset-2 md:text-preset-1 text-neutral-900">{headerTitle}</span>
@@ -99,7 +100,7 @@ export function BookmarkList() {
                     )}*/}
                 </div>
                 <button onClick={handleClickSortBy}
-                    className={`relative flex justify-center 
+                    className={`relative flex justify-center
                     items-center gap-x-4 px-3 py-2.5 bg-neutral-0 dark:bg-neutral-d-800
                     rounded-8 border border-neutral-400 dark:border-neutral-d-400 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
                     ${isSortByDropdownOpen ? "ring ring-teal-700 dark:ring-neutral-d-0" : ""}
@@ -109,9 +110,9 @@ export function BookmarkList() {
                     {isSortByDropdownOpen && <SortByDropdown />}
                 </button>
             </div>
-            <div className="flex flex-wrap gap-8 pt-8 items-center justify-center">
+            <div className="flex flex-wrap gap-8 pt-8 items-center justify-center h-full overflow-y-auto">
                 {isLoading ?
-                    <p className="px-3 text-preset-2 text-neutral-800">Loading bookmarks...</p> :
+                    <LoadingIcon className="size-20 stroke-neutral-500" /> :
                     bookmarks?.map((bookmark, index) => (
                         <BookmarkListCard key={index} bookmark={bookmark} />
                     ))

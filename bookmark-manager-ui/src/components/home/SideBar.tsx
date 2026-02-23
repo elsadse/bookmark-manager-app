@@ -10,6 +10,7 @@ import { UnauthorizedApiError } from "@/api/errors/UnauthorizedApiError"
 import { CloseIcon } from "@/components/icons/CloseIcon"
 import { HomeIcon } from "@/components/icons/HomeIcon"
 import { ArchivedIcon } from "@/components/icons/ArchivedIcon"
+import { LoadingIcon } from "@/components/icons/LoadingIcon"
 
 export function SideBar({ onClose }: { onClose?: () => void }) {
     const { setFilterArchivedBookmarks, filterArchivedBookmarks } = useGlobalStore(
@@ -81,11 +82,11 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                         </div>
                     </div>
                 </div>
-                <div>
+                <div className="">
                     <span className="h-5.25 items-center px-3 pb-1 text-[#4D4D4D] text-xs font-bold dark:text-neutral-d-100">TAGS</span>
-                    <div>
+                    <div className="">
                         {isLoading ?
-                            <p className="px-3 text-preset-3 text-neutral-800 dark:text-neutral-d-100">Loading tags...</p> :
+                            <LoadingIcon className="size-12 stroke-neutral-500" />  :
                             tags?.map(tag => (
                                 <ContentItemNavigationSideBar
                                     key={tag.name}

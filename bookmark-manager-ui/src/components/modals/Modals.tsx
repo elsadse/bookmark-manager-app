@@ -1,5 +1,4 @@
 import { InputField } from "@/components/auth/FormContainerSignIn"
-import LoadingIcon from "@/assets/images/icon-loading.svg"
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { addBookmark } from "@/api/bookmarks"
@@ -11,6 +10,7 @@ import type { Nullable } from "@/types"
 import type { ErrorApiResponse } from "@/api/errors/schema"
 import { ApiError } from "@/api/errors/ApiError"
 import { CloseIcon } from "@/components/icons/CloseIcon"
+import { LoadingIcon } from "@/components/icons/LoadingIcon"
 
 export function AddBookmark({ onClose }: { onClose: () => void }) {
 
@@ -248,10 +248,10 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                             className="w-35.5 flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-neutral-0 border border-neutral-400 cursor-pointer">
                             <span className="text-center px-0.5 text-neutral-900">Cancel</span>
                         </button>
-                        <button type="submit"
-                            className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-teal-700 cursor-pointer">
+                        <button type="submit" disabled={isPending}
+                            className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-teal-700 cursor-pointer disabled:opacity-60">
                             {
-                                isPending && <img src={LoadingIcon} alt="Loading Icon" className="w-4 h-4 spin-slow" />
+                                isPending && <LoadingIcon className="w-4 h-4 stroke-neutral-0 dark:stroke-neutral-d-0" />
                             }
                             <span className="text-center px-0.5 text-neutral-0 dark:text-neutral-d-0">{titleButton}</span>
                         </button>

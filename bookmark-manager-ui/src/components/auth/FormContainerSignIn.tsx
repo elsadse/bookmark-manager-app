@@ -1,9 +1,9 @@
 import logo_light from "@/assets/images/logo-light-theme.svg"
 import logo_dark from "@/assets/images/logo-dark-theme.svg"
-import LoadingIcon from "@/assets/images/icon-loading.svg"
 import { Link } from "react-router"
 import { useState, type SyntheticEvent } from "react"
 import { useAuthContext } from "@/hooks/useAuthContext"
+import { LoadingIcon } from "@/components/icons/LoadingIcon"
 
 export function FormContainerSignIn() {
     const [email, setEmail] = useState("azerty@gmail.com")
@@ -26,7 +26,7 @@ export function FormContainerSignIn() {
                     typeInput="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className={`${error !== null && "errors" in error && "Email" in error.errors? "border border-red-600 focus:border-none":""}`}
+                    className={`${error !== null && "errors" in error && "Email" in error.errors ? "border border-red-600 focus:border-none" : ""}`}
                 />
                 {
                     error !== null && "errors" in error && "Email" in error.errors &&
@@ -43,7 +43,7 @@ export function FormContainerSignIn() {
                     typeInput="password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    className={`${error !== null && "errors" in error && "Password" in error.errors? "border border-red-600 focus:border-none":""}`}
+                    className={`${error !== null && "errors" in error && "Password" in error.errors ? "border border-red-600 focus:border-none" : ""}`}
                 />
                 {
                     error !== null && "errors" in error && "Password" in error.errors &&
@@ -110,9 +110,10 @@ export function InputField({ typeInput, labelInput, value, onChange, name, class
 export function ButtonForm({ textButton, isLoading }: { textButton: string, isLoading: boolean }) {
 
     return (
-        <button className="flex justify-center items-center px-4 py-3 gap-1 bg-teal-700 rounded-8 cursor-pointer focus:ring ring-teal-700 dark:ring-neutral-d-0" type="submit">
+        <button type="submit" disabled={isLoading}
+            className="flex justify-center items-center px-4 py-3 gap-1 bg-teal-700 rounded-8 cursor-pointer focus:ring ring-teal-700 dark:ring-neutral-d-0 disabled:opacity-60">
             {
-                isLoading && <img src={LoadingIcon} alt="Loading Icon" className="w-4 h-4 spin-slow" />
+                isLoading && <LoadingIcon className="w-4 h-4 stroke-neutral-0 dark:stroke-neutral-d-0" />
             }
             <span className="text-center px-0.5 text-preset-3 text-neutral-0 dark:text-neutral-d-0">{textButton}</span>
         </button>
