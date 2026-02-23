@@ -11,6 +11,7 @@ import { CloseIcon } from "@/components/icons/CloseIcon"
 import { HomeIcon } from "@/components/icons/HomeIcon"
 import { ArchivedIcon } from "@/components/icons/ArchivedIcon"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
+import { CheckIcon } from "@/components/icons/CheckIcon"
 
 export function SideBar({ onClose }: { onClose?: () => void }) {
     const { setFilterArchivedBookmarks, filterArchivedBookmarks } = useGlobalStore(
@@ -43,7 +44,7 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                 {onClose && (
                     <div onClick={onClose}
                         className="absolute right-0 top-0 size-8 flex justify-center items-center gap-x-1 cursor-pointer">
-                        <CloseIcon className="size-5"/>
+                        <CloseIcon className="size-5" />
                     </div>
 
                 )}
@@ -62,7 +63,7 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                         cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
                         ${selectedItem === "Home" ? 'bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-100 dark:border-neutral-d-500 text-neutral-900 ring ring-teal-700 dark:ring-neutral-d-0' : 'text-neutral-800'}`}>
                         <div className="flex flex-row items-center gap-x-2">
-                            <HomeIcon className="size-5"/>
+                            <HomeIcon className="size-5" />
                             <span className="text-preset-3">Home</span>
                         </div>
                     </div>
@@ -77,7 +78,7 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                         cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600 
                         ${selectedItem === "Archived" ? 'bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-100 dark:border-neutral-d-500 text-neutral-900 ring ring-teal-700 dark:ring-neutral-d-0' : 'text-neutral-800'}`}>
                         <div className="flex flex-row items-center gap-x-2">
-                            <ArchivedIcon className="size-5"/>
+                            <ArchivedIcon className="size-5" />
                             <span className="text-preset-3">Archived</span>
                         </div>
                     </div>
@@ -86,7 +87,7 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                     <span className="h-5.25 items-center px-3 pb-1 text-[#4D4D4D] text-xs font-bold dark:text-neutral-d-100">TAGS</span>
                     <div className="">
                         {isLoading ?
-                            <LoadingIcon className="size-12 stroke-neutral-500" />  :
+                            <LoadingIcon className="size-12 stroke-neutral-500" /> :
                             tags?.map(tag => (
                                 <ContentItemNavigationSideBar
                                     key={tag.name}
@@ -111,7 +112,7 @@ export function ContentItemNavigationSideBar({ text, numberBadge, inputId }: { t
             removeFilter: store.removeTagFilter,
         }))
     )
-    const isChecked = tagFilters.includes(text)
+    const isChecked =tagFilters.includes(text)
 
     function handleChangeInput(event: React.ChangeEvent<HTMLInputElement>) {
         if (event.target.checked) {
@@ -123,12 +124,14 @@ export function ContentItemNavigationSideBar({ text, numberBadge, inputId }: { t
 
     return (
         <div className="flex justify-between px-3 py-2.5">
-            <div className="flex flex-row items-center gap-x-2">
+            <div className="relative flex flex-row items-center gap-x-2">
                 <input id={inputId}
                     type="checkbox" checked={isChecked} onChange={handleChangeInput}
-                    className={`size-4 border border-neutral-500 dark:border-neutral-d-300 dark:bg-transparent cursor-pointer 
-                         ${isChecked ? "accent-teal-700" : ""}`}
+                    className={`appearance-none checked:bg-teal-700 size-4 rounded-sm border border-neutral-500 cursor-pointer `}
                 />
+                {isChecked && (
+                    <CheckIcon className="absolute top-1.45 size-4 stroke-neutral-d-0 fill-none cursor-pointer" onClick={()=>removeFilter(text)}/>
+                )}
                 <label htmlFor={inputId} className="text-preset-3 text-neutral-800 cursor-pointer dark:text-neutral-d-100"> {text} </label>
             </div>
             <div className="items-center px-2 pb-0.5 rounded-full bg-neutral-100 dark:bg-neutral-d-600 border border-neutral-300 dark:border-neutral-d-300">

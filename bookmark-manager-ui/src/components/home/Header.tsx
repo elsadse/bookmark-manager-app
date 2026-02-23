@@ -21,7 +21,7 @@ export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, o
     //const { searchQuery, setSearchQuery } = useBookmarkList()
 
     return (
-        <div className="absolute top-0 w-full flex justify-center sm:items-start md:justify-between gap-x-2.5 md:gap-x-auto px-4 py-3 md:px-8 md:py-4 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500">
+        <div className="absolute top-0 w-full flex justify-between gap-x-2.5 md:gap-x-auto px-4 py-3 md:px-8 md:py-4 bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-300 dark:border-neutral-d-500">
             <div className="flex flex-row justify-center gap-x-2.5 md:gap-x-4">
                 <div
                     onClick={onMenuClick}

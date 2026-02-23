@@ -79,30 +79,13 @@ export function BookmarkList() {
     }
 
     return (
-        <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16 h-full overflow-hidden">
+        <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16 h-full overflow-y-auto">
             <div className="flex flex-row justify-between items-center gap-x-4">
-                <div className="flex flex-col md:flex-row">
-                    <span className="text-preset-2 md:text-preset-1 text-neutral-900">{headerTitle}</span>
-                    {/*{tagFilters.length !== 0 && (
-                        <div className="flex flex-row">
-                            {tagFilters.map((tag, index) => (
-                                <span key={index} className="text-preset-2 md:text-preset-1 text-teal-700">
-                                    &nbsp;{tag}
-                                    {index < tagFilters.length - 1 && ","}&nbsp;
-                                </span>
-                            ))}
-                        </div>
-                    )}
-                    {searchQuery.length > 0 && (
-                        <span className="text-preset-2 md:text-preset-1 text-teal-700">
-                            &nbsp;{'"' + searchQuery + '"'}
-                        </span>
-                    )}*/}
-                </div>
+                <span className="text-preset-2 md:text-preset-1 text-neutral-900">{headerTitle}</span>
                 <button onClick={handleClickSortBy}
-                    className={`relative flex justify-center
-                    items-center gap-x-4 px-3 py-2.5 bg-neutral-0 dark:bg-neutral-d-800
-                    rounded-8 border border-neutral-400 dark:border-neutral-d-400 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
+                    className={`relative flex flex-row justify-between
+                    items-center gap-x-1 px-3 py-2.5 bg-neutral-0 
+                    rounded-8 border border-neutral-400 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
                     ${isSortByDropdownOpen ? "ring ring-teal-700 dark:ring-neutral-d-0" : ""}
                     `} ref={ref}>
                     <SwitchVerticalIcon className="w-5 h-5" />
@@ -110,7 +93,7 @@ export function BookmarkList() {
                     {isSortByDropdownOpen && <SortByDropdown />}
                 </button>
             </div>
-            <div className="flex flex-wrap gap-8 pt-8 items-center justify-center h-full overflow-y-auto">
+            <div className="flex flex-wrap gap-8 pt-8 items-center justify-center">
                 {isLoading ?
                     <LoadingIcon className="size-20 stroke-neutral-500" /> :
                     bookmarks?.map((bookmark, index) => (
@@ -299,7 +282,7 @@ export function SortByDropdown() {
 
 
     return (
-        <div className="absolute right-0 top-12 w-50 flex flex-col gap-y-p-2 rounded-8 bg-neutral-0 border border-neutral-100 z-10">
+        <div className="fixed right-5 top-38 w-50 flex flex-col gap-y-p-2 rounded-8 bg-neutral-0 border border-neutral-100 z-10">
             <div onClick={(): void => {
                 if (sortBookmarksBy !== "recently-added") {
                     setSortBookmarksBy("recently-added")
