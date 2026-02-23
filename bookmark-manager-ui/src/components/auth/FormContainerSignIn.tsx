@@ -111,7 +111,7 @@ export function ButtonForm({ textButton, isLoading }: { textButton: string, isLo
 
     return (
         <button type="submit" disabled={isLoading}
-            className="flex justify-center items-center px-4 py-3 gap-1 bg-teal-700 rounded-8 cursor-pointer focus:ring ring-teal-700 dark:ring-neutral-d-0 disabled:opacity-60">
+            className="flex justify-center items-center px-4 py-3 gap-1 bg-teal-700 rounded-8 cursor-pointer focus:ring ring-teal-700 dark:ring-neutral-d-0 disabled:opacity-60 disabled:cursor-not-allowed">
             {
                 isLoading && <LoadingIcon className="w-4 h-4 stroke-neutral-0 dark:stroke-neutral-d-0" />
             }

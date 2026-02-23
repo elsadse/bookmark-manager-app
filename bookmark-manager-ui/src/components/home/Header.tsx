@@ -85,10 +85,10 @@ export function ProfileMenuDropdown() {
                 </div>
                 <div onClick={toggleTheme}
                     className="flex flex-row p-0.5 rounded-4 bg-neutral-300 border border-neutral-300 cursor-pointer hover:ring ring-teal-700 dark:ring-neutral-d-0">
-                    <div className={`flex justify-center items-center px-2 py-1.5 rounded-4 bg-neutral-0`}>
+                    <div className={`flex justify-center items-center px-2 py-1.5 rounded-4 ${theme === "light" ? "bg-neutral-0" : "bg-neutral-300"}`}>
                         <LightThemeIcon className="w-3.5 h-3.5" />
                     </div>
-                    <div className={`flex justify-center items-center px-2 py-1.5 rounded-4 bg-neutral-300`}>
+                    <div className={`flex justify-center items-center px-2 py-1.5 rounded-4 ${theme === "dark" ? "bg-neutral-0" : "bg-neutral-300"}`}>
                         <DarkThemeIcon className="w-3.5 h-3.5" />
                     </div>
                 </div>

@@ -287,7 +287,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                             <span className="text-center px-0.5 text-neutral-900">Cancel</span>
                         </button>
                         <button type="submit" disabled={isPending}
-                            className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-teal-700 cursor-pointer disabled:opacity-60">
+                            className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-teal-700 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
                             {
                                 isPending && <LoadingIcon className="w-4 h-4 stroke-neutral-0 dark:stroke-neutral-d-0" />
                             }
