@@ -199,16 +199,6 @@ export function BookmarkListCardFooterInfo({ Icon, information }: { Icon: Compon
 
 
 export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: number, pinned: boolean, archived: boolean, url: string }) {
-    const queryClient = useQueryClient()
-    const { mutate: visitBookmarkFn } = useMutation({
-        mutationFn: visitBookmark,
-        onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
-    })
-    const { mutate: pinToggleFn } = useMutation({
-        mutationFn: togglePin,
-        onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
-    })
-
     const { setIsDialogOrModalOpen, setIsToastOpen, setIsNotificationOpen } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
             setIsNotificationOpen: store.setIsNotificationOpen,
@@ -216,6 +206,19 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
             setIsToastOpen: store.setIsToastOpen,
         }))
     )
+
+    const queryClient = useQueryClient()
+    const { mutate: visitBookmarkFn } = useMutation({
+        mutationFn: visitBookmark,
+        onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
+    })
+    const { mutate: pinToggleFn } = useMutation({
+        mutationFn: togglePin,
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
+            setIsNotificationOpen(true, pinned? "bookmark-unpinned": "bookmark-pinned")
+        }
+    })
 
     function handleVisit() {
         visitBookmarkFn({ bookmarkId: id, visitTime: new Date() })

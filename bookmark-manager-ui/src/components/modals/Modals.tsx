@@ -26,10 +26,10 @@ export function AddBookmark({ onClose }: { onClose: () => void }) {
             onClose()
             setIsNotificationOpen(true, "bookmark-added")
         },
-        onError: (err) => {
+        /*onError: (err) => {
             console.error("Erreur complète de la mutation :", err)
             console.log("Response de l’erreur :", (err as any).response)
-        },
+        },*/
     })
     const error: Nullable<ErrorApiResponse> = mutationError instanceof ApiError ? mutationError.response : null
 
