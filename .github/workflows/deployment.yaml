@@ -85,6 +85,9 @@ jobs:
         with:
           path: ./bookmark-manager-ui/dist
 
+      - name: Deploy API to Render
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
