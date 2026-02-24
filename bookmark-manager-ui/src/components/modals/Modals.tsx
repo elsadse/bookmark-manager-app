@@ -4,14 +4,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { addBookmark, updateBookmark } from "@/api/bookmarks"
 import { useShallow } from "zustand/shallow"
 import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
-import { fetchTagCount } from "@/api/tags"
-import type { TagCount } from "@/api/tags/schema"
 import type { Nullable } from "@/types"
 import type { ErrorApiResponse } from "@/api/errors/schema"
 import { ApiError } from "@/api/errors/ApiError"
 import { CloseIcon } from "@/components/icons/CloseIcon"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import type { Bookmark } from "@/api/bookmarks/schema"
+import { fetchTags } from "@/api/tags"
+import type { Tag } from "@/api/tags/schema"
 
 export function AddBookmark({ onClose }: { onClose: () => void }) {
 
@@ -121,9 +121,9 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
     const [currentTag, setCurrentTag] = useState<string>("")
     const { data: tagSuggestions } = useQuery({
         queryKey: ["tags"],
-        queryFn: fetchTagCount,
-        select: (tags: TagCount[]): TagCount[] =>
-            [...tags].sort((a: TagCount, b: TagCount): number => a.name.localeCompare(b.name))
+        queryFn: fetchTags,
+        select: (tags: Tag[]): Tag[] =>
+            [...tags].sort((a: Tag, b: Tag): number => a.name.localeCompare(b.name))
     })
 
     return (
@@ -269,7 +269,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                 {tagSuggestions
                                     ?.filter((s) => s.name.toLowerCase().includes(currentTag.toLowerCase().trim()))
                                     ?.map((suggestion) => (
-                                        <option key={suggestion.id} value={suggestion.name} />
+                                        <option key={suggestion.tagId} value={suggestion.name} />
                                     ))}
                             </datalist>
                         </div>

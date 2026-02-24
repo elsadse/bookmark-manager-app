@@ -1,20 +1,19 @@
+import { parseKnownErrors } from "@/api/errors"
+import { TagApiResponseSchema, type Tag } from "@/api/tags/schema"
 import { z } from "zod"
-import { type TagCount, TagCountApiResponseSchema } from "@/api/tags/schema"
 
 const apiUrl = import.meta.env.VITE_BOOKMARK_MANAGER_API_URL
 
-export async function fetchTagCount(): Promise<TagCount[]> {
+export async function fetchTags(): Promise<Tag[]> {
     if (!apiUrl) throw new Error("BOOKMARK_MANAGER_API_URL environment variable is not set")
 
     const response = await fetch(`${apiUrl}/tags`, {
         method: "GET",
         credentials: "include"
     })
-    if (response.status !== 200) {
-        throw new Error(`Unexpected status code: ${response.status}`)
-    }
+     await parseKnownErrors({ expectedStatusCode: 200, response })
 
-    const parsedResponse = z.array(TagCountApiResponseSchema).safeParse(await response.json())
+     const parsedResponse = z.array(TagApiResponseSchema).safeParse(await response.json())
     if (!parsedResponse.success) {
         throw new Error(`Failed to parse response: ${parsedResponse.error}`)
     }

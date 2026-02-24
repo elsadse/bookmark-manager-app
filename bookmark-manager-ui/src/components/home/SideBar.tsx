@@ -1,8 +1,6 @@
 import { Logo } from "@/components/auth/FormContainerSignIn"
 import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { fetchTagCount } from "@/api/tags"
-import type { TagCount } from "@/api/tags/schema"
 import { useShallow } from "zustand/shallow"
 import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
 import { useAuthContext } from "@/hooks/useAuthContext"
@@ -12,20 +10,44 @@ import { HomeIcon } from "@/components/icons/HomeIcon"
 import { ArchivedIcon } from "@/components/icons/ArchivedIcon"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { CheckIcon } from "@/components/icons/CheckIcon"
+import type { Bookmark } from "@/api/bookmarks/schema"
+import { fetchBookmarks } from "@/api/bookmarks"
+
+function buildTag2count({ bookmarks }: { bookmarks: Bookmark[] | undefined }): Map<string, number> {
+    const tag2count: Map<string, number> = new Map()
+    if (!bookmarks) return tag2count
+
+    for (const bookmark of bookmarks) {
+        for (const tag of bookmark.tags) {
+            tag2count.set(tag, (tag2count.get(tag) ?? 0) + 1)
+        }
+    }
+
+    return tag2count
+}
 
 export function SideBar({ onClose }: { onClose?: () => void }) {
-    const { setFilterArchivedBookmarks, filterArchivedBookmarks } = useGlobalStore(
+    const { setFilterArchivedBookmarks, filterArchivedBookmarks, tagFilters, searchQuery } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
             setFilterArchivedBookmarks: store.setFilterArchivedBookmarks,
-            filterArchivedBookmarks: store.filterArchivedBookmarks
+            filterArchivedBookmarks: store.filterArchivedBookmarks,
+            searchQuery: store.searchQuery,
+            tagFilters: store.tagFilters,
         }))
     )
-    const { data: tags, isLoading, isError, error } = useQuery({
-        queryKey: ["tags"],
-        queryFn: fetchTagCount,
-        select: (tags: TagCount[]): TagCount[] =>
-            [...tags].sort((a: TagCount, b: TagCount): number => a.name.localeCompare(b.name))
+
+    const { data: bookmarks, isFetching, isError, error } = useQuery({
+        queryKey: ["bookmarks", searchQuery],
+        queryFn: async (): Promise<Bookmark[]> => fetchBookmarks(searchQuery),
+        select: (data: Bookmark[]): Bookmark[] =>
+            [
+                ...data
+                    .filter((bookmark: Bookmark): boolean => filterArchivedBookmarks ? bookmark.isArchived : !bookmark.isArchived)
+                    .filter((bookmark: Bookmark): boolean => tagFilters.every((filter: string): boolean => bookmark.tags.includes(filter)))
+            ]
     })
+    const tag2count = buildTag2count({ bookmarks })
+
     const [selectedItem, setSelectedItem] = useState<"Home" | "Archived">(() => {
         return filterArchivedBookmarks ? "Archived" : "Home"
     })
@@ -86,16 +108,18 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                 <div className="">
                     <span className="h-5.25 items-center px-3 pb-1 text-[#4D4D4D] text-xs font-bold dark:text-neutral-d-100">TAGS</span>
                     <div className="">
-                        {isLoading ?
+                        {isFetching ?
                             <LoadingIcon className="size-12 stroke-neutral-500" /> :
-                            tags?.map(tag => (
-                                <ContentItemNavigationSideBar
-                                    key={tag.name}
-                                    text={tag.name}
-                                    numberBadge={filterArchivedBookmarks ? tag.archivedCount : tag.count}
-                                    inputId={tag.name}
-                                />
-                            ))
+                            Array.from(tag2count.entries())
+                                .sort((a: [string, number], b: [string, number]): number => a[0].localeCompare(b[0]))
+                                .map(([tag, count]: [string, number]) =>
+                                    <ContentItemNavigationSideBar
+                                        key={tag}
+                                        text={tag}
+                                        numberBadge={count}
+                                        inputId={tag}
+                                    />
+                                )
                         }
                     </div>
                 </div>
@@ -112,7 +136,7 @@ export function ContentItemNavigationSideBar({ text, numberBadge, inputId }: { t
             removeFilter: store.removeTagFilter,
         }))
     )
-    const isChecked =tagFilters.includes(text)
+    const isChecked = tagFilters.includes(text)
 
     function handleChangeInput(event: React.ChangeEvent<HTMLInputElement>) {
         if (event.target.checked) {
@@ -130,7 +154,7 @@ export function ContentItemNavigationSideBar({ text, numberBadge, inputId }: { t
                     className={`appearance-none checked:bg-teal-700 size-4 rounded-sm border border-neutral-500 cursor-pointer `}
                 />
                 {isChecked && (
-                    <CheckIcon className="absolute top-1.45 size-4 stroke-neutral-d-0 fill-none cursor-pointer" onClick={()=>removeFilter(text)}/>
+                    <CheckIcon className="absolute top-1.45 size-4 stroke-neutral-d-0 fill-none cursor-pointer" onClick={() => removeFilter(text)} />
                 )}
                 <label htmlFor={inputId} className="text-preset-3 text-neutral-800 cursor-pointer dark:text-neutral-d-100"> {text} </label>
             </div>
