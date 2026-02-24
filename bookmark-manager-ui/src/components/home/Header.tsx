@@ -21,12 +21,13 @@ export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, o
     const ref = useRef<HTMLDivElement>(null)
     useCloseDropdown(ref, (): void => setIsProfileDropdownOpen(false))
 
-    const [searchTerm, setSearchTerm] = useState("")
-    const { setSearchQuery } = useGlobalStore(
+    const { searchQuery, setSearchQuery } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
             setSearchQuery: store.setSearchQuery,
+            searchQuery: store.searchQuery,
         }))
     )
+    const [searchTerm, setSearchTerm] = useState(searchQuery)
 
     function handleSearch(event: KeyboardEvent<HTMLInputElement>) {
         if (event.key === "Enter") {
