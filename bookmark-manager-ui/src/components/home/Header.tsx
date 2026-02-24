@@ -31,13 +31,14 @@ export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, o
     function handleSearch(event: KeyboardEvent<HTMLInputElement>) {
         if (event.key === "Enter") {
             event.preventDefault()
-            setSearchQuery(searchTerm.toLowerCase())
+            if (searchTerm.length > 1)
+                setSearchQuery(searchTerm.toLowerCase())
         }
     }
 
     function handleChange(event: ChangeEvent<HTMLInputElement>): void {
         setSearchTerm(event.target.value)
-        if (event.target.value.length === 0) setSearchQuery("")
+        if (event.target.value.length < 1) setSearchQuery("")
     }
 
     return (
