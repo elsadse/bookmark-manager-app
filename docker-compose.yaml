@@ -18,7 +18,7 @@ services:
   migration:
     build:
       context: .
-      dockerfile: migration.Dockerfile
+      dockerfile: BookmarkManagerApp/migration.Dockerfile
     image: bookmark-manager-database-migration
     container_name: migration
     environment:
@@ -31,7 +31,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: BookmarkManagerApp/Dockerfile
     image: bookmark-manager-api
     container_name: api
     environment:

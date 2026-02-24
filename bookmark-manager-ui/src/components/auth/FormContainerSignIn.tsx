@@ -3,11 +3,12 @@ import logo_dark from "@/assets/images/logo-dark-theme.svg"
 import { Link } from "react-router"
 import { useState, type SyntheticEvent } from "react"
 import { useAuthContext } from "@/hooks/useAuthContext"
+import { LoadingIcon } from "@/components/icons/LoadingIcon"
 
 export function FormContainerSignIn() {
     const [email, setEmail] = useState("azerty@gmail.com")
     const [password, setPassword] = useState("12345678")
-    const { login } = useAuthContext()
+    const { login, isLoading, error: { login: error } } = useAuthContext()
 
     function handleSubmit(event: SyntheticEvent<HTMLFormElement>): void {
         event.preventDefault()
@@ -16,7 +17,7 @@ export function FormContainerSignIn() {
     }
 
     return (
-        <div className="flex flex-col gap-y-8 px-5 py-8 md:w-112 md:h-auto md:px-8 md:py-10 rounded-12 bg-neutral-0 dark:bg-neutral-d-800 dark:border border-neutral-d-500">
+        <div className="flex flex-col gap-y-8 px-5 py-8 md:w-112 md:h-auto md:px-8 md:py-10 rounded-12 bg-neutral-0">
             <Logo />
             <FormHeader text="Log in your account" supportingText="Welcome back! Please enter your details." />
             <form className="flex flex-col gap-y-4" onSubmit={handleSubmit}>
@@ -25,14 +26,42 @@ export function FormContainerSignIn() {
                     typeInput="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
+                    className={`${error !== null && "errors" in error && "Email" in error.errors ? "border border-red-600 focus:border-none" : ""}`}
                 />
+                {
+                    error !== null && "errors" in error && "Email" in error.errors &&
+                    <div className="flex flex-col gap-y-1.5">
+                        {
+                            error.errors["Email"].map((error: string, index: number) => (
+                                <span key={index} className="text-preset-4 text-red-800">{error}</span>
+                            ))
+                        }
+                    </div>
+                }
                 <InputField labelInput="Password"
                     name="password"
                     typeInput="password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
+                    className={`${error !== null && "errors" in error && "Password" in error.errors ? "border border-red-600 focus:border-none" : ""}`}
                 />
-                <ButtonForm textButton="Log in" />
+                {
+                    error !== null && "errors" in error && "Password" in error.errors &&
+                    <div className="flex flex-col">
+                        {
+                            error.errors["Password"].map((error: string, index: number) => (
+                                <span key={index} className="text-preset-4 text-red-800">{error}</span>
+                            ))
+                        }
+                    </div>
+                }
+                {
+                    error !== null && "detail" in error &&
+                    <div className="flex flex-col gap-y-1.5">
+                        <span className="text-preset-4 text-red-800">{error.detail}</span>
+                    </div>
+                }
+                <ButtonForm textButton="Log in" isLoading={isLoading} />
             </form>
             <div className="flex flex-col items-center gap-y-3">
                 <FormFooterRow textFooterRow="Forgot password?" textFooterRowLink="Reset it" linkFooterRow="/forgotPassword" />
@@ -62,7 +91,7 @@ export function FormHeader({ text, supportingText }: { text: string, supportingT
     )
 }
 
-export function InputField({ typeInput, labelInput, value, onChange, name }: { name: string, typeInput: string, labelInput: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
+export function InputField({ typeInput, labelInput, value, onChange, name, className }: { name: string, typeInput: string, labelInput: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, className?: string }) {
 
     return (
         <div className="flex flex-col gap-y-1.5">
@@ -71,18 +100,22 @@ export function InputField({ typeInput, labelInput, value, onChange, name }: { n
                 name={name}
                 value={value}
                 onChange={onChange}
-                className="p-3 rounded-8 border border-neutral-500 dark:border-neutral-d-300 dark:bg-neutral-d-600 focus:outline-none
-                focus:ring ring-teal-700 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500"
+                className={`p-3 rounded-8 border border-neutral-500 focus:outline-none dark:bg-neutral-d-600 ${className}
+                focus:ring ring-teal-700 dark:ring-neutral-d-0 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-500`}
             />
         </div>
     )
 }
 
-export function ButtonForm({ textButton }: { textButton: string }) {
+export function ButtonForm({ textButton, isLoading }: { textButton: string, isLoading: boolean }) {
 
     return (
-        <button className="flex justify-center px-4 py-3 gap-1 bg-teal-700 rounded-8 cursor-pointer ring ring-teal-700" type="submit">
-            <span className="text-center px-0.5 text-preset-3 text-neutral-0">{textButton}</span>
+        <button type="submit" disabled={isLoading}
+            className="flex justify-center items-center px-4 py-3 gap-1 bg-teal-700 rounded-8 cursor-pointer focus:ring ring-teal-700 dark:ring-neutral-d-0 disabled:opacity-60 disabled:cursor-not-allowed">
+            {
+                isLoading && <LoadingIcon className="w-4 h-4 stroke-neutral-0 dark:stroke-neutral-d-0" />
+            }
+            <span className="text-center px-0.5 text-preset-3 text-neutral-0 dark:text-neutral-d-0">{textButton}</span>
         </button>
     )
 }

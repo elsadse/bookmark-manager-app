@@ -6,7 +6,7 @@ export function FormContainerSignUp() {
     const [fullname, setFullname] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const { register } = useAuthContext()
+    const { register, isLoading, error: { register: error } } = useAuthContext()
 
     function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -24,20 +24,59 @@ export function FormContainerSignUp() {
                     typeInput="text"
                     value={fullname}
                     onChange={e => setFullname(e.target.value)}
+                    className={`${error !== null && "errors" in error && "Fullname" in error.errors? "border border-red-600 focus:border-none":""}`}
                 />
+                {
+                    error !== null && "errors" in error && "Fullname" in error.errors &&
+                    <div className="flex flex-col gap-y-1.5">
+                        {
+                            error.errors["Fullname"].map((error: string, index: number) => (
+                                <span key={index} className="text-preset-4 text-red-800">{error}</span>
+                            ))
+                        }
+                    </div>
+                }
                 <InputField name="email"
                     labelInput="Email *"
                     typeInput="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
+                    className={`${error !== null && "errors" in error && "Email" in error.errors? "border border-red-600 focus:border-none":""}`}
                 />
+                {
+                    error !== null && "errors" in error && "Email" in error.errors &&
+                    <div className="flex flex-col gap-y-1.5">
+                        {
+                            error.errors["Email"].map((error: string, index: number) => (
+                                <span key={index} className="text-preset-4 text-red-800">{error}</span>
+                            ))
+                        }
+                    </div>
+                }
                 <InputField name="password"
                     labelInput="Password *"
                     typeInput="password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
+                    className={`${error !== null && "errors" in error && "Password" in error.errors? "border border-red-600 focus:border-none":""}`}
                 />
-                <ButtonForm textButton="Create account" />
+                {
+                    error !== null && "errors" in error && "Password" in error.errors &&
+                    <div className="flex flex-col gap-y-1.5">
+                        {
+                            error.errors["Password"].map((error: string, index: number) => (
+                                <span key={index} className="text-preset-4 text-red-800">{error}</span>
+                            ))
+                        }
+                    </div>
+                }
+                {
+                    error !== null && "detail" in error &&
+                    <div className="flex flex-col gap-y-1.5">
+                        <span className="text-preset-4 text-red-800">{error.detail}</span>
+                    </div>
+                }
+                <ButtonForm textButton="Create account" isLoading={isLoading} />
             </form>
             <div className="flex flex-col items-center gap-y-3">
                 <FormFooterRow textFooterRow="Already have an account?" textFooterRowLink="Log in" linkFooterRow="/login" />

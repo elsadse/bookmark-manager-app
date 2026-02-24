@@ -1,6 +1,0 @@
-@bookmark_manager_app_HostAddress = http://localhost:5160
-
-GET {{bookmark_manager_app_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

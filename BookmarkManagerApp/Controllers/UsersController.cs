@@ -1,0 +1,21 @@
+using BookmarkManagerApp.Controllers.Responses;
+using BookmarkManagerApp.Services;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BookmarkManagerApp.Controllers;
+
+[ApiController]
+[Route("/api/users")]
+public class UserController(UserService userService) : ControllerBase
+{
+    [HttpGet("{id:long}", Name = nameof(GetUserByIdAsync))]
+    public async Task<ActionResult<GetUserByIdResponse>> GetUserByIdAsync(long id)
+    {
+        var user = await userService.GetUserByIdAsync(id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+        return Ok(GetUserByIdResponse.FromModel(user));
+    }
+}

@@ -9,8 +9,6 @@
 
 Fully functional bookmark manager with creation, edit, archive, search, and filter features.
 
-Fully functional bookmark manager with creation, edit, archive, search, and filter features.
-
 ## Features
 
 Users are able to:
@@ -48,7 +46,7 @@ docker compose up
 
 After executing these commands and once the Docker containers are started, you can access the application at the following address: **http://localhost/bookmark-manager-app**
 
-## Tech Stack
+## Technical Stack
 
 - **Backend Core:** [Asp.net Core](https://dotnet.microsoft.com/fr-fr/apps/aspnet) 10 with [Entity Framework](https://learn.microsoft.com/fr-fr/aspnet/entity-framework) for database migrations and management.
 - **Frontend Core:** [React](https://react.dev/) 19 with [TypeScript](https://www.typescriptlang.org/) for type-safe development.

@@ -1,11 +1,9 @@
 import type { ConflictApiResponse } from "@/api/errors/schema"
+import { ApiError } from "@/api/errors/ApiError"
 
-export class ConflictApiError extends Error {
-    readonly response: ConflictApiResponse
+export class ConflictApiError extends ApiError {
 
     constructor(response: ConflictApiResponse) {
-        super(response.detail)
-        this.name = response.title
-        this.response = response
+        super(response)
     }
 }

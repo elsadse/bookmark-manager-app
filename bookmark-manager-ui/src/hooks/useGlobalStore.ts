@@ -1,12 +1,16 @@
 import type { Bookmark } from "@/api/bookmarks/schema"
-import type { DialogAction, NotificationType, Nullable, SortBookmarksBy, ToastAction } from "@/types"
+import type { Action, NotificationType, Nullable, SortBookmarksBy, ToastAction } from "@/types"
 import { create } from "zustand"
+import { persist } from "zustand/middleware"
 
 export type GlobalStore = {
     headerTitle: string,
 
     sortBookmarksBy: SortBookmarksBy,
     setSortBookmarksBy: (sortBookmarksBy: SortBookmarksBy) => void,
+
+    searchQuery: string,
+    setSearchQuery: (searchQuery: string) => void,
 
     tagFilters: string[],
     addTagFilter: (tag: string) => void,
@@ -15,9 +19,9 @@ export type GlobalStore = {
     filterArchivedBookmarks: boolean,
     setFilterArchivedBookmarks: (filterArchivedBookmarks: boolean) => void,
 
-    isDialogOpen: boolean,
-    dialogAction: Nullable<DialogAction>,
-    setIsDialogOpen: (dialogAction: Nullable<DialogAction>) => void,
+    isDialogOrModalOpen: boolean,
+    action: Nullable<Action>,
+    setIsDialogOrModalOpen: (action: Nullable<Action>) => void,
 
     bookmarkSelected: Nullable<Bookmark>,
     setBookmarkSelected: (bookmarkSelected: Nullable<Bookmark>) => void,
@@ -31,82 +35,117 @@ export type GlobalStore = {
     setIsNotificationOpen: (isNotificationOpen: boolean, notificationType: Nullable<NotificationType>) => void
 }
 
-export const useGlobalStore = create<GlobalStore>((set) => ({
-    headerTitle: "All bookmarks",
+export const useGlobalStore = create<GlobalStore>()(
+    persist(
+        (set) => ({
+            headerTitle: "Bookmarks",
 
-    sortBookmarksBy: "recently-added",
-    setSortBookmarksBy: (sortBookmarksBy: SortBookmarksBy) => set({ sortBookmarksBy }),
+            sortBookmarksBy: "recently-added",
+            setSortBookmarksBy: (sortBookmarksBy: SortBookmarksBy) => set({ sortBookmarksBy }),
 
-    tagFilters: [],
-    addTagFilter: (tag: string) => set((store) => {
-        let headerTitle = store.headerTitle
-        if (store.tagFilters.length > 0) {
-            const prevSuffix = `tagged with [${store.tagFilters.join(", ")}]`
-            headerTitle = headerTitle.slice(0, -prevSuffix.length)
-        }
-        const tagFilters = [...store.tagFilters, tag]
-        const suffix = `tagged with [${tagFilters.join(", ")}]`
-        headerTitle = `${headerTitle} ${suffix}`
-        return { headerTitle, tagFilters }
-    }),
-    removeTagFilter: (tag: string) => set((store) => {
-        let headerTitle = store.headerTitle
-        if (store.tagFilters.length > 0) {
-            const prevSuffix = `tagged with [${store.tagFilters.join(", ")}]`
-            headerTitle = headerTitle.slice(0, -prevSuffix.length)
-        }
-        const tagFilters = store.tagFilters.filter((t) => t !== tag)
-        const suffix = `tagged with [${tagFilters.join(", ")}]`
-        headerTitle = tagFilters.length === 0 ? headerTitle : `${headerTitle} ${suffix}`
-        return { headerTitle, tagFilters }
-    }),
+            searchQuery: "",
+            setSearchQuery: (searchQuery: string) => set((store) => {
+                const {tagFilters, filterArchivedBookmarks} = store
+                const headerTitle = buildHeaderTitle({tagFilters, filterArchivedBookmarks, searchQuery})
 
-    filterArchivedBookmarks: false,
-    setFilterArchivedBookmarks: (filterArchivedBookmarks: boolean) => set((store) => {
-        const prevPrefix = store.filterArchivedBookmarks ? "Archived" : "All"
-        let headerTitle = store.headerTitle.slice(prevPrefix.length + 1, store.headerTitle.length)
-        const prefix = filterArchivedBookmarks ? "Archived" : "All"
-        headerTitle = `${prefix} ${headerTitle}`
-        return { headerTitle, filterArchivedBookmarks }
-    }),
+                return { searchQuery, headerTitle }
+            }),
 
-    isDialogOpen: false,
-    dialogAction: null,
-    setIsDialogOpen: (dialogAction: Nullable<DialogAction>) => set(() => {
-        const dialogOpenAndAction = getIsDialogOpen({ dialogAction })
-        return { isDialogOpen: dialogOpenAndAction.isDialogOpen, dialogAction: dialogOpenAndAction.dialogAction }
-    }),
+            tagFilters: [],
+            addTagFilter: (tag: string) => set((store) => {
+                const tagFilters = [...store.tagFilters, tag]
+                const {filterArchivedBookmarks, searchQuery} = store
+                const headerTitle = buildHeaderTitle({tagFilters, filterArchivedBookmarks, searchQuery})
+                return { headerTitle, tagFilters }
+            }),
+            removeTagFilter: (tag: string) => set((store) => {
+                const tagFilters = store.tagFilters.filter((t) => t !== tag)
+                const {filterArchivedBookmarks, searchQuery} = store
+                const headerTitle = buildHeaderTitle({tagFilters, filterArchivedBookmarks, searchQuery})
+                return { headerTitle, tagFilters }
+            }),
 
-    bookmarkSelected: null,
-    setBookmarkSelected: (bookmarkSelected: Nullable<Bookmark>) => set({ bookmarkSelected }),
+            filterArchivedBookmarks: false,
+            setFilterArchivedBookmarks: (filterArchivedBookmarks: boolean) => set((store) => {
+                const {tagFilters, searchQuery} = store
+                const headerTitle = buildHeaderTitle({tagFilters, filterArchivedBookmarks, searchQuery})
+                return { headerTitle, filterArchivedBookmarks }
+            }),
 
-    isToastOpen: false,
-    toastDescription: null,
-    setIsToastOpen: (toastAction: Nullable<ToastAction>) => set(() => {
-        const { isToastOpen, toastDescription } = getIsToastOpenAndToastDescription(toastAction)
-        return { isToastOpen, toastDescription }
-    }),
+            isDialogOrModalOpen: false,
+            action: null,
+            setIsDialogOrModalOpen: (action: Nullable<Action>) => set(() => {
+                const dialogOpenAndAction = getIsDialogOrModalOpen({ action })
+                return { isDialogOrModalOpen: dialogOpenAndAction.isDialogOrModalOpen, action: dialogOpenAndAction.action }
+            }),
 
-    notificationType: null,
-    isNotificationOpen: false,
-    setIsNotificationOpen: (isOpen: boolean, type: Nullable<NotificationType> = null) =>set({
-            isNotificationOpen: isOpen,
-            notificationType: type,
+            bookmarkSelected: null,
+            setBookmarkSelected: (bookmarkSelected: Nullable<Bookmark>) => set({ bookmarkSelected }),
+
+            isToastOpen: false,
+            toastDescription: null,
+            setIsToastOpen: (toastAction: Nullable<ToastAction>) => set(() => {
+                const { isToastOpen, toastDescription } = getIsToastOpenAndToastDescription(toastAction)
+                return { isToastOpen, toastDescription }
+            }),
+
+            notificationType: null,
+            isNotificationOpen: false,
+            setIsNotificationOpen: (isOpen: boolean, type: Nullable<NotificationType> = null) => set({
+                isNotificationOpen: isOpen,
+                notificationType: type,
+            }),
+
         }),
-}))
+        {
+            name: "global-storage"
+        }
+    )
+)
 
 
-export function getIsDialogOpen({ dialogAction }: { dialogAction: Nullable<DialogAction> }): { isDialogOpen: boolean, dialogAction: Nullable<DialogAction> } {
-    if (dialogAction === "delete") {
-        return { isDialogOpen: true, dialogAction: "delete" }
+export function buildHeaderTitle({ tagFilters, filterArchivedBookmarks, searchQuery }: {
+    tagFilters: string[],
+    filterArchivedBookmarks: boolean,
+    searchQuery: string
+}): string {
+    const parts: string[] = []
+
+    if (searchQuery.length > 1) {
+        parts.push("Search")
     }
-    if (dialogAction === "archive") {
-        return { isDialogOpen: true, dialogAction: "archive" }
+
+    if (filterArchivedBookmarks) {
+        parts.push("Archives")
     }
-    if (dialogAction === "unarchive") {
-        return { isDialogOpen: true, dialogAction: "unarchive" }
+
+    parts.push("Bookmarks")
+
+    if (searchQuery.length > 1) {
+        parts.push(`"${searchQuery}"`)
     }
-    return { isDialogOpen: false, dialogAction: null }
+
+    if (tagFilters.length > 0) {
+        parts.push(`Tagged with: [${tagFilters.join(', ')}]`)
+    }
+
+    return parts.join(" > ")
+}
+
+export function getIsDialogOrModalOpen({ action }: { action: Nullable<Action> }): { isDialogOrModalOpen?: boolean, action: Nullable<Action> } {
+    if (action === "delete") {
+        return { isDialogOrModalOpen: true, action: "delete" }
+    }
+    if (action === "archive") {
+        return { isDialogOrModalOpen: true, action: "archive" }
+    }
+    if (action === "unarchive") {
+        return { isDialogOrModalOpen: true, action: "unarchive" }
+    }
+    if (action === "edit") {
+        return { isDialogOrModalOpen: true, action: "edit" }
+    }
+    return { isDialogOrModalOpen: false, action: null }
 }
 
 export function getIsToastOpenAndToastDescription(toastAction: Nullable<ToastAction>): { isToastOpen: boolean, toastDescription: Nullable<string> } {

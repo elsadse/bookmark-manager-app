@@ -1,0 +1,73 @@
+import {
+    BadRequestApiResponseSchema,
+    ConflictApiResponseSchema, ForbiddenApiResponseSchema, NotFoundApiResponseSchema,
+    UnauthorizedApiResponseSchema
+} from "@/api/errors/schema"
+import { BadRequestApiError } from "@/api/errors/BadRequestApiError"
+import { UnauthorizedApiError } from "@/api/errors/UnauthorizedApiError"
+import { ConflictApiError } from "@/api/errors/ConflictApiError"
+import { ForbiddenApiError } from "@/api/errors/ForbiddenApiError"
+import { NotFoundApiError } from "@/api/errors/NotFoundApiError"
+
+export async function parseKnownErrors({ expectedStatusCode, response }: {
+    expectedStatusCode: number,
+    response: Response
+}): Promise<void> {
+    if (response.status === 400) {
+        const parsedResponse = BadRequestApiResponseSchema.safeParse(await response.json())
+        if (!parsedResponse.success) {
+            throw parsedResponse.error
+        }
+        throw new BadRequestApiError(parsedResponse.data)
+    }
+    if (response.status === 401) {
+        /*console.log(response.headers.get("Content-Length"))
+        console.log(response.headers.get("Token-Invalid"))
+        console.log(response.headers.get("Token-Missing"))
+        console.log(response.headers.get("Token-Expired"))*/
+        if (response.headers.get("Content-Length") === "0") {
+            const tokenInvalid = response.headers.get("Token-Invalid")
+            const tokenMissing = response.headers.get("Token-Missing")
+            const tokenExpired = response.headers.get("Token-Expired")
+            if (tokenInvalid === null || tokenMissing === null || tokenExpired === null) {
+                throw new UnauthorizedApiError({
+                    title: "Token is missing, invalid, or expired",
+                    status: 401,
+                    detail: "The provided token is either missing, invalid, or has expired. Please authenticate again."
+                })
+            }
+        } else {
+            const parsedResponse = UnauthorizedApiResponseSchema.safeParse(await response.json())
+            console.log(parsedResponse)
+            if (!parsedResponse.success) {
+                throw parsedResponse.error
+            }
+            throw new UnauthorizedApiError(parsedResponse.data)
+        }
+    }
+    if (response.status === 403) {
+        const parsedResponse = ForbiddenApiResponseSchema.safeParse(await response.json())
+        if (!parsedResponse.success) {
+            throw parsedResponse.error
+        }
+        throw new ForbiddenApiError(parsedResponse.data)
+    }
+    if (response.status === 404) {
+        const parsedResponse = NotFoundApiResponseSchema.safeParse(await response.json())
+        if (!parsedResponse.success) {
+            throw parsedResponse.error
+        }
+        throw new NotFoundApiError(parsedResponse.data)
+    }
+    if (response.status === 409) {
+        const parsedResponse = ConflictApiResponseSchema.safeParse(await response.json())
+        if (!parsedResponse.success) {
+            throw parsedResponse.error
+        }
+        throw new ConflictApiError(parsedResponse.data)
+    }
+
+    if (response.status !== expectedStatusCode) {
+        throw new Error(`Unexpected status code: ${response.status}`)
+    }
+}

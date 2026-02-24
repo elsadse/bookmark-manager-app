@@ -26,6 +26,7 @@
   --color-neutral-100: #E8F0EF;
   --color-neutral-0: #FFFFFF;
 
+  --color-neutral-d-0: #FFFFFF;
   --color-neutral-d-900: #001414;
   --color-neutral-d-800: #001F1F;
   --color-neutral-d-500: #004241;
@@ -77,6 +78,21 @@
 
 }
 
+.dark {
+  --color-neutral-0: #001F1F;
+  --color-neutral-100: #001414;
+  --color-neutral-300: #004241;
+  --color-neutral-400: #004746;
+  --color-neutral-500: #00706E;
+  --color-neutral-800: #B1B9B9;
+  --color-neutral-900: #FFFFFF;
+
+  --color-neutral-d-800: #001F1F;
+  --color-neutral-d-600: #002E2D;
+  --color-neutral-d-400: #004746;
+  --color-neutral-d-300: #00706E;
+}
+
 @layer base {
   :root {
     font-family: var(--font-mediumbold), serif;
@@ -84,17 +100,14 @@
   }
 
   :root.dark {
-    color: var(--color-neutral-0);
+    color: var(--color-neutral-900);
     background-color: var(--color-neutral-d-900);
   }
 
   body {
-    @apply min-w-93.75 max-w-360 min-h-screen mx-auto
+    @apply min-w-93.75 mx-auto
   }
 
-  #root {
-    @apply min-h-screen w-full
-  }
 }
 
 @layer components {

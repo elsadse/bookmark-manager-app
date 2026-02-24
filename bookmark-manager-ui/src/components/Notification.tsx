@@ -1,13 +1,13 @@
-import { type JSX, useEffect } from "react"
-import CheckIcon from "@/assets/images/icon-check.svg"
-import CloseIcon from "@/assets/images/icon-close.svg"
-import CopyIcon from "@/assets/images/icon-copy.svg"
-import PinIcon from "@/assets/images/icon-pin.svg"
-import UnpinIcon from "@/assets/images/icon-unpin.svg"
-import ArchiveIcon from "@/assets/images/icon-archive.svg"
-import UnarchiveIcon from "@/assets/images/icon-unarchive.svg"
-import DeleteIcon from "@/assets/images/icon-delete.svg"
+import { type ComponentType, type JSX, useEffect } from "react"
 import type { NotificationType, Nullable } from "@/types"
+import { CheckIcon } from "@/components/icons/CheckIcon"
+import { CopyIcon } from "@/components/icons/CopyIcon"
+import { PinIcon } from "@/components/icons/PinIcon"
+import { UnpinIcon } from "@/components/icons/UnpinIcon"
+import { ArchivedIcon } from "@/components/icons/ArchivedIcon"
+import { UnarchivedIcon } from "@/components/icons/UnarchivedIcon"
+import { DeleteIcon } from "@/components/icons/DeleteIcon"
+import { CloseIcon } from "@/components/icons/CloseIcon"
 
 export function NotificationContainer({ notificationType, closeNotification }: {
     notificationType: Nullable<NotificationType>,
@@ -19,39 +19,44 @@ export function NotificationContainer({ notificationType, closeNotification }: {
         return () => clearTimeout(timeout)
     }, [closeNotification])
 
-    const { logo, text } = getLogoAndTextNotificationFrom(notificationType)
+    const { Icon, text } = getLogoAndTextNotificationFrom(notificationType)
 
     return (
         <div
-            className="w-85 h-10.25 flex flex-row gap-x-2 px-3 py-2.5 items-center justify-between rounded-8 bg-neutral-0 border border-neutral-300">
-            <img src={logo} alt="Notification Icon" className="w-5 h-5"/>
+            className="w-85 h-10.25 flex flex-row gap-x-2 px-3 py-2.5 items-center justify-between rounded-8 bg-neutral-0 dark:bg-neutral-d-500 border border-neutral-300">
+            <Icon className="w-5 h-5 dark:fill-neutral-d-500"/>
             <p className="text-preset-4-md text-neutral-900">{text}</p>
             <button onClick={closeNotification} className="cursor-pointer">
-                <img src={CloseIcon} alt="Close Icon" className="w-4 h-4"/>
+                <CloseIcon className="w-4 h-4"/>
             </button>
         </div>
     )
 }
 
-function getLogoAndTextNotificationFrom(type: Nullable<NotificationType>): { logo: string, text: string } {
+type NotificationConfig = {
+  Icon: ComponentType<{ className?: string }>;
+  text: string;
+}
+
+function getLogoAndTextNotificationFrom(type: Nullable<NotificationType>): NotificationConfig {
     switch (type) {
         case "bookmark-added":
-            return { logo: CheckIcon, text: "Bookmark added successfully." }
-        case "bookmark-updated":
-            return { logo: CheckIcon, text: "Bookmark updated successfully" }
+            return { Icon: CheckIcon, text: "Bookmark added successfully." }
+        case "bookmark-edited":
+            return { Icon: CheckIcon, text: "Bookmark updated successfully" }
         case "bookmark-link-copied":
-            return { logo: CopyIcon, text: "Bookmark link copied to clipboard." }
+            return { Icon: CopyIcon, text: "Bookmark link copied to clipboard." }
         case "bookmark-pinned":
-            return { logo: PinIcon, text: "Bookmark pinned to the top." }
+            return { Icon: PinIcon, text: "Bookmark pinned to the top." }
         case "bookmark-unpinned":
-            return { logo: UnpinIcon, text: "Bookmark unpinned from the top." }
+            return { Icon: UnpinIcon, text: "Bookmark unpinned from the top." }
         case "bookmark-archived":
-            return { logo: ArchiveIcon, text: "Bookmark archived." }
+            return { Icon: ArchivedIcon, text: "Bookmark archived." }
         case "bookmark-restored":
-            return { logo: UnarchiveIcon, text: "Bookmark restored." }
+            return { Icon: UnarchivedIcon, text: "Bookmark restored." }
         case "bookmark-deleted":
-            return { logo: DeleteIcon, text: "Bookmark permanently deleted." }
+            return { Icon: DeleteIcon, text: "Bookmark permanently deleted." }
         default:
-            return { logo: CheckIcon, text: "Action executed successfully." }
+            return { Icon: CheckIcon, text: "Action executed successfully." }
     }
 }

@@ -1,33 +1,31 @@
-import iconSwitchVertical from "@/assets/images/icon-switch-vert.svg"
-import iconSwitchVerticalDark from "@/assets/images/icon-switch-vert-dark.svg"
-import iconLeading from "@/assets/images/icon-leading.svg"
-import iconLeadingDark from "@/assets/images/icon-leading-dark.svg"
-import iconVisitCount from "@/assets/images/icon-visit-count.svg"
-import iconTime from "@/assets/images/icon-time.svg"
-import iconDate from "@/assets/images/icon-date.svg"
-import iconVisitCountDark from "@/assets/images/icon-visit-count-dark.svg"
-import iconTimeDark from "@/assets/images/icon-time-dark.svg"
-import iconDateDark from "@/assets/images/icon-date-dark.svg"
-import iconPin from "@/assets/images/icon-pin.svg"
-import iconPinDark from "@/assets/images/icon-pin-dark.svg"
-import iconVisit from "@/assets/images/icon-visit.svg"
-import iconCopy from "@/assets/images/icon-copy.svg"
-import iconUnpin from "@/assets/images/icon-unpin.svg"
-import iconEdit from "@/assets/images/icon-edit.svg"
-import iconArchive from "@/assets/images/icon-archive.svg"
-import iconUnarchive from "@/assets/images/icon-unarchive.svg"
-import iconDelete from "@/assets/images/icon-delete.svg"
-import iconCheck from "@/assets/images/icon-check.svg"
-import { useState } from "react"
+import { useEffect, useRef, useState, type ComponentType } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { fetchBookmarks, togglePin } from "@/api/bookmarks"
 import { useGlobalStore, type GlobalStore } from "@/hooks/useGlobalStore"
 import { useShallow } from "zustand/shallow"
 import type { Bookmark } from "@/api/bookmarks/schema"
 import { visitBookmark } from "@/api/visits"
+import { useAuthContext } from "@/hooks/useAuthContext"
+import { UnauthorizedApiError } from "@/api/errors/UnauthorizedApiError"
+import { useCloseDropdown } from "@/hooks/useCloseDropdown"
+import { SwitchVerticalIcon } from "@/components/icons/SwitchVerticalIcon"
+import { PinIcon } from "@/components/icons/PinIcon"
+import { LeadingIcon } from "@/components/icons/LeadingIcon"
+import { CheckIcon } from "@/components/icons/CheckIcon"
+import { VisitIcon } from "@/components/icons/VisitIcon"
+import { CopyIcon } from "@/components/icons/CopyIcon"
+import { UnpinIcon } from "@/components/icons/UnpinIcon"
+import { EditIcon } from "@/components/icons/EditIcon"
+import { ArchivedIcon } from "@/components/icons/ArchivedIcon"
+import { UnarchivedIcon } from "@/components/icons/UnarchivedIcon"
+import { DeleteIcon } from "@/components/icons/DeleteIcon"
+import { VisitCountIcon } from "@/components/icons/VisitCountIcon"
+import { TimeIcon } from "@/components/icons/TimeIcon"
+import { DateIcon } from "@/components/icons/DateIcon"
+import { LoadingIcon } from "@/components/icons/LoadingIcon"
 
 export function BookmarkList() {
-    const { sortBookmarksBy, tagFilters, filterArchivedBookmarks, headerTitle } = useGlobalStore(
+    const { sortBookmarksBy, tagFilters, filterArchivedBookmarks, headerTitle, searchQuery } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
             headerTitle: store.headerTitle,
             sortBookmarksBy: store.sortBookmarksBy,
@@ -35,13 +33,17 @@ export function BookmarkList() {
             filterArchivedBookmarks: store.filterArchivedBookmarks,
             isToastOpen: store.isToastOpen,
             toastDescription: store.toastDescription,
+            searchQuery: store.searchQuery,
         }))
     )
-    const [isSortByDropdownOpen, setIsSortByDropdownOpen] = useState(false)
 
-    const { data: bookmarks } = useQuery({
-        queryKey: ["bookmarks"],
-        queryFn: fetchBookmarks,
+    const [isSortByDropdownOpen, setIsSortByDropdownOpen] = useState(false)
+    const ref = useRef<HTMLButtonElement>(null)
+    useCloseDropdown(ref, (): void => setIsSortByDropdownOpen(false))
+
+    const { data: bookmarks, isLoading, isError, error } = useQuery({
+        queryKey: ["bookmarks", searchQuery],
+        queryFn: async (): Promise<Bookmark[]> => fetchBookmarks(searchQuery),
         select: (data: Bookmark[]): Bookmark[] =>
             [
                 ...data
@@ -55,54 +57,53 @@ export function BookmarkList() {
                 } else if (sortBookmarksBy === "most-visited") {
                     return b.visitsCount - a.visitsCount
                 } else if (sortBookmarksBy === "recently-visited") {
-                    return b.lastVisitTime.getTime() - a.lastVisitTime.getTime()
+                    return (b.lastVisitTime?.getTime() ?? 0) - (a.lastVisitTime?.getTime() ?? 0)
                 }
                 return 0
             })
     })
+
+    // Gestion de la déconnexion automatique
+    const { logout } = useAuthContext()
+    useEffect(() => {
+        /*console.log(error instanceof UnauthorizedApiError)
+        console.log(error)
+        console.log((error as any)?.response?.status)*/
+        if (isError && error instanceof UnauthorizedApiError) {
+            logout()
+        }
+    }, [error, isError, logout])
+
 
     function handleClickSortBy() {
         setIsSortByDropdownOpen(!isSortByDropdownOpen)
     }
 
     return (
-        <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16 h-screen overflow-y-auto">
+        <div className="flex flex-col gap-y-5 px-4 pt-6 pb-16 h-full overflow-y-auto">
             <div className="flex flex-row justify-between items-center gap-x-4">
-                <div className="flex flex-col md:flex-row">
-                    <span className="text-preset-2 md:text-preset-1 text-neutral-900 dark:text-neutral-0">{headerTitle}</span>
-                    {/*{tagFilters.length !== 0 && (
-                        <div className="flex flex-row">
-                            {tagFilters.map((tag, index) => (
-                                <span key={index} className="text-preset-2 md:text-preset-1 text-teal-700">
-                                    &nbsp;{tag}
-                                    {index < tagFilters.length - 1 && ","}&nbsp;
-                                </span>
-                            ))}
-                        </div>
-                    )}
-                    {searchQuery.length > 0 && (
-                        <span className="text-preset-2 md:text-preset-1 text-teal-700">
-                            &nbsp;{'"' + searchQuery + '"'}
-                        </span>
-                    )}*/}
-                </div>
+                <span className="text-preset-2 md:text-preset-1 text-neutral-900">{headerTitle}</span>
                 <button onClick={handleClickSortBy}
-                    className={`relative flex justify-center 
-                    items-center gap-x-4 px-3 py-2.5 bg-neutral-0 dark:bg-neutral-d-800
-                    rounded-8 border border-neutral-400 dark:border-neutral-d-400 cursor-pointer hover:bg-neutral-100
-                    ${isSortByDropdownOpen ? "ring ring-teal-700" : ""}
-                    `}>
-                    <img src={iconSwitchVertical} className="dark:hidden" alt="icon switch" />
-                    <img src={iconSwitchVerticalDark} className="hidden dark:block" alt="icon switch" />
-                    <span className="text-preset-3 text-neutral-900 dark:text-neutral-0">Sort by</span>
+                    className={`relative flex flex-row justify-between
+                    items-center gap-x-1 px-3 py-2.5 bg-neutral-0 
+                    rounded-8 border border-neutral-400 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-600
+                    ${isSortByDropdownOpen ? "ring ring-teal-700 dark:ring-neutral-d-0" : ""}
+                    `} ref={ref}>
+                    <SwitchVerticalIcon className="w-5 h-5" />
+                    <span className="text-preset-3 text-neutral-900">Sort by</span>
                     {isSortByDropdownOpen && <SortByDropdown />}
                 </button>
-
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-8 overflow-y-auto">
-                {bookmarks?.map((bookmark, index) => (
-                    <BookmarkListCard key={index} bookmark={bookmark} />
-                ))}
+            <div className="flex flex-wrap gap-8 pt-8 items-center justify-center">
+                {isLoading ?
+                    <LoadingIcon className="size-20 stroke-neutral-500" /> :
+                    bookmarks?.map((bookmark, index) => (
+                        <BookmarkListCard key={index} bookmark={bookmark} />
+                    ))
+                }
+                {bookmarks?.length === 0 &&
+                    <p className="px-3 text-preset-2 text-neutral-800">No bookmarks to display</p>
+                }
             </div>
         </div>
     )
@@ -111,18 +112,15 @@ export function BookmarkList() {
 export function BookmarkListCard({ bookmark }: { bookmark: Bookmark }) {
 
     return (
-        <div className="rounded-8 bg-neutral-0 dark:bg-neutral-d-800 h-68">
+        <div className="rounded-8 bg-neutral-0 dark:bg-neutral-d-800 h-68 w-84.5">
             <BookmarkListCardContainer bookmark={bookmark} />
             <div className="h-1O.25 flex flex-row justify-between items-center gap-x-2 px-4 py-3 border-t border-neutral-300 dark:border-neutral-d-500">
                 <div className="flex flex-row gap-x-4">
-                    <BookmarkListCardFooterInfo icon={iconVisitCount} iconDark={iconVisitCountDark} information={bookmark.visitsCount.toString()} />
-                    <BookmarkListCardFooterInfo icon={iconTime} iconDark={iconTimeDark} information={bookmark.creationTime.toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
-                    {bookmark.lastVisitTime !== null &&
-                        <BookmarkListCardFooterInfo icon={iconDate} iconDark={iconDateDark} information={bookmark.lastVisitTime.toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
-                    }
+                    <BookmarkListCardFooterInfo Icon={VisitCountIcon} information={bookmark.visitsCount.toString()} />
+                    <BookmarkListCardFooterInfo Icon={TimeIcon} information={bookmark.lastVisitTime === null ? "Never" : bookmark.lastVisitTime.toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
+                    <BookmarkListCardFooterInfo Icon={DateIcon} information={bookmark.creationTime.toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
                 </div>
-                {!bookmark.isArchived && bookmark.isPinned && <img src={iconPin} className="size-4 dark:hidden" alt="icon pin" />}
-                {!bookmark.isArchived && bookmark.isPinned && <img src={iconPinDark} className="size-4 hidden dark:block" alt="icon pin" />}
+                {!bookmark.isArchived && bookmark.isPinned && <PinIcon className="size-3" />}
                 {bookmark.isArchived &&
                     <span className="text-center text-preset-5 text-neutral-800 dark:text-neutral-d-100 bg-neutral-100 dark:bg-neutral-d-600 rounded-4 px-1.5">Archived</span>
                 }
@@ -134,6 +132,8 @@ export function BookmarkListCard({ bookmark }: { bookmark: Bookmark }) {
 
 export function BookmarkListCardContainer({ bookmark }: { bookmark: Bookmark }) {
     const [isBookmarkActionDropdownOpen, setIsBookmarkActionDropdownOpen] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
+    useCloseDropdown(ref, (): void => setIsBookmarkActionDropdownOpen(false))
 
     const urlObject = new URL(bookmark.url)
     const formattedUrl = urlObject.pathname === "/"
@@ -159,17 +159,16 @@ export function BookmarkListCardContainer({ bookmark }: { bookmark: Bookmark }) 
                         <img src={`https://www.faviconextractor.com/favicon/${urlObject.host}`} className="w-11 h-11" alt="icon logo" />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <span className="text-preset-2 text-neutral-900 dark:text-neutral-0">{bookmark.title}</span>
-                        <span className="text-preset-5 text-neutral-800 dark:text-neutral-d-100">{formattedUrl}</span>
+                        <span className="text-preset-2 text-neutral-900 ">{bookmark.title}</span>
+                        <span className="text-preset-5 text-neutral-800">{formattedUrl}</span>
                     </div>
                 </div>
-                <div onClick={handleActionDropdown}
-                    className={`${isBookmarkActionDropdownOpen ? "ring ring-teal-700" : ""}
+                <div onClick={handleActionDropdown} ref={ref}
+                    className={`${isBookmarkActionDropdownOpen ? "ring ring-teal-700 dark:ring-neutral-d-0" : ""}
                         relative flex justify-center items-center size-8 gap-x-1 rounded-8 
-                      bg-neutral-0 dark:bg-neutral-d-800 border border-neutral-400 dark:border-neutral-d-500 cursor-pointer hover:bg-neutral-100
+                      bg-neutral-0 border border-neutral-400 dark:border-neutral-d-500 cursor-pointer hover:bg-neutral-100
                         `}>
-                    <img src={iconLeading} className="size-5 dark:hidden" alt="icon logo" />
-                    <img src={iconLeadingDark} className="size-5 hidden dark:block" alt="icon logo" />
+                    <LeadingIcon className="size-5" />
                     {isBookmarkActionDropdownOpen &&
                         <BookmarkActionDropdown pinned={bookmark.isPinned} id={bookmark.bookmarkId} url={bookmark.url} archived={bookmark.isArchived} />
                     }
@@ -181,19 +180,18 @@ export function BookmarkListCardContainer({ bookmark }: { bookmark: Bookmark }) 
             </span>
             <div className="flex flex-row gap-x-2">
                 {bookmark.tags.map((tag, index) => (
-                    <span key={index} className="text-center text-preset-5 text-neutral-800 dark:text-neutral-d-100 bg-neutral-100 dark:bg-neutral-d-600 rounded-4 px-2 py-0.5">{tag}</span>
+                    <span key={index} className="text-center text-preset-5 text-neutral-800 dark:text-neutral-d-100 bg-neutral-100 dark:bg-neutral-d-600 rounded-4 px-2 py-0.5">{tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase()}</span>
                 ))}
             </div>
         </div>
     )
 }
 
-export function BookmarkListCardFooterInfo({ icon, iconDark, information }: { icon: string, information: string, iconDark: string }) {
+export function BookmarkListCardFooterInfo({ Icon, information }: { Icon: ComponentType<{ className?: string }>, information: string }) {
 
     return (
         <div className="flex flex-row justify-center items-center gap-x-1.5">
-            <img src={icon} className="size-3 dark:hidden" alt="icon" />
-            <img src={iconDark} className="size-3 hidden dark:block" alt="icon" />
+            <Icon className="size-3" />
             <span className="text-preset-5 text-left text-neutral-800 dark:text-neutral-d-100">{information}</span>
         </div>
     )
@@ -201,6 +199,14 @@ export function BookmarkListCardFooterInfo({ icon, iconDark, information }: { ic
 
 
 export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: number, pinned: boolean, archived: boolean, url: string }) {
+    const { setIsDialogOrModalOpen, setIsToastOpen, setIsNotificationOpen } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            setIsNotificationOpen: store.setIsNotificationOpen,
+            setIsDialogOrModalOpen: store.setIsDialogOrModalOpen,
+            setIsToastOpen: store.setIsToastOpen,
+        }))
+    )
+
     const queryClient = useQueryClient()
     const { mutate: visitBookmarkFn } = useMutation({
         mutationFn: visitBookmark,
@@ -208,16 +214,11 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
     })
     const { mutate: pinToggleFn } = useMutation({
         mutationFn: togglePin,
-        onSuccess: async () => await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["bookmarks"] })
+            setIsNotificationOpen(true, pinned? "bookmark-unpinned": "bookmark-pinned")
+        }
     })
-
-    const { setIsDialogOpen, setIsToastOpen, setIsNotificationOpen } = useGlobalStore(
-        useShallow((store: GlobalStore) => ({
-            setIsNotificationOpen: store.setIsNotificationOpen,
-            setIsDialogOpen: store.setIsDialogOpen,
-            setIsToastOpen: store.setIsToastOpen,
-        }))
-    )
 
     function handleVisit() {
         visitBookmarkFn({ bookmarkId: id, visitTime: new Date() })
@@ -229,11 +230,11 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
     }
 
     function handleArchive() {
-        setIsDialogOpen("archive")
+        setIsDialogOrModalOpen("archive")
     }
 
     function handleUnarchive() {
-        setIsDialogOpen("unarchive")
+        setIsDialogOrModalOpen("unarchive")
     }
 
     function handleCopy() {
@@ -243,33 +244,33 @@ export function BookmarkActionDropdown({ id, pinned, archived, url }: { id: numb
     }
 
     function handleEdit() {
-        setIsNotificationOpen(true, "bookmark-link-copied")
+        setIsDialogOrModalOpen("edit")
     }
 
     function handleDelete() {
-        setIsDialogOpen("delete")
+        setIsDialogOrModalOpen("delete")
     }
 
     return (
         <div className="absolute top-10 right-0 w-50 flex flex-col gap-y-1 p-2 rounded-8 bg-neutral-0 border border-neutral-100">
-            <BookmarkActionDropdownMenu icon={iconVisit} text="Visit" onClick={handleVisit} />
-            <BookmarkActionDropdownMenu icon={iconCopy} text="Copy Url" onClick={handleCopy} />
-            {!archived && pinned && <BookmarkActionDropdownMenu icon={iconUnpin} text="Unpin" onClick={handlePin} />}
-            {!archived && !pinned && <BookmarkActionDropdownMenu icon={iconPin} text="Pin" onClick={handlePin} />}
-            {!archived && <BookmarkActionDropdownMenu icon={iconEdit} text="Edit" onClick={handleEdit} />}
-            {!archived && <BookmarkActionDropdownMenu icon={iconArchive} text="Archive" onClick={handleArchive} />}
-            {archived && <BookmarkActionDropdownMenu icon={iconUnarchive} text="Unarchive" onClick={handleUnarchive} />}
-            {archived && <BookmarkActionDropdownMenu icon={iconDelete} text="Delete Permanently" onClick={handleDelete} />}
+            <BookmarkActionDropdownMenu Icon={VisitIcon} text="Visit" onClick={handleVisit} />
+            <BookmarkActionDropdownMenu Icon={CopyIcon} text="Copy Url" onClick={handleCopy} />
+            {!archived && pinned && <BookmarkActionDropdownMenu Icon={UnpinIcon} text="Unpin" onClick={handlePin} />}
+            {!archived && !pinned && <BookmarkActionDropdownMenu Icon={PinIcon} text="Pin" onClick={handlePin} />}
+            {!archived && <BookmarkActionDropdownMenu Icon={EditIcon} text="Edit" onClick={handleEdit} />}
+            {!archived && <BookmarkActionDropdownMenu Icon={ArchivedIcon} text="Archive" onClick={handleArchive} />}
+            {archived && <BookmarkActionDropdownMenu Icon={UnarchivedIcon} text="Unarchive" onClick={handleUnarchive} />}
+            {archived && <BookmarkActionDropdownMenu Icon={DeleteIcon} text="Delete Permanently" onClick={handleDelete} />}
         </div>
     )
 }
 
-export function BookmarkActionDropdownMenu({ icon, text, onClick }: { icon: string, text: string, onClick: () => void }) {
+export function BookmarkActionDropdownMenu({ Icon, text, onClick }: { Icon: ComponentType<{ className?: string }>, text: string, onClick: () => void }) {
 
     return (
         <div onClick={onClick}
-            className="flex flex-row items-center gap-x-2.5 p-2 rounded-8 cursor-pointer hover:ring ring-teal-700">
-            <img src={icon} alt="icon" />
+            className="flex flex-row items-center gap-x-2.5 p-2 rounded-8 cursor-pointer hover:ring ring-teal-700 dark:ring-neutral-d-0">
+            <Icon className="size-4" />
             <span className="text-preset-4 text-neutral-800">{text}</span>
         </div>
     )
@@ -283,34 +284,35 @@ export function SortByDropdown() {
         }))
     )
 
+
     return (
-        <div className="absolute right-0 top-12 w-50 flex flex-col gap-y-p-2 rounded-8 bg-neutral-0 border border-neutral-100 z-10">
+        <div className="fixed right-5 top-38 w-50 flex flex-col gap-y-p-2 rounded-8 bg-neutral-0 border border-neutral-100 z-10">
             <div onClick={(): void => {
                 if (sortBookmarksBy !== "recently-added") {
                     setSortBookmarksBy("recently-added")
                 }
             }}
-                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
+                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700 dark:ring-neutral-d-0">
                 <span className="text-preset-4 text-neutral-800">Recently added</span>
-                {sortBookmarksBy === "recently-added" && <img src={iconCheck} alt="icon check" />}
+                {sortBookmarksBy === "recently-added" && <CheckIcon className="w-4 h-4" />}
             </div>
             <div onClick={(): void => {
                 if (sortBookmarksBy !== "recently-visited") {
                     setSortBookmarksBy("recently-visited")
                 }
             }}
-                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
+                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700 dark:ring-neutral-d-0">
                 <span className="text-preset-4 text-neutral-800">Recently visited</span>
-                {sortBookmarksBy === "recently-visited" && <img src={iconCheck} alt="icon check" />}
+                {sortBookmarksBy === "recently-visited" && <CheckIcon className="w-4 h-4" />}
             </div>
             <div onClick={(): void => {
                 if (sortBookmarksBy !== "most-visited") {
                     setSortBookmarksBy("most-visited")
                 }
             }}
-                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700">
+                className="flex flex-row p-4 justify-between rounded-6 hover:ring ring-teal-700 dark:ring-neutral-d-0">
                 <span className="text-preset-4 text-neutral-800">Most visited</span>
-                {sortBookmarksBy === "most-visited" && <img src={iconCheck} alt="icon check" />}
+                {sortBookmarksBy === "most-visited" && <CheckIcon className="w-4 h-4" />}
             </div>
         </div>
     )
