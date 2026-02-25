@@ -5,6 +5,7 @@ using BookmarkManagerApp.Persistence;
 using BookmarkManagerApp.Repositories;
 using BookmarkManagerApp.Repositories.Contracts;
 using BookmarkManagerApp.Services;
+using BookmarkManagerApp.Services.Contracts;
 using BookmarkManagerApp.Services.Utils;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,10 +45,10 @@ builder.Services.AddDbContext<BookmarkDbContext>(options =>
 
 builder.Services.AddSingleton<PasswordHasher<IdentityUser>>();
 
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<BookmarkRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
-builder.Services.AddScoped<VisitRepository>();
+builder.Services.AddScoped<IVisitRepository, VisitRepository>();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
@@ -107,7 +108,7 @@ builder.Services.AddScoped<ClaimsPrincipal>(sp =>
     var accessor = sp.GetRequiredService<IHttpContextAccessor>();
     return accessor.HttpContext?.User ?? new ClaimsPrincipal(new ClaimsIdentity());
 });
-builder.Services.AddScoped<UserContext>();
+builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.AddCors(options =>
 {

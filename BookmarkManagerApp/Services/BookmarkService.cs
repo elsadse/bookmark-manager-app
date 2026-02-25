@@ -1,14 +1,14 @@
 using BookmarkManagerApp.Exceptions;
 using BookmarkManagerApp.Models;
-using BookmarkManagerApp.Repositories;
-using BookmarkManagerApp.Services.Utils;
+using BookmarkManagerApp.Repositories.Contracts;
+using BookmarkManagerApp.Services.Contracts;
 
 namespace BookmarkManagerApp.Services;
 
 public class BookmarkService(
-    BookmarkRepository bookmarkRepository,
-    UserContext userContext,
-    TagRepository tagRepository)
+    IBookmarkRepository bookmarkRepository,
+    IUserContext userContext,
+    ITagRepository tagRepository)
 {
     public async Task DeleteAsync(long bookmarkId)
     {

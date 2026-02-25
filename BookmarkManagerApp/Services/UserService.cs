@@ -1,10 +1,10 @@
 using BookmarkManagerApp.Exceptions;
 using BookmarkManagerApp.Models;
-using BookmarkManagerApp.Repositories;
+using BookmarkManagerApp.Repositories.Contracts;
 
 namespace BookmarkManagerApp.Services;
 
-public class UserService(UserRepository userRepository)
+public class UserService(IUserRepository userRepository)
 {
     public async Task<User> GetUserByIdAsync(long userId)
     {
