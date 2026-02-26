@@ -18,6 +18,9 @@ DotEnv.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Force anglais partout pour FluentValidation (désactive la localisation)
+ValidatorOptions.Global.LanguageManager.Enabled = false;
+
 builder.Services.AddHealthChecks();
 
 builder.Services.AddProblemDetails(options =>

@@ -86,7 +86,7 @@ public class BookmarkService(
         bookmark.Url = command.Url;
         bookmark.Description = command.Description;
 
-        var existingTags = await tagRepository.GetByNamesForUpdate(command.TagNames);
+        var existingTags = await tagRepository.GetByNames(command.TagNames);
         var existingTagNames = existingTags.ToDictionary(tag => tag.Name);
 
         bookmark.Tags.Clear();

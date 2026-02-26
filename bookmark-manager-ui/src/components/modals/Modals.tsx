@@ -106,15 +106,19 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
     const [title, setTitle] = useState(bookmark ? bookmark.title : "")
     const [description, setDescription] = useState(bookmark ? bookmark.description : "")
     const [url, setUrl] = useState(bookmark ? bookmark.url : "")
+    const maxDescriptionLength: number = 280
+    const isOverLimitDescription = description.length > maxDescriptionLength
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
-        onsubmit({
-            title,
-            description,
-            url,
-            tags: tags.map(t => t.trim())
-        })
+        if (description.length <= maxDescriptionLength) {
+            onsubmit({
+                title,
+                description,
+                url,
+                tags: tags.map(t => t.trim())
+            })
+        }
     }
 
     const [tags, setTags] = useState<string[]>(bookmark ? bookmark.tags : [])
@@ -170,7 +174,9 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                 />
                             </div>
                             <div className="flex justify-end gap-x-2.5">
-                                <span className="text-preset-5 text-neutral-800">{description.length}/1024</span>
+                                <span className={`text-preset-5 text-neutral-800 ${isOverLimitDescription ? "text-red-600" : ""}`}>
+                                    {description.length}/{maxDescriptionLength}
+                                </span>
                             </div>
                             {
                                 error !== null && "errors" in error! && "Description" in error.errors &&
@@ -225,19 +231,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                                 `}
                                 type="text"
                                 value={currentTag}
-                                onChange={(e) => {
-                                    const value = e.target.value
-                                    // Transforme chaque mot : première lettre majuscule, reste minuscule
-                                    const capitalized = value
-                                        .split(" ")
-                                        .map(word =>
-                                            word.trim()
-                                                .charAt(0).toUpperCase() +
-                                            word.slice(1).toLowerCase()
-                                        )
-                                        .join(" ");
-                                    setCurrentTag(capitalized)
-                                }}
+                                onChange={(e) => { setCurrentTag(e.target.value) }}
                                 onKeyDown={(e): void => {
                                     if (e.key === "," || e.key === "Enter") {
                                         e.preventDefault()
@@ -285,7 +279,7 @@ export function BookmarkForm({ onsubmit, onClose, titleForm, descriptionForm, ti
                             className="w-35.5 flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-neutral-0 border border-neutral-400 cursor-pointer">
                             <span className="text-center px-0.5 text-neutral-900">Cancel</span>
                         </button>
-                        <button type="submit" disabled={isPending}
+                        <button type="submit" disabled={isPending || isOverLimitDescription}
                             className="flex justify-center items-center gap-x-1 px-4 py-3 rounded-8 bg-teal-700 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
                             {
                                 isPending && <LoadingIcon className="w-4 h-4 stroke-neutral-0 dark:stroke-neutral-d-0" />

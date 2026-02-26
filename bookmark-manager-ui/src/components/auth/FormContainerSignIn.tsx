@@ -6,7 +6,7 @@ import { useAuthContext } from "@/hooks/useAuthContext"
 import { LoadingIcon } from "@/components/icons/LoadingIcon"
 
 export function FormContainerSignIn() {
-    const [email, setEmail] = useState("azerty@gmail.com")
+    const [email, setEmail] = useState("elsasifoua02@gmail.com")
     const [password, setPassword] = useState("12345678")
     const { login, isLoading, error: { login: error } } = useAuthContext()
 
@@ -64,7 +64,7 @@ export function FormContainerSignIn() {
                 <ButtonForm textButton="Log in" isLoading={isLoading} />
             </form>
             <div className="flex flex-col items-center gap-y-3">
-                <FormFooterRow textFooterRow="Forgot password?" textFooterRowLink="Reset it" linkFooterRow="/forgotPassword" />
+                {/*<FormFooterRow textFooterRow="Forgot password?" textFooterRowLink="Reset it" linkFooterRow="/forgotPassword" />*/}
                 <FormFooterRow textFooterRow="Don’t have an account?" textFooterRowLink="Sign up" linkFooterRow="/register" />
             </div>
         </div>
@@ -110,13 +110,20 @@ export function InputField({ typeInput, labelInput, value, onChange, name, class
 export function ButtonForm({ textButton, isLoading }: { textButton: string, isLoading: boolean }) {
 
     return (
-        <button type="submit" disabled={isLoading}
-            className="flex justify-center items-center px-4 py-3 gap-1 bg-teal-700 rounded-8 cursor-pointer focus:ring ring-teal-700 dark:ring-neutral-d-0 disabled:opacity-60 disabled:cursor-not-allowed">
-            {
-                isLoading && <LoadingIcon className="w-4 h-4 stroke-neutral-0 dark:stroke-neutral-d-0" />
+        <div className="flex flex-col gap-y-1.5">
+            <button type="submit" disabled={isLoading}
+                className="flex justify-center items-center px-4 py-3 gap-1 bg-teal-700 rounded-8 cursor-pointer focus:ring ring-teal-700 dark:ring-neutral-d-0 disabled:opacity-60 disabled:cursor-not-allowed">
+                {
+                    isLoading && <LoadingIcon className="w-4 h-4 stroke-neutral-0 dark:stroke-neutral-d-0" />
+                }
+                <span className="text-center px-0.5 text-preset-3 text-neutral-0 dark:text-neutral-d-0">{textButton}</span>
+            </button>
+            {isLoading &&
+                <span className="text-preset-3 text-teal-800 dark:text-neutral-d-0">
+                    Please wait..., the server is waking up (max. 2 min)
+                </span>
             }
-            <span className="text-center px-0.5 text-preset-3 text-neutral-0 dark:text-neutral-d-0">{textButton}</span>
-        </button>
+        </div>
     )
 }
 

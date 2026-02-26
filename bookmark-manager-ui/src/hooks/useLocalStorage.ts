@@ -1,5 +1,6 @@
 import type { Nullable } from "@/types"
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router"
 
 export function useLocalStorage<T>(key: string, initialValue: Nullable<T> = null): {
     value: Nullable<T>,
@@ -17,10 +18,13 @@ export function useLocalStorage<T>(key: string, initialValue: Nullable<T> = null
             return initialValue
         }
     })
+    const navigate = useNavigate()
 
     function setLocalStorageValue(newValue: Nullable<T>): void {
-        setValue(newValue)
-        localStorage.setItem(key, JSON.stringify(newValue))
+        if (key !== "hs_theme" || newValue !== null) {
+            setValue(newValue)
+            localStorage.setItem(key, JSON.stringify(newValue))
+        }
     }
 
     function getLocalStorageValue(): Nullable<T> {
@@ -32,6 +36,7 @@ export function useLocalStorage<T>(key: string, initialValue: Nullable<T> = null
     useEffect(() => {
         const timeout: number = setTimeout((): void => {
             setLocalStorageValue(null)
+            navigate("login", { replace: true })
         }, 60 * 60 * 1000)
 
         return (): void => clearTimeout(timeout)

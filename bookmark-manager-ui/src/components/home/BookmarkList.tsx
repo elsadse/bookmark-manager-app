@@ -180,7 +180,7 @@ export function BookmarkListCardContainer({ bookmark }: { bookmark: Bookmark }) 
             </span>
             <div className="flex flex-row gap-x-2">
                 {bookmark.tags.map((tag, index) => (
-                    <span key={index} className="text-center text-preset-5 text-neutral-800 dark:text-neutral-d-100 bg-neutral-100 dark:bg-neutral-d-600 rounded-4 px-2 py-0.5">{tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase()}</span>
+                    <span key={index} className="text-center text-preset-5 text-neutral-800 dark:text-neutral-d-100 bg-neutral-100 dark:bg-neutral-d-600 rounded-4 px-2 py-0.5">{tag}</span>
                 ))}
             </div>
         </div>
