@@ -1,6 +1,7 @@
 
 # Application de gestionnaire de favoris
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/elsadse/bookmark-manager-app/deployment.yaml)
+[![codecov](https://codecov.io/gh/elsadse/bookmark-manager-app/branch/develop/graph/badge.svg?token=DTVXcTpGCf)](https://codecov.io/gh/elsadse/bookmark-manager-app)
 ![GitHub repo size](https://img.shields.io/github/repo-size/elsadse/bookmark-manager-app)
 ![GitHub License](https://img.shields.io/github/license/elsadse/bookmark-manager-app)
 ![GitHub top language](https://img.shields.io/github/languages/top/elsadse/bookmark-manager-app)
