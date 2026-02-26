@@ -253,4 +253,201 @@ public class BookmarkServiceTest
         _mockBookmarkRepository.Verify(r => r.GetByIdAsync(bookmarkId), Times.Once);
     }
 
+    [Fact]
+    public async Task UpdateAsync_WithNonExistentBookmark_ThrowsNotFoundException()
+    {
+        // Arrange
+        _mockBookmarkRepository
+            .Setup(x => x.GetByIdForUpdateAsync(It.IsAny<long>()))
+            .ReturnsAsync(null as Bookmark);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            _bookmarkService.UpdateAsync(It.IsAny<long>(), It.IsAny<CreateOrUpdateBookmarkCommand>()));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WithDuplicateTitle_ThrowsConflictException()
+    {
+        // Arrange
+        const long bookmarkId = 1L;
+        var existingBookmark = new Bookmark
+        { BookmarkId = bookmarkId, Title = "Old Title", Url = "https://url.com", Tags = new List<Tag>() };
+        var command = new CreateOrUpdateBookmarkCommand("New Title", "https://url.com", "Description", []);
+
+        _mockBookmarkRepository
+            .Setup(x => x.GetByIdForUpdateAsync(bookmarkId))
+            .ReturnsAsync(existingBookmark);
+        _mockBookmarkRepository
+            .Setup(x => x.ExistsByUserIdAndTitle(_userId, command.Title))
+            .ReturnsAsync(true);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ConflictException>(() => _bookmarkService.UpdateAsync(bookmarkId, command));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WithDuplicateUrl_ThrowsConflictException()
+    {
+        // Arrange
+        const long bookmarkId = 1L;
+        var existingBookmark = new Bookmark
+            { BookmarkId = bookmarkId, Title = "Title", Url = "https://old.com", Tags = new List<Tag>() };
+        var command =
+            new CreateOrUpdateBookmarkCommand("Title", "https://new.com", "Description", []);
+    
+        _mockBookmarkRepository
+            .Setup(x => x.GetByIdForUpdateAsync(bookmarkId))
+            .ReturnsAsync(existingBookmark);
+        _mockBookmarkRepository
+            .Setup(x => x.ExistsByUserIdAndTitle(_userId, command.Title))
+            .ReturnsAsync(false);
+        _mockBookmarkRepository
+            .Setup(x => x.ExistsByUserIdAndUrl(_userId, command.Url))
+            .ReturnsAsync(true);
+    
+        // Act & Assert
+        await Assert.ThrowsAsync<ConflictException>(() => _bookmarkService.UpdateAsync(bookmarkId, command));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WithValidData_UpdatesBookmark()
+    {
+        // Arrange
+        const long bookmarkId = 1L;
+        var existingBookmark = new Bookmark
+            { BookmarkId = bookmarkId, Title = "Old Title", Url = "https://old.com", Tags = new List<Tag>() };
+        var command =
+            new CreateOrUpdateBookmarkCommand("New Title", "https://new.com", "Description", ["tag1", "tag2"]);
+        var existingTag = new Tag { Name = "tag1" };
+
+        _mockBookmarkRepository
+            .Setup(x => x.GetByIdForUpdateAsync(bookmarkId))
+            .ReturnsAsync(existingBookmark);
+        _mockBookmarkRepository
+            .Setup(x => x.ExistsByUserIdAndTitle(_userId, command.Title))
+            .ReturnsAsync(false);
+        _mockBookmarkRepository
+            .Setup(x => x.ExistsByUserIdAndUrl(_userId, command.Url))
+            .ReturnsAsync(false);
+        _mockTagRepository
+            .Setup(x => x.GetByNamesForUpdate(command.TagNames))
+            .ReturnsAsync([existingTag]);
+
+        // Act
+        await _bookmarkService.UpdateAsync(bookmarkId, command);
+
+        // Assert
+        Assert.Equal("New Title", existingBookmark.Title);
+        Assert.Equal("https://new.com", existingBookmark.Url);
+        Assert.Equal("Description", existingBookmark.Description);
+        Assert.Equal(2, existingBookmark.Tags.Count);
+        _mockBookmarkRepository.Verify(x => x.UpdateAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithDuplicateTitleOrUrl_ThrowsConflictException()
+    {
+        // Arrange
+        var command = new CreateOrUpdateBookmarkCommand("Title", "https://url.com", "Description", []);
+        _mockBookmarkRepository
+            .Setup(x => x.ExistsByUserIdAndTitleOrUrl(_userId, command.Title, command.Url))
+            .ReturnsAsync(true);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ConflictException>(() => _bookmarkService.CreateAsync(command));
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithValidDataAndExistingTags_CreatesBookmarkWithTags()
+    {
+        // Arrange
+        var command = new CreateOrUpdateBookmarkCommand("Title", "https://url.com", "Description", ["tag1", "tag2"]);
+        var existingTag = new Tag { Name = "tag1" };
+        var createdBookmark = new Bookmark
+        {
+            BookmarkId = 1, Title = command.Title, Url = command.Url, Description = command.Description,
+            Tags = new List<Tag> { new() { Name = "tag1" }, new() { Name = "tag2" } }
+        };
+
+        _mockBookmarkRepository
+            .Setup(x => x.ExistsByUserIdAndTitleOrUrl(_userId, command.Title, command.Url))
+            .ReturnsAsync(false);
+        _mockTagRepository
+            .Setup(x => x.GetByNamesForUpdate(command.TagNames))
+            .ReturnsAsync([existingTag]);
+        _mockBookmarkRepository
+            .Setup(x => x.CreateAsync(It.IsAny<Bookmark>()))
+            .ReturnsAsync(createdBookmark);
+
+        // Act
+        var result = await _bookmarkService.CreateAsync(command);
+
+        // Assert
+        Assert.Equal(createdBookmark, result);
+        _mockBookmarkRepository.Verify(x => x.CreateAsync(It.Is<Bookmark>(b => b.Tags.Count == 2)), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithValidDataAndNewTags_CreatesBookmarkWithNewTags()
+    {
+        // Arrange
+        var command =
+            new CreateOrUpdateBookmarkCommand("Title", "https://url.com", "Description", ["newTag1", "newTag2"]);
+        var createdBookmark = new Bookmark
+        {
+            BookmarkId = 1, Title = command.Title, Url = command.Url, Description = command.Description,
+            Tags = new List<Tag> { new() { Name = "newTag1" }, new() { Name = "newTag2" } }
+        };
+
+        _mockBookmarkRepository
+            .Setup(x => x.ExistsByUserIdAndTitleOrUrl(_userId, command.Title, command.Url))
+            .ReturnsAsync(false);
+        _mockTagRepository
+            .Setup(x => x.GetByNamesForUpdate(command.TagNames))
+            .ReturnsAsync([]);
+        _mockBookmarkRepository
+            .Setup(x => x.CreateAsync(It.IsAny<Bookmark>()))
+            .ReturnsAsync(createdBookmark);
+
+        // Act
+        var result = await _bookmarkService.CreateAsync(command);
+
+        // Assert
+        Assert.Equal(createdBookmark, result);
+        _mockBookmarkRepository.Verify(x => x.CreateAsync(It.Is<Bookmark>(b =>
+            b.Tags.Count == 2 &&
+            b.Tags.All(t => command.TagNames.AsEnumerable().Contains(t.Name))
+        )), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithValidDataAndNoTags_CreatesBookmark()
+    {
+        // Arrange
+        var command = new CreateOrUpdateBookmarkCommand("Title", "https://url.com", "Description", []);
+        var createdBookmark = new Bookmark
+            { BookmarkId = 1, Title = command.Title, Url = command.Url, Description = command.Description };
+
+        _mockBookmarkRepository
+            .Setup(x => x.ExistsByUserIdAndTitleOrUrl(_userId, command.Title, command.Url))
+            .ReturnsAsync(false);
+        _mockBookmarkRepository
+            .Setup(x => x.CreateAsync(It.IsAny<Bookmark>()))
+            .ReturnsAsync(createdBookmark);
+
+        // Act
+        var result = await _bookmarkService.CreateAsync(command);
+
+        // Assert
+        Assert.Equal(createdBookmark, result);
+        _mockBookmarkRepository.Verify(x => x.CreateAsync(It.Is<Bookmark>(b =>
+            b.UserId == _userId &&
+            b.Title == command.Title &&
+            b.Url == command.Url &&
+            b.Description == command.Description &&
+            b.Tags.Count == 0
+        )), Times.Once);
+    }
+    
 }
