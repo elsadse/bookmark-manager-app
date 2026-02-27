@@ -9,13 +9,11 @@ namespace BookmarkManagerApp.Controllers;
 public class UserController(UserService userService) : ControllerBase
 {
     [HttpGet("{id:long}", Name = nameof(GetUserByIdAsync))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetUserByIdResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     public async Task<ActionResult<GetUserByIdResponse>> GetUserByIdAsync(long id)
     {
         var user = await userService.GetUserByIdAsync(id);
-        if (user == null)
-        {
-            return NotFound();
-        }
         return Ok(GetUserByIdResponse.FromModel(user));
     }
 }

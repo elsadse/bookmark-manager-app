@@ -35,6 +35,18 @@ public class BookmarkManagerAppFactory : WebApplicationFactory<Program>, IAsyncL
         var dbContext = scope.ServiceProvider.GetRequiredService<BookmarkDbContext>();
         await dbContext.Database.EnsureCreatedAsync();
 
+        await SeedTestData(dbContext);
+    }
+
+    public new async ValueTask DisposeAsync()
+    {
+        await _dbContainer.DisposeAsync();
+        await base.DisposeAsync();
+        GC.SuppressFinalize(this);
+    }
+
+    private static async Task SeedTestData(BookmarkDbContext dbContext)
+    {
         var user = new User
         {
             Fullname = "Test User",
@@ -80,10 +92,8 @@ public class BookmarkManagerAppFactory : WebApplicationFactory<Program>, IAsyncL
         await dbContext.SaveChangesAsync();
     }
 
-    public new async ValueTask DisposeAsync()
+    public static (string Email, string Password) getSeedUser()
     {
-        await _dbContainer.DisposeAsync();
-        await base.DisposeAsync();
-        GC.SuppressFinalize(this);
+        return ("test.user@example.com", "Pass123!");
     }
 }

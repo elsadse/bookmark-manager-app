@@ -4,28 +4,20 @@ using FluentAssertions;
 
 namespace BookmarkManagerApp.IntegrationTests.Controllers;
 
-public class VisitControllerTest(BookmarkManagerAppFactory factory) : IClassFixture<BookmarkManagerAppFactory>
+public class VisitControllerTest : IClassFixture<BookmarkManagerAppFactory>
 {
-    private readonly HttpClient _client = factory.CreateClient();
-    private readonly CancellationToken _cancellationToken = CancellationToken.None;
     private const string BaseUrl = "/api/visits";
+    private readonly HttpClient _client;
+    private readonly CancellationToken _cancellationToken;
+    private readonly Utility _utility;
+    private readonly (string Email, string Password) _seedUser;
 
-    private async Task<string> LoginAndGetJwtCookieAsync()
+    public VisitControllerTest(BookmarkManagerAppFactory factory)
     {
-        using var loginRequest = new HttpRequestMessage(HttpMethod.Post, "/api/auth/login");
-        var loginRequestData = new
-        {
-            Email = "test.user@example.com",
-            Password = "Pass123!"
-        };
-        loginRequest.Content = JsonContent.Create(loginRequestData);
-
-        using var loginResponse = await _client.SendAsync(loginRequest, _cancellationToken);
-        loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        return loginResponse.Headers.TryGetValues("Set-Cookie", out var values)
-            ? values.First()
-            : throw new InvalidOperationException("Login response did not contain Set-Cookie header.");
+        _client = factory.CreateClient();
+        _cancellationToken = CancellationToken.None;
+        _utility = new Utility(_client, _cancellationToken);
+        _seedUser = BookmarkManagerAppFactory.getSeedUser();
     }
 
     [Fact]
@@ -46,7 +38,7 @@ public class VisitControllerTest(BookmarkManagerAppFactory factory) : IClassFixt
     {
         //Arrange
         using var GetVisitByIdRequest = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/123");
-        GetVisitByIdRequest.Headers.Add("Cookie", await LoginAndGetJwtCookieAsync());
+        GetVisitByIdRequest.Headers.Add("Cookie", await _utility.LoginAndGetJwtCookieAsync(_seedUser.Email, _seedUser.Password));
 
         // Act
         using var GetVisitByIdResponse = await _client.SendAsync(GetVisitByIdRequest, _cancellationToken);
@@ -60,7 +52,7 @@ public class VisitControllerTest(BookmarkManagerAppFactory factory) : IClassFixt
     {
         //Arrange
         using var GetVisitByIdRequest = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/1");
-        GetVisitByIdRequest.Headers.Add("Cookie", await LoginAndGetJwtCookieAsync());
+        GetVisitByIdRequest.Headers.Add("Cookie", await _utility.LoginAndGetJwtCookieAsync(_seedUser.Email, _seedUser.Password));
 
         // Act
         using var GetVisitByIdResponse = await _client.SendAsync(GetVisitByIdRequest, _cancellationToken);
@@ -82,7 +74,7 @@ public class VisitControllerTest(BookmarkManagerAppFactory factory) : IClassFixt
         var createVisitData = new
         {
             BookmarkId = 1,
-            VisitTime = DateTime.UtcNow
+            VisitTime = DateTimeOffset.UtcNow
         };
         createVisitRequest.Content = JsonContent.Create(createVisitData);
 
@@ -98,7 +90,7 @@ public class VisitControllerTest(BookmarkManagerAppFactory factory) : IClassFixt
     {
         //Arrange
         using var createVisitRequest = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}");
-        createVisitRequest.Headers.Add("Cookie", await LoginAndGetJwtCookieAsync());
+        createVisitRequest.Headers.Add("Cookie", await _utility.LoginAndGetJwtCookieAsync(_seedUser.Email, _seedUser.Password));
         var createVisitData = new
         {
             BookmarkId = 1,
@@ -118,7 +110,7 @@ public class VisitControllerTest(BookmarkManagerAppFactory factory) : IClassFixt
     {
         //Arrange
         using var createVisitRequest = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}");
-        createVisitRequest.Headers.Add("Cookie", await LoginAndGetJwtCookieAsync());
+        createVisitRequest.Headers.Add("Cookie", await _utility.LoginAndGetJwtCookieAsync(_seedUser.Email, _seedUser.Password));
         var createVisitData = new
         {
             BookmarkId = 0,
@@ -148,7 +140,7 @@ public class VisitControllerTest(BookmarkManagerAppFactory factory) : IClassFixt
     {
         //Arrange
         using var createVisitRequest = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}");
-        createVisitRequest.Headers.Add("Cookie", await LoginAndGetJwtCookieAsync());
+        createVisitRequest.Headers.Add("Cookie", await _utility.LoginAndGetJwtCookieAsync(_seedUser.Email, _seedUser.Password));
         var createVisitData = new
         {
             BookmarkId = 2,
@@ -170,6 +162,5 @@ public class VisitControllerTest(BookmarkManagerAppFactory factory) : IClassFixt
             .And.Match($"http://localhost{BaseUrl}/2");
 
     }
-
 
 }

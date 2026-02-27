@@ -4,28 +4,20 @@ using FluentAssertions;
 
 namespace BookmarkManagerApp.IntegrationTests.Controllers;
 
-public class TagControllerTest(BookmarkManagerAppFactory factory) : IClassFixture<BookmarkManagerAppFactory>
+public class TagControllerTest: IClassFixture<BookmarkManagerAppFactory>
 {
-    private readonly HttpClient _client = factory.CreateClient();
-    private readonly CancellationToken _cancellationToken = CancellationToken.None;
     private const string BaseUrl = "/api/tags";
+    private readonly HttpClient _client;
+    private readonly CancellationToken _cancellationToken;
+    private readonly Utility _utility;
+    private readonly (string Email, string Password) _seedUser;
 
-    private async Task<string> LoginAndGetJwtCookieAsync()
+    public TagControllerTest(BookmarkManagerAppFactory factory)
     {
-        using var loginRequest = new HttpRequestMessage(HttpMethod.Post, "/api/auth/login");
-        var loginRequestData = new
-        {
-            Email = "test.user@example.com",
-            Password = "Pass123!"
-        };
-        loginRequest.Content = JsonContent.Create(loginRequestData);
-
-        using var loginResponse = await _client.SendAsync(loginRequest, _cancellationToken);
-        loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        return loginResponse.Headers.TryGetValues("Set-Cookie", out var values)
-            ? values.First()
-            : throw new InvalidOperationException("Login response did not contain Set-Cookie header.");
+        _client = factory.CreateClient();
+        _cancellationToken = CancellationToken.None;
+        _utility = new Utility(_client, _cancellationToken);
+        _seedUser = BookmarkManagerAppFactory.getSeedUser();
     }
 
     [Fact]
@@ -33,7 +25,7 @@ public class TagControllerTest(BookmarkManagerAppFactory factory) : IClassFixtur
     {
         // Arrange
         using var RetrieveAllTagRequest = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}");
-        RetrieveAllTagRequest.Headers.Add("Cookie", await LoginAndGetJwtCookieAsync());
+        RetrieveAllTagRequest.Headers.Add("Cookie", await _utility.LoginAndGetJwtCookieAsync(_seedUser.Email, _seedUser.Password));
 
         // Act
         using var RetrieveAllTagResponse = await _client.SendAsync(RetrieveAllTagRequest, _cancellationToken);

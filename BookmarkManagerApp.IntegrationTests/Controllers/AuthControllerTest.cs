@@ -4,31 +4,21 @@ using FluentAssertions;
 
 namespace BookmarkManagerApp.IntegrationTests.Controllers;
 
-public class AuthControllerTest(BookmarkManagerAppFactory factory) : IClassFixture<BookmarkManagerAppFactory>
+public class AuthControllerTest : IClassFixture<BookmarkManagerAppFactory>
 {
-    private readonly HttpClient _client = factory.CreateClient();
-    private readonly CancellationToken _cancellationToken = CancellationToken.None;
-
     private const string BaseUrl = "/api/auth";
+    
+    private readonly HttpClient _client;
+    private readonly CancellationToken _cancellationToken;
+    private readonly Utility _utility;
 
-    private async Task<string> LoginAndGetJwtCookieAsync(string email, string password)
+    public AuthControllerTest(BookmarkManagerAppFactory factory)
     {
-        using var loginRequest = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/login");
-        var loginRequestData = new
-        {
-            Email = email,
-            Password = password
-        };
-        loginRequest.Content = JsonContent.Create(loginRequestData);
-
-        using var loginResponse = await _client.SendAsync(loginRequest, _cancellationToken);
-        loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        return loginResponse.Headers.TryGetValues("Set-Cookie", out var values)
-            ? values.First()
-            : throw new InvalidOperationException("Login response did not contain Set-Cookie header.");
+        _client = factory.CreateClient();
+        _cancellationToken = CancellationToken.None;
+        _utility = new Utility(_client, _cancellationToken);
     }
-
+    
     [Fact]
     public async Task Register_WithValidData_ReturnsCreated()
     {
@@ -52,7 +42,7 @@ public class AuthControllerTest(BookmarkManagerAppFactory factory) : IClassFixtu
             .And.Match("http://localhost/api/users/2");
 
         // Arrange
-        var validJwtCookie = await LoginAndGetJwtCookieAsync(registerRequestData.Email, registerRequestData.Password);
+        var validJwtCookie =  await _utility.LoginAndGetJwtCookieAsync(registerRequestData.Email, registerRequestData.Password);
         using var getUserRequest = new HttpRequestMessage(HttpMethod.Get, "api/users/2");
         getUserRequest.Headers.Add("Cookie", validJwtCookie);
 
@@ -168,7 +158,7 @@ public class AuthControllerTest(BookmarkManagerAppFactory factory) : IClassFixtu
         using var loginRequest = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/login");
         var loginRequestData = new
         {
-            Email = "email",
+            Email = "",
             Password = "Pass123"
         };
         loginRequest.Content = JsonContent.Create(loginRequestData);
@@ -184,7 +174,11 @@ public class AuthControllerTest(BookmarkManagerAppFactory factory) : IClassFixtu
                 status = 400,
                 errors = new
                 {
-                    Email = (string[])["'Email' is not a valid email address."],
+                    Email = (string[])
+                    [
+                        "'Email' must not be empty.",
+                        "'Email' is not a valid email address."
+                    ],
                     Password = (string[])
                         ["The length of 'Password' must be at least 8 characters. You entered 7 characters."]
                 }
@@ -196,7 +190,7 @@ public class AuthControllerTest(BookmarkManagerAppFactory factory) : IClassFixtu
     public async Task Logout_ReturnsOk()
     {
         // Arrange
-        var validJwtCookie = await LoginAndGetJwtCookieAsync("test.user@example.com", "Pass123!");
+        var validJwtCookie =  await _utility.LoginAndGetJwtCookieAsync("test.user@example.com", "Pass123!");
 
         using var logoutRequest = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/logout");
         logoutRequest.Headers.Add("Cookie", validJwtCookie);
