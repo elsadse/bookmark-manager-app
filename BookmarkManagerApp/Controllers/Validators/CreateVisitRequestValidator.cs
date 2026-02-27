@@ -8,6 +8,7 @@ public class CreateVisitRequestValidator : DefaultRequestValidator<CreateVisitRe
     public CreateVisitRequestValidator()
     {
         RuleFor(x => x.BookmarkId).GreaterThan(0);
-        RuleFor(x => x.VisitTime).GreaterThan(DateTimeOffset.UtcNow.AddYears(-1));
+        RuleFor(x => x.VisitTime).GreaterThan(DateTimeOffset.UtcNow.AddYears(-1))
+            .WithMessage("'Visit Time' must be within the last year or in the future.");
     }
 }
