@@ -331,7 +331,7 @@ public class BookmarkServiceTest
             .Setup(x => x.ExistsByUserIdAndUrl(_userId, command.Url))
             .ReturnsAsync(false);
         _mockTagRepository
-            .Setup(x => x.GetByNamesForUpdate(command.TagNames))
+            .Setup(x => x.GetByNames(command.TagNames))
             .ReturnsAsync([existingTag]);
 
         // Act
@@ -374,7 +374,7 @@ public class BookmarkServiceTest
             .Setup(x => x.ExistsByUserIdAndTitleOrUrl(_userId, command.Title, command.Url))
             .ReturnsAsync(false);
         _mockTagRepository
-            .Setup(x => x.GetByNamesForUpdate(command.TagNames))
+            .Setup(x => x.GetByNames(command.TagNames))
             .ReturnsAsync([existingTag]);
         _mockBookmarkRepository
             .Setup(x => x.CreateAsync(It.IsAny<Bookmark>()))
@@ -404,7 +404,7 @@ public class BookmarkServiceTest
             .Setup(x => x.ExistsByUserIdAndTitleOrUrl(_userId, command.Title, command.Url))
             .ReturnsAsync(false);
         _mockTagRepository
-            .Setup(x => x.GetByNamesForUpdate(command.TagNames))
+            .Setup(x => x.GetByNames(command.TagNames))
             .ReturnsAsync([]);
         _mockBookmarkRepository
             .Setup(x => x.CreateAsync(It.IsAny<Bookmark>()))

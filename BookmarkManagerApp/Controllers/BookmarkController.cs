@@ -33,10 +33,11 @@ public class BookmarkController(
     }
 
     [HttpPut("{id:long}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(CreateBookmarkResponse))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     public async Task<ActionResult> UpdateAsync(long id, CreateOrUpdateBookmarkRequest request)
     {
         await createBookmarkRequestValidator.ValidateAndThrowAsync(request);

@@ -159,7 +159,7 @@ public class AuthControllerTest : IClassFixture<BookmarkManagerAppFactory>
         var loginRequestData = new
         {
             Email = "",
-            Password = "Pass123"
+            Password = ""
         };
         loginRequest.Content = JsonContent.Create(loginRequestData);
 
@@ -180,7 +180,9 @@ public class AuthControllerTest : IClassFixture<BookmarkManagerAppFactory>
                         "'Email' is not a valid email address."
                     ],
                     Password = (string[])
-                        ["The length of 'Password' must be at least 8 characters. You entered 7 characters."]
+                    [
+                        "'Password' must not be empty.",
+                        "The length of 'Password' must be at least 8 characters. You entered 0 characters."]
                 }
             });
     }

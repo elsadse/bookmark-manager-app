@@ -33,6 +33,7 @@ public class BookmarkManagerAppFactory : WebApplicationFactory<Program>, IAsyncL
 
         using var scope = Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<BookmarkDbContext>();
+        
         await dbContext.Database.EnsureCreatedAsync();
 
         await SeedTestData(dbContext);
@@ -43,6 +44,17 @@ public class BookmarkManagerAppFactory : WebApplicationFactory<Program>, IAsyncL
         await _dbContainer.DisposeAsync();
         await base.DisposeAsync();
         GC.SuppressFinalize(this);
+    }
+
+    public async Task ResetDatabaseAsync()
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<BookmarkDbContext>();
+        
+        await db.Database.EnsureDeletedAsync();    
+        await db.Database.EnsureCreatedAsync();
+        
+        await SeedTestData(db);                     
     }
 
     private static async Task SeedTestData(BookmarkDbContext dbContext)
@@ -70,14 +82,15 @@ public class BookmarkManagerAppFactory : WebApplicationFactory<Program>, IAsyncL
                 Title = "GitHub",
                 Url = "https://github.com",
                 Description = "Where the world builds software. Millions of developers and companies build, ship, and maintain their software on GitHub.",
-                Tags = tags
+                IsArchived= true,
+                Tags = tags.TakeLast(2).ToList()
             },
             new (){
                 User = user,
                 Title = "Stack Overflow",
                 Url = "https://stackoverflow.com",
-                Description = "Where the world builds software. Millions of developers and companies build, ship, and maintain their software on GitHub.",
-                Tags = tags
+                Description = "The largest, most trusted online community for developers to learn, share their knowledge, and build their careers.",
+                Tags = tags.Take(2).ToList()
             },
         };
         await dbContext.Bookmarks.AddRangeAsync(bookmarks, CancellationToken.None);
