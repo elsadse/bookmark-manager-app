@@ -12,10 +12,18 @@ import { LoadingIcon } from "@/components/icons/LoadingIcon"
 import { CheckIcon } from "@/components/icons/CheckIcon"
 import type { Bookmark } from "@/api/bookmarks/schema"
 import { fetchBookmarks } from "@/api/bookmarks"
+import type { Tag } from "@/api/tags/schema"
+import { fetchTags } from "@/api/tags"
 
-function buildTag2count({ bookmarks }: { bookmarks: Bookmark[] | undefined }): Map<string, number> {
+function buildTag2count({ bookmarks, tags  }: { bookmarks: Bookmark[] | undefined, tags: Tag[] | undefined }): Map<string, number> {
     const tag2count: Map<string, number> = new Map()
     if (!bookmarks) return tag2count
+
+    if (tags) {
+        for (const tag of tags) {
+            tag2count.set(tag.name, 0)
+        }
+    }
 
     for (const bookmark of bookmarks) {
         for (const tag of bookmark.tags) {
@@ -27,12 +35,13 @@ function buildTag2count({ bookmarks }: { bookmarks: Bookmark[] | undefined }): M
 }
 
 export function SideBar({ onClose }: { onClose?: () => void }) {
-    const { setFilterArchivedBookmarks, filterArchivedBookmarks, tagFilters, searchQuery } = useGlobalStore(
+    const { setFilterArchivedBookmarks, filterArchivedBookmarks, tagFilters, searchQuery, removeFilter } = useGlobalStore(
         useShallow((store: GlobalStore) => ({
             setFilterArchivedBookmarks: store.setFilterArchivedBookmarks,
             filterArchivedBookmarks: store.filterArchivedBookmarks,
             searchQuery: store.searchQuery,
             tagFilters: store.tagFilters,
+            removeFilter: store.removeTagFilter
         }))
     )
 
@@ -46,11 +55,30 @@ export function SideBar({ onClose }: { onClose?: () => void }) {
                     .filter((bookmark: Bookmark): boolean => tagFilters.every((filter: string): boolean => bookmark.tags.includes(filter)))
             ]
     })
-    const tag2count = buildTag2count({ bookmarks })
+    const { data: tags } = useQuery({
+        queryKey: ["tags"],
+        queryFn: fetchTags,
+    })
+
+    const tag2count = buildTag2count({ bookmarks, tags })
 
     const [selectedItem, setSelectedItem] = useState<"Home" | "Archived">(() => {
         return filterArchivedBookmarks ? "Archived" : "Home"
     })
+
+    //suppression des tags avec un bagde de 0 dans le tagFilters
+    useEffect(() => {
+        if (tagFilters.length === 0) return;
+
+        const tagsToRemove = tagFilters.filter(tag => {
+            const count = tag2count.get(tag) ?? 0
+            return count === 0
+        })
+
+        if (tagsToRemove.length > 0) {
+            tagsToRemove.forEach(tag => removeFilter(tag))
+        }
+    }, [tag2count, tagFilters, removeFilter]);
 
     // Gestion de la déconnexion automatique
     const { logout } = useAuthContext()

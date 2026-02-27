@@ -50,8 +50,8 @@ export function Header({ onMenuClick, onAddClick }: { onMenuClick: () => void, o
                     className="flex flex-row justify-center items-center xl:hidden gap-x-1 p-2.5 md:p-3 rounded-8 bg-neutral-0 border border-neutral-400 dark:border-neutral-500 cursor-pointer">
                     <MenuHamburgerIcon className="w-5 h-5" />
                 </div>
-                <div className={`flex flex-row justify-center items-center dark:bg-neutral-d-500
-                    gap-x-1.5 md:gap-x-2 md:p-3 border border-neutral-300 dark:border-neutral-d-400
+                <div className={`flex flex-row justify-center items-center dark:bg-neutral-d-500 md:w-80
+                    gap-x-1.5 md:gap-x-2 md:px-3 border border-neutral-300 dark:border-neutral-d-400
                     rounded-8 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-d-400
                    ${searchTerm.length > 0 ? "ring ring-teal-700 dark:ring-neutral-d-0" : ""} `}>
                     <SearchIcon className="w-5 h-5" />

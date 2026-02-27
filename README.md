@@ -32,7 +32,7 @@ Users are able to:
 
 ## Database diagram
 
-![Database diagram](images/bookmark-manager.png)
+![Database diagram](images/database-diagram.png)
 
 ## Run the application locally
 
@@ -45,7 +45,7 @@ cd bookmark-manager-app
 docker compose up
 ```
 
-After executing these commands and once the Docker containers are started, you can access the application at the following address: **http://localhost/bookmark-manager-app**
+After executing these commands and once the Docker containers are started, you can access the application at the following address: **http://localhost/bookmark-manager-app** and the API at **http://localhost:8080/api**.
 
 ## Technical Stack
 

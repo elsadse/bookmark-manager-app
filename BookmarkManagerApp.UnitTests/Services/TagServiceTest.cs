@@ -1,12 +1,26 @@
 using BookmarkManagerApp.Models;
 using BookmarkManagerApp.Repositories.Contracts;
 using BookmarkManagerApp.Services;
+using BookmarkManagerApp.Services.Contracts;
 using Moq;
 
 namespace BookmarkManagerApp.UnitTests.Services;
 
 public class TagServiceTest
 {
+    private readonly Mock<ITagRepository> _mockTagRepository;
+    private readonly Mock<IUserContext> _mockUserContext;
+    private readonly TagService _tagService;
+    private readonly long _userId = 123L;
+
+    public TagServiceTest()
+    {
+        _mockTagRepository = new Mock<ITagRepository>();
+        _mockUserContext = new Mock<IUserContext>();
+        _mockUserContext.Setup(u => u.UserId).Returns(_userId);
+        _tagService = new TagService( _mockTagRepository.Object, _mockUserContext.Object);
+    }
+
     [Fact]
     public async Task GetTagsAsync_ShouldReturnAllTags()
     {
@@ -18,20 +32,18 @@ public class TagServiceTest
             new() { TagId = 3, Name = "CSharp" }
         };
 
-        var mockRepository = new Mock<ITagRepository>();
-        mockRepository.Setup(repo => repo.GetAllAsync())
+        _mockTagRepository.Setup(repo => repo.GetTagAllForUserAsync(_userId))
             .ReturnsAsync(expectedTags);
 
-        var tagService = new TagService(mockRepository.Object);
 
         // Act
-        var result = (await tagService.GetTagsAsync()).ToList();
+        var result = (await _tagService.GetTagsAsync()).ToList();
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(expectedTags.Count, result.Count);
         Assert.Equal(expectedTags, result);
         
-        mockRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
+        _mockTagRepository.Verify(repo => repo.GetTagAllForUserAsync(_userId), Times.Once);
     }
 }

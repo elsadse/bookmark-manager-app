@@ -42,6 +42,13 @@ export function ToggleArchiveDialog({ onClose }: { onClose: () => void }) {
 
 export function DeleteDialog({ onClose }: { onClose: () => void }) {
     const queryClient = useQueryClient()
+    const { bookmarkSelected, setBookmarkSelected, setIsNotificationOpen } = useGlobalStore(
+        useShallow((store: GlobalStore) => ({
+            bookmarkSelected: store.bookmarkSelected,
+            setBookmarkSelected: store.setBookmarkSelected,
+            setIsNotificationOpen: store.setIsNotificationOpen,
+        }))
+    )
     const { mutate: deleteFn, isPending } = useMutation({
         mutationFn: deleteBookmark,
         onSuccess: async () => {
@@ -54,14 +61,6 @@ export function DeleteDialog({ onClose }: { onClose: () => void }) {
             setIsNotificationOpen(true, "bookmark-deleted")
         }
     })
-
-    const { bookmarkSelected, setBookmarkSelected, setIsNotificationOpen } = useGlobalStore(
-        useShallow((store: GlobalStore) => ({
-            bookmarkSelected: store.bookmarkSelected,
-            setBookmarkSelected: store.setBookmarkSelected,
-            setIsNotificationOpen: store.setIsNotificationOpen
-        }))
-    )
 
     function handleDelete() {
         deleteFn({ bookmarkId: bookmarkSelected!.bookmarkId })
