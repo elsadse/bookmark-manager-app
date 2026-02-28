@@ -1,7 +1,8 @@
 .vscode/
-bookmark-manager-ui/node_modules/
+
+**/bin/
+**/obj/
 
 
 **.env
-bin/
-obj/
+**/node_modules 

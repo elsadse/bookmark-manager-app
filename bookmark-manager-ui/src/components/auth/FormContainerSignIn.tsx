@@ -120,7 +120,7 @@ export function ButtonForm({ textButton, isLoading }: { textButton: string, isLo
             </button>
             {isLoading &&
                 <span className="text-preset-3 text-teal-800 dark:text-neutral-d-0">
-                    Please wait..., the server is waking up (max. 2 min)
+                    Please wait, the server is waking up (max. 2 min)...
                 </span>
             }
         </div>

@@ -1,6 +1,7 @@
 
 # Application de gestionnaire de favoris
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/elsadse/bookmark-manager-app/deployment.yaml)
+[![codecov](https://codecov.io/gh/elsadse/bookmark-manager-app/branch/develop/graph/badge.svg?token=DTVXcTpGCf)](https://codecov.io/gh/elsadse/bookmark-manager-app)
 ![GitHub repo size](https://img.shields.io/github/repo-size/elsadse/bookmark-manager-app)
 ![GitHub License](https://img.shields.io/github/license/elsadse/bookmark-manager-app)
 ![GitHub top language](https://img.shields.io/github/languages/top/elsadse/bookmark-manager-app)
@@ -31,7 +32,7 @@ Users are able to:
 
 ## Database diagram
 
-![Database diagram](images/bookmark-manager.png)
+![Database diagram](images/database-diagram.png)
 
 ## Run the application locally
 
@@ -44,7 +45,7 @@ cd bookmark-manager-app
 docker compose up
 ```
 
-After executing these commands and once the Docker containers are started, you can access the application at the following address: **http://localhost/bookmark-manager-app**
+After executing these commands and once the Docker containers are started, you can access the application at the following address: **http://localhost/bookmark-manager-app** and the API at **http://localhost:8080/api**.
 
 ## Technical Stack
 
