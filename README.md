@@ -1,11 +1,13 @@
 
 # Application de gestionnaire de favoris
+![Endpoint Badge](https://img.shields.io/endpoint?url=https%3A%2F%2Fbookmark-manager-api-latest-hkyo.onrender.com%2F)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/elsadse/bookmark-manager-app/deployment.yaml)
-[![codecov](https://codecov.io/gh/elsadse/bookmark-manager-app/branch/develop/graph/badge.svg?token=DTVXcTpGCf)](https://codecov.io/gh/elsadse/bookmark-manager-app)
+[![codecov](https://codecov.io/gh/elsadse/bookmark-manager-app/graph/badge.svg?token=H2Q4U70MHQ)](https://codecov.io/gh/elsadse/bookmark-manager-app)
 ![GitHub repo size](https://img.shields.io/github/repo-size/elsadse/bookmark-manager-app)
 ![GitHub License](https://img.shields.io/github/license/elsadse/bookmark-manager-app)
 ![GitHub top language](https://img.shields.io/github/languages/top/elsadse/bookmark-manager-app)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/elsadse/bookmark-manager-app)
+![GitHub License](https://img.shields.io/github/license/elsadse/bookmark-manager-app)
 ![GitHub Repo stars](https://img.shields.io/github/stars/elsadse/bookmark-manager-app)
 
 Fully functional bookmark manager with creation, edit, archive, search, and filter features.
@@ -49,15 +51,39 @@ After executing these commands and once the Docker containers are started, you c
 
 ## Technical Stack
 
-- **Backend Core:** [Asp.net Core](https://dotnet.microsoft.com/fr-fr/apps/aspnet) 10 with [Entity Framework](https://learn.microsoft.com/fr-fr/aspnet/entity-framework) for database migrations and management.
-- **Frontend Core:** [React](https://react.dev/) 19 with [TypeScript](https://www.typescriptlang.org/) for type-safe development.
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) 4.1 for a modern, utility-first UI design.
-- **Data Fetching :** [TanStack Query](https://tanstack.com/query/latest)
-- **State Management:** [Zustand](https://zustand-demo.pmnd.rs/) for global state management.
-- **Data Management:** [Zod](https://zod.dev/) for schema-driven API validation and the native Fetch API for network requests.
-- **Build Tooling:** [Vite](https://vitejs.dev/) for an optimized development environment and fast bundling.
-- **CI/CD & Infrastructure:** [GitHub Actions](https://github.com/features/actions) for automated Build & Deploy pipelines, hosted on [GitHub Pages](https://pages.github.com/).
-- **Containerization:** [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) for containerized deployment and simplified local development setup.
+### Backend (API)
+
+- **Language/Runtime:** C# 14, .NET 10
+- **Framework:** ASP.NET Core (MVC / Controllers)
+- **Data Access:** Entity Framework Core (code-first)
+- **Database:** PostgreSQL
+- **Authentication:** JWT Bearer auth (token stored in **HttpOnly cookie**)
+- **Validation:** FluentValidation
+- **API Documentation:** OpenAPI + Scalar API Reference
+
+### Frontend (UI)
+
+- **Framework:** React 19 + TypeScript
+- **Build tool:** Vite
+- **Runtime / Package manager:** Bun
+- **Routing:** React Router
+- **Styling:** Tailwind CSS (v4)
+- **Data fetching / caching:** TanStack Query (React Query)
+- **State management:** Zustand & React Context API
+- **Validation / schemas:** Zod
+- **Linting:** ESLint
+
+### Testing
+
+- **Unit & Integration tests:** xUnit3 + Moq
+- **Integration infrastructure:** AspNetCore.Mvc.Testing + FluentAssertions + Testcontainers (PostgreSQL)
+
+### DevOps / Tooling
+
+- **Containerization:** Docker (multi-stage images) + Docker Compose
+- **CI:** GitHub Actions
+- **Coverage:** Cobertura XML + Codecov
+- **Deployment:** Render (API) + GitHub Pages (UI)
 
 ## Auteurs
 
