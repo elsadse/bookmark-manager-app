@@ -15,7 +15,7 @@ RUN dotnet build "BookmarkManagerApp/BookmarkManagerApp.csproj" -c $BUILD_CONFIG
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./BookmarkManagerApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "BookmarkManagerApp/BookmarkManagerApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

@@ -32,7 +32,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./migration.Dockerfile
+          file: ./BookmarkManagerApp/migration.Dockerfile
           load: true
           tags: bookmark-manager-migration:ci
           push: false
@@ -53,7 +53,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Dockerfile
+          file: ./BookmarkManagerApp/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bookmark-manager-api:latest
 
